@@ -11,6 +11,9 @@ const { ValidationError, NotFoundError, PermissionError } = require('../../utils
 const { logAudit } = require('../logging/auditLogger');
 const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { warningsRepo } = require('../../database/repos/moderation');
+const { BRAND } = require('../../config/constants');
+
+const COLORS = BRAND.colors;
 
 /**
  * Central moderation service.
@@ -45,7 +48,7 @@ async function warn(client, interaction, { target, reason }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0xf0a500,
+        color: COLORS.warn,
         title: `Warning ${count} for ${member.user.username}`,
         description: reason,
       },
@@ -72,7 +75,7 @@ async function timeout(client, interaction, { target, durationMs, reason }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0xf0a500,
+        color: COLORS.warn,
         title: `${member.user.username} has been timed out`,
         description: `Duration: ${durationMs / 60000} minutes${reason ? `\nReason: ${reason}` : ''}`,
       },
@@ -97,7 +100,7 @@ async function kick(client, interaction, { target, reason }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0xb91c1c,
+        color: COLORS.danger,
         title: `${member.user.username} has been kicked`,
         description: reason || 'No reason provided.',
       },
@@ -127,7 +130,7 @@ async function ban(client, interaction, { target, reason, deleteDays }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0xb91c1c,
+        color: COLORS.danger,
         title: `${target.username} has been banned`,
         description: reason || 'No reason provided.',
       },
@@ -152,7 +155,7 @@ async function unban(client, interaction, { target, reason }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0x2fbf71,
+        color: COLORS.success,
         title: `${target.username} has been unbanned`,
         description: reason || 'No reason provided.',
       },
@@ -206,7 +209,7 @@ async function purge(client, interaction, { channel, count, filter }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0x23272a,
+        color: COLORS.neutral,
         title: `Deleted ${deletedCount} messages`,
         description: `Channel: ${channel}`,
       },
@@ -228,7 +231,7 @@ async function setSlowmode(client, interaction, { channel, seconds }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0x23272a,
+        color: COLORS.neutral,
         title: seconds > 0 ? `Slowmode set to ${seconds}s` : 'Slowmode removed',
         description: `Channel: ${channel}`,
       },
@@ -261,7 +264,7 @@ async function setLock(client, interaction, { channel, locked, reason }) {
   await interaction.reply({
     embeds: [
       {
-        color: locked ? 0xb91c1c : 0x2fbf71,
+        color: locked ? COLORS.danger : COLORS.success,
         title: locked ? `Channel locked` : `Channel unlocked`,
         description: `${channel} has been ${locked ? 'locked' : 'unlocked'}.${reason ? `\nReason: ${reason}` : ''}`,
       },
@@ -284,7 +287,7 @@ async function setNick(client, interaction, { member, nickname }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0x23272a,
+        color: COLORS.neutral,
         title: `Nickname updated for ${member.user.username}`,
         description: `**Before:** ${old || '(none)'}\n**After:** ${nickname || '(none)'}`,
       },
@@ -313,7 +316,7 @@ async function setRole(client, interaction, { member, role, add }) {
   await interaction.reply({
     embeds: [
       {
-        color: 0x23272a,
+        color: COLORS.neutral,
         title: `${add ? 'Added' : 'Removed'} role ${role.name}`,
         description: `${member.user.username} ${add ? 'now has' : 'no longer has'} ${role}.`,
       },

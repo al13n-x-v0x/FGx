@@ -10,19 +10,31 @@ const { commandUsageRepo } = require('../database/repos/moderation');
 const { router } = require('../interactions');
 const { Cooldown } = require('../utils/cooldown');
 const { FGxError } = require('../utils/errors');
+const { BRAND } = require('../config/constants');
 const { logger } = require('../utils/logger');
 
 /** Per-user command cooldown (anti-abuse). */
 const cooldown = new Cooldown();
 const COMMAND_COOLDOWN_MS = 3000;
 
-/** Reply to an interaction safely, honoring deferral state. */
-async function safeReply(interaction, content) {
+/** Reply to an interaction safely with a styled embed, honoring deferral state. */
+async function safeReply(interaction, content, { ok = false } = {}) {
+  const embed = {
+    embeds: [
+      {
+        color: ok ? BRAND.colors.success : BRAND.colors.warn,
+        title: ok ? '✅ Done' : '⚠️ Something went wrong',
+        description: content,
+        footer: { text: BRAND.footer },
+      },
+    ],
+    ephemeral: true,
+  };
   try {
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content, ephemeral: true });
+      await interaction.followUp(embed);
     } else {
-      await interaction.reply({ content, ephemeral: true });
+      await interaction.reply(embed);
     }
   } catch {
     /* interaction already gone */

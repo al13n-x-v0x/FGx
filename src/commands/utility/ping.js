@@ -6,14 +6,31 @@
  */
 
 const { SlashCommandBuilder } = require('discord.js');
+const { BRAND } = require('../../config/constants');
 
 module.exports = {
   data: new SlashCommandBuilder().setName('ping').setDescription('Check bot latency.'),
   async execute(interaction) {
-    const sent = await interaction.reply({ content: 'Pinging…', fetchReply: true });
+    const sent = await interaction.reply({
+      embeds: [
+        {
+          color: BRAND.colors.neutral,
+          title: 'Pinging…',
+          description: 'Measuring roundtrip latency…',
+        },
+      ],
+      fetchReply: true,
+    });
     const roundtrip = sent.createdTimestamp - interaction.createdTimestamp;
     await interaction.editReply({
-      content: `Pong. **${roundtrip}ms** roundtrip • **${interaction.client.ws.ping}ms** gateway.`,
+      embeds: [
+        {
+          color: BRAND.colors.success,
+          title: 'Pong 🏓',
+          description: `**Roundtrip:** ${roundtrip}ms\n**Gateway:** ${interaction.client.ws.ping}ms`,
+          footer: { text: BRAND.footer },
+        },
+      ],
     });
   },
 };

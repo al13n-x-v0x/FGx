@@ -89,13 +89,21 @@ async function enforce(client, message, result, { ban = false } = {}) {
   const count = warningsRepo.countFor(message.guild.id, message.author.id) + 1;
 
   await message.author
-    .send(
-      `**FGx moderation notice — ${message.guild.name}**\n` +
-        `Your message in #${message.channel.name} was removed for violating the community rules ` +
-        `(${result.category}: ${result.reason}). This is **warning #${count}**.\n` +
-        `Repeated violations lead to longer timeouts or removal from the server. ` +
-        `If you believe this was a mistake, contact a staff member.`,
-    )
+    .send({
+      embeds: [
+        {
+          color: BRAND.colors.danger,
+          title: `FGx moderation notice — ${message.guild.name}`,
+          description:
+            `Your message in <#${message.channel.id}> was removed for violating the community rules ` +
+            `(**${result.category}**: ${result.reason}).\n\n` +
+            `This is **warning #${count}**.\n` +
+            `Repeated violations lead to longer timeouts or removal from the server.\n` +
+            `If you believe this was a mistake, contact a staff member.`,
+          footer: { text: BRAND.footer },
+        },
+      ],
+    })
     .catch(() => {});
 
   warningsRepo.add(

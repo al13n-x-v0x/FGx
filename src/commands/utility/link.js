@@ -100,9 +100,16 @@ module.exports = {
         details: { status: 'verified' },
       });
       await target
-        .send(
-          `✅ **${interaction.guild.name}** — your BloxStrike link **${link.blox_username}** has been **verified** by staff.`,
-        )
+        .send({
+          embeds: [
+            {
+              color: BRAND.colors.success,
+              title: '✅ BloxStrike link verified',
+              description: `**${interaction.guild.name}** — your BloxStrike link **${link.blox_username}** has been **verified** by staff.`,
+              footer: { text: BRAND.footer },
+            },
+          ],
+        })
         .catch(() => {});
       return interaction.reply({
         embeds: [
