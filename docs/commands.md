@@ -62,7 +62,8 @@ Buttons inside tickets: **Claim**, **Close** (saves a transcript), and
 
 | Command | Description | Access |
 | --- | --- | --- |
-| `/bloxstrike` | Interactive hub (select menu) | Anyone |
+| `/bloxstrike` | Interactive hub (select menu, incl. loadout guide) | Anyone |
+| `/loadout` | Instant BloxStrike loadout guide (buys, roles, economy) | Anyone |
 | `/shuffle players <players> [team_size] [team_count]` | Shuffle any player list into even teams | Anyone |
 | `/shuffle scrim <id> [team_size]` | Shuffle a scrim roster (uses the format, e.g. 5v5) | Anyone |
 | `/shuffle event <id> [team_size]` | Shuffle an event participant list | Anyone |
@@ -86,9 +87,9 @@ Buttons inside tickets: **Claim**, **Close** (saves a transcript), and
 
 | Command | Description |
 | --- | --- |
-| `/ask <question>` | FGx community assistant |
+| `/ask <question>` | FGx community assistant (incl. BloxStrike knowledge base) |
 | `/ai <question>` | Alias of `/ask` |
-| `/bloxai <question>` | BloxStrike-focused assistant with no-fabrication guardrails |
+| `/bloxai <question>` | BloxStrike-focused assistant (knowledge base + no-fabrication guardrails) |
 
 ## System
 

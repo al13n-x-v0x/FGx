@@ -91,3 +91,21 @@ Internal rating (not an official BloxStrike ranking — labeled as such):
 `/analysis player|team|match` summarizes only recorded data: record, win
 rate, K/D, recent trend, strength/weakness heuristics, and sample size —
 all clearly labeled as internal FGx metrics.
+
+## Knowledge base (loadouts & strategy)
+
+`src/data/bloxstrike.js` is FGx's curated BloxStrike strategy guide — the
+same single source of truth feeds three surfaces:
+
+- **`/loadout`** — instant embed: buy situations (pistol/eco/force/full
+  buy/anti-eco), roles (entry, support, anchor, AWPer, IGL, lurker),
+  utility, economy, and teamplay rules.
+- **`/bloxstrike` hub → Loadouts** — the same guide inside the hub.
+- **AI assistant (`/ask`, `/ai`, `/bloxai`)** — the guide is injected as
+  verified system context, so loadout and strategy questions get real
+  answers instead of "I don't have verified data for that".
+
+Weapon advice is deliberately **class/role-based** (e.g. "AK/M4-class
+rifle", "Deagle-class pistol") rather than inventing specific gun names
+or stats, so it stays accurate across balance patches and never pretends
+to be official game data.

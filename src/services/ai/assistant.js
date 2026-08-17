@@ -8,18 +8,22 @@
 const { chatCompletion, AIUnavailableError } = require('./client');
 const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { matchesRepo, scrimsRepo, eventsRepo, clanWarsRepo } = require('../../database/repos/competitive');
+const { systemPromptSection } = require('../../data/bloxstrike');
 const { RateLimiter } = require('../../utils/ratelimit');
 
 /**
  * FGx community assistant (/ask, /ai, /bloxai).
- * Answers from the guild's configured system prompt plus *verified* internal
- * data (upcoming scrims, matches, roster size). It is explicitly forbidden
- * from inventing statistics or leaking secrets.
+ * Answers from the guild's configured system prompt, the FGx BloxStrike
+ * knowledge base (verified context for loadout/strategy questions), and
+ * *verified* internal data (upcoming scrims, matches, roster size). It is
+ * explicitly forbidden from inventing statistics or leaking secrets.
  */
 
 const GUARDRAILS =
-  'If you do not have verified data for a match result, player statistic, ranking, or BloxStrike fact, ' +
-  'respond with: "I don\'t have verified data for that." Never invent numbers.';
+  'Answer loadout, role, economy, utility, and strategy questions using the FGx BloxStrike ' +
+  'knowledge base below. Never invent match results, player statistics, rankings, or specific ' +
+  'numeric stats that are not in the provided knowledge. If asked about something not covered ' +
+  'by the verified FGx context, respond with: "I don\'t have verified data for that."';
 
 const limiter = new RateLimiter({ max: 5, windowMs: 60_000 });
 
@@ -74,15 +78,20 @@ async function ask(client, guild, userId, question, { extraSystem } = {}) {
 
   const system = [
     config.ai.systemPrompt || 'You are FGx, a helpful community assistant.',
+    'Answer in clean, readable Discord markdown. Be concise: aim for under 250 words.',
     GUARDRAILS,
     ...(extraSystem ? [extraSystem] : []),
-    `Verified FGx data (context, from FGx records only):\n${buildContext(client, guild)}`,
+    `FGx BloxStrike knowledge base (verified FGx context):\n${systemPromptSection()}`,
+    `Verified FGx server data (from FGx records only):\n${buildContext(client, guild)}`,
   ].join('\n\n');
 
+  // Generous budget: thinking-capable models spend tokens on internal
+  // reasoning before producing the visible answer, so a tight cap truncates
+  // it mid-sentence. The final reply is still bounded for Discord.
   const reply = await chatCompletion({
     system,
     messages: [{ role: 'user', content: question.slice(0, 2000) }],
-    maxTokens: 700,
+    maxTokens: 1500,
     temperature: 0.4,
   });
   return reply.slice(0, 3800);

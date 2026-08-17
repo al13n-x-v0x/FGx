@@ -12,7 +12,8 @@ const GROUPS = [
   { name: 'Moderation', icon: '🛡️', commands: ['/warn', '/warnings', '/timeout', '/kick', '/ban', '/unban', '/purge', '/slowmode', '/lock', '/unlock', '/nick', '/role'] },
   { name: 'Security', icon: '🔐', commands: ['/security', '/automod'] },
   { name: 'Community', icon: '👥', commands: ['/profile', '/link', '/level', '/leaderboard', '/achievements', '/verify', '/ticket'] },
-  { name: 'BloxStrike', icon: '⚔️', commands: ['/bloxstrike', '/roster', '/tryout', '/evaluate', '/scrim', '/match', '/event', '/clanwar', '/training', '/analysis', '/bloxai'] },
+  { name: 'BloxStrike', icon: '⚔️', commands: ['/bloxstrike', '/loadout', '/roster', '/tryout', '/evaluate', '/scrim', '/match', '/event', '/clanwar', '/training', '/analysis', '/bloxai'] },
+  { name: 'AI Assistant', icon: '🤖', commands: ['/ask', '/ai', '/bloxai'] },
   { name: 'Admin', icon: '⚙️', commands: ['/setup', '/config', '/status', '/help'] },
   { name: 'BloxStrike Tools', icon: '🔀', commands: ['/shuffle'] },
 ];

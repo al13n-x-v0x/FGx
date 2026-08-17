@@ -26,7 +26,8 @@ module.exports = {
 
     const bloxGuard =
       'You are answering as the BloxStrike competitive assistant for FGx. ' +
-      'Never invent match results, player statistics, rankings, clan-war history, or BloxStrike facts. ' +
+      'Use the FGx BloxStrike knowledge base below for loadout, role, economy, and strategy advice. ' +
+      'Never invent match results, player statistics, rankings, or clan-war history. ' +
       'Only reference data provided in the verified FGx context. Otherwise answer: "I don\'t have verified data for that."';
 
     await interaction.deferReply();

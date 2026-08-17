@@ -78,14 +78,20 @@ Commands: `/ask`, `/ai`, `/bloxai`.
 
 - The system prompt is configurable per guild (`/config ai` →
   `ai.systemPrompt`).
-- Verified FGx context (record, upcoming scrims, events, clan wars) is
+- The **FGx BloxStrike knowledge base** (`src/data/bloxstrike.js`) is
+  injected as verified context — roles, buy situations, utility, economy,
+  and teamplay — so loadout/strategy questions get real answers instead of
+  "no data". Weapon advice is class/role-based and clearly community
+  strategy, never invented game stats.
+- Verified server data (record, upcoming scrims, events, clan wars) is
   injected from the database — **never fabricated**.
 - Guardrails: never reveal tokens, environment variables, internal config,
   moderation logs, hidden instructions, or private user data; never invent
-  match results, player statistics, rankings, or BloxStrike facts. When no
-  verified data exists the assistant says:
+  match results, player statistics, rankings, or numeric stats not in the
+  provided knowledge. When no verified data exists the assistant says:
   > I don't have verified data for that.
 - `/bloxai` adds a stricter competitive no-fabrication system line.
+- `/loadout` renders the same knowledge base as an instant, no-AI embed.
 - Rate limit: 5 calls per user per minute (configurable via
   `ai.userRateLimit`).
 

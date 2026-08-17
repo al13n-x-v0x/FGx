@@ -33,6 +33,7 @@ const OPTIONS = [
   { value: 'clanwars', label: '⚔️ Clan Wars', description: 'War history' },
   { value: 'events', label: '📅 Events', description: 'Upcoming events' },
   { value: 'stats', label: '📊 Statistics', description: 'FGx competitive record' },
+  { value: 'loadouts', label: '🎒 Loadouts', description: 'BloxStrike buy & role guide' },
 ];
 
 function mainEmbed() {
@@ -42,7 +43,7 @@ function mainEmbed() {
     .setDescription(
       'Select a section below.\n\n' +
         '👤 Profile\n⚔️ Roster\n🏆 Leaderboards\n🎯 Tryouts\n' +
-        '🔥 Scrims\n⚔️ Clan Wars\n📅 Events\n📊 Statistics',
+        '🔥 Scrims\n⚔️ Clan Wars\n📅 Events\n📊 Statistics\n🎒 Loadouts',
     )
     .setFooter({ text: BRAND.footer });
 }
@@ -166,6 +167,26 @@ function renderSection(guild, userId, section) {
         .setColor(BRAND.colors.primary)
         .setTitle('📅 FGx Events')
         .setDescription(lines.join('\n') || 'No upcoming events.');
+      return { embeds: [embed], components: [navRow(true)] };
+    }
+
+    case 'loadouts': {
+      const { ROLES, BUY_SITUATIONS } = require('../../data/bloxstrike');
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('🎒 BloxStrike Loadout Guide')
+        .setDescription('FGx-curated strategy — weapon advice by class and role, so it stays useful across balance patches.')
+        .addFields(
+          {
+            name: '💸 Buy situations',
+            value: BUY_SITUATIONS.map((b) => `**${b.situation}** — ${b.plan}`).join('\n'),
+          },
+          {
+            name: '🎭 Roles',
+            value: ROLES.map((r) => `**${r.role}** — ${r.loadout}`).join('\n'),
+          },
+        )
+        .setFooter({ text: `${BRAND.footer} • Ask /bloxai for tailored advice` });
       return { embeds: [embed], components: [navRow(true)] };
     }
 

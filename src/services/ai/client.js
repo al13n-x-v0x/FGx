@@ -237,7 +237,7 @@ async function classify(content, { context = '' } = {}) {
 
   const user = `${context ? `Context: ${context}\n` : ''}Message to classify:\n"""\n${content.slice(0, 3000)}\n"""`;
 
-  const raw = await chatCompletion({ system, messages: [{ role: 'user', content: user }], maxTokens: 300, temperature: 0 });
+  const raw = await chatCompletion({ system, messages: [{ role: 'user', content: user }], maxTokens: 800, temperature: 0 });
   const parsed = extractJson(raw);
   if (!parsed || typeof parsed.risk !== 'string') return null;
   return {
