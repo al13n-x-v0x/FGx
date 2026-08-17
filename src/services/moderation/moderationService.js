@@ -31,6 +31,9 @@ async function fetchMember(guild, userId) {
 }
 
 async function warn(client, interaction, { target, reason }) {
+  // Defer first: member fetch + warn + audit are multiple API roundtrips
+  // that can exceed Discord's 3s interaction window.
+  await interaction.deferReply();
   const member = await fetchMember(interaction.guild, target.id);
   validateHierarchy(interaction.member, member, client);
 
@@ -45,7 +48,7 @@ async function warn(client, interaction, { target, reason }) {
     details: { warningId: warning.id, totalWarnings: count },
   });
 
-  await interaction.reply({
+  await interaction.editReply({
     embeds: [
       {
         color: COLORS.warn,
@@ -58,6 +61,7 @@ async function warn(client, interaction, { target, reason }) {
 }
 
 async function timeout(client, interaction, { target, durationMs, reason }) {
+  await interaction.deferReply();
   const member = await fetchMember(interaction.guild, target.id);
   validateHierarchy(interaction.member, member, client);
   requireBotPerms(interaction.channel, [PermissionsBitField.Flags.ModerateMembers]);
@@ -72,7 +76,7 @@ async function timeout(client, interaction, { target, durationMs, reason }) {
     details: { duration: `${durationMs / 60000} minutes` },
   });
 
-  await interaction.reply({
+  await interaction.editReply({
     embeds: [
       {
         color: COLORS.warn,
@@ -84,6 +88,7 @@ async function timeout(client, interaction, { target, durationMs, reason }) {
 }
 
 async function kick(client, interaction, { target, reason }) {
+  await interaction.deferReply();
   const member = await fetchMember(interaction.guild, target.id);
   validateHierarchy(interaction.member, member, client);
   requireBotPerms(interaction.channel, [PermissionsBitField.Flags.KickMembers]);
@@ -97,7 +102,7 @@ async function kick(client, interaction, { target, reason }) {
     reason,
   });
 
-  await interaction.reply({
+  await interaction.editReply({
     embeds: [
       {
         color: COLORS.danger,
@@ -109,6 +114,7 @@ async function kick(client, interaction, { target, reason }) {
 }
 
 async function ban(client, interaction, { target, reason, deleteDays }) {
+  await interaction.deferReply();
   // Banning works by user ID; we still fetch for hierarchy awareness when present.
   const member = interaction.guild.members.cache.get(target.id);
   if (member) validateHierarchy(interaction.member, member, client);
@@ -127,7 +133,7 @@ async function ban(client, interaction, { target, reason, deleteDays }) {
     details: { messageHistoryDeleted: `${days} days` },
   });
 
-  await interaction.reply({
+  await interaction.editReply({
     embeds: [
       {
         color: COLORS.danger,
@@ -139,6 +145,7 @@ async function ban(client, interaction, { target, reason, deleteDays }) {
 }
 
 async function unban(client, interaction, { target, reason }) {
+  await interaction.deferReply();
   try {
     await interaction.guild.bans.remove(target.id, reason || 'No reason provided.');
   } catch {
@@ -152,7 +159,7 @@ async function unban(client, interaction, { target, reason }) {
     reason,
   });
 
-  await interaction.reply({
+  await interaction.editReply({
     embeds: [
       {
         color: COLORS.success,
@@ -164,6 +171,7 @@ async function unban(client, interaction, { target, reason }) {
 }
 
 async function purge(client, interaction, { channel, count, filter }) {
+  await interaction.deferReply();
   requireBotPerms(channel, [PermissionsBitField.Flags.ManageMessages]);
 
   let amount = Math.min(Math.max(count, 1), 100);
@@ -206,7 +214,7 @@ async function purge(client, interaction, { channel, count, filter }) {
     details: { channel: channel.name, count: deletedCount },
   });
 
-  await interaction.reply({
+  await interaction.editReply({
     embeds: [
       {
         color: COLORS.neutral,

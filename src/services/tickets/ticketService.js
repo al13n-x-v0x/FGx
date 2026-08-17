@@ -152,6 +152,11 @@ async function handleCreate(interaction) {
     }
   }
 
+  // Channel creation + permission overwrites can exceed Discord's 3s
+  // interaction window — acknowledge first so users never see
+  // "The application did not respond".
+  await interaction.deferReply({ ephemeral: true });
+
   const channel = await interaction.guild.channels.create({
     name: `${type}-${id.replace('FGX-', '').toLowerCase()}`,
     type: ChannelType.GuildText,
@@ -193,7 +198,7 @@ async function handleCreate(interaction) {
     details: { ticket: id, type: label, channel: channel.name },
   });
 
-  await interaction.reply({ content: `Ticket **${id}** created: ${channel}`, ephemeral: true });
+  await interaction.editReply({ content: `Ticket **${id}** created: ${channel}` });
 }
 
 /** Handle the claim button. */

@@ -84,8 +84,10 @@ module.exports = {
       return interaction.reply({ embeds: [embed] });
     }
 
-    // Staff-only operations.
+    // Staff-only operations. Defer first: member fetch + role changes are
+    // API roundtrips that can exceed Discord's 3s interaction window.
     rosterService.requireStaff(interaction.member, config);
+    await interaction.deferReply();
     const target = interaction.options.getUser('user', true);
     const member = await interaction.guild.members.fetch(target.id).catch(() => null);
 
@@ -93,7 +95,7 @@ module.exports = {
       const rank = rosterService.resolveRank(interaction.options.getString('rank', true));
       if (!member) throw new ValidationError('That member is not in this server.');
       await rosterService.setRank(interaction.client, interaction.guild, member, rank);
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [{ color: BRAND.colors.success, title: 'Roster updated', description: `${target} is now **${rank}**.` }],
       });
     }
@@ -109,7 +111,7 @@ module.exports = {
         moderator: interaction.user,
         reason: 'Removed from roster',
       });
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [{ color: BRAND.colors.danger, title: 'Roster updated', description: `${target} was removed from the roster.` }],
       });
     }
@@ -128,7 +130,7 @@ module.exports = {
       } else {
         profilesRepo.updateStats(interaction.guild.id, target.id, { clan_rank: next });
       }
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [
           {
             color: BRAND.colors.success,
@@ -142,7 +144,7 @@ module.exports = {
     if (sub === 'inactive') {
       const active = interaction.options.getBoolean('active') ?? false;
       const isInactive = await rosterService.setInactive(interaction.client, interaction.guild, member ?? { user: target, id: target.id }, { active });
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [
           {
             color: BRAND.colors.neutral,
