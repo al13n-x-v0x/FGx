@@ -44,18 +44,41 @@ Never commit real values; use the host's secret store.
 
 ## Cloud hosting
 
-### Railway / Render / Fly.io (examples)
+### Render (recommended free option — no credit card)
+
+The repo ships a **Render Blueprint** ([`render.yaml`](../render.yaml)) that
+pre-configures everything: Node runtime, build/start commands, health check,
+env var names, and a persistent disk for the SQLite database.
+
+1. Push the latest code (`git push origin main`).
+2. Render dashboard → **New → Blueprint** → pick the **FGx** repo.
+3. Render reads `render.yaml` and creates the `fgx` web service + disk.
+4. Open the service → **Environment** tab → fill the four secrets
+   (`DISCORD_TOKEN`, `CLIENT_ID`, `GEMINI_KEYS`, `GROQ_KEYS`) → **Save**
+   (triggers an automatic redeploy).
+5. Open `https://<your-app>.onrender.com/health` — expect
+   `{ "status": "ok", "service": "FGx", "database": "ok" }`.
+
+Without the Blueprint, the manual settings are: runtime **Node**, build
+`npm install`, start `npm start`, health check `/health`, `DATABASE_PATH`
+`/data/fgx.db`, and a **disk** mounted at `/data`.
+
+**Keep it awake:** Render's free tier spins the service down after 15 min
+without inbound traffic, which would disconnect the Discord gateway. Point
+[UptimeRobot](https://uptimerobot.com) (free) at
+`https://<your-app>.onrender.com/health` every 5 minutes to keep it online
+24/7. The bot itself is idle-tolerant: it reconnects on its own after a
+brief outage, and the health pings prevent the spin-down in the first place.
+
+### Railway / Fly.io (alternative PaaS)
 
 1. Create a new service from this repository.
-2. Set the environment variables in the dashboard (see `.env.example`).
+2. Set the environment variables (see `.env.example`).
 3. Build command: `npm install` — Start command: `npm start`.
-4. Add a **persistent volume** mounted at the app directory's `data/` folder
-   (e.g. `/app/data`) and set `DATABASE_PATH=data/fgx.db`.
-5. Deploy. Verify with a request to `http://<host>:3000/health`:
-
-```json
-{ "status": "ok", "service": "FGx", "version": "1.0.0", "database": "ok" }
-```
+4. Add a **persistent volume** for the database and set `DATABASE_PATH` to a
+   path on it (e.g. `/data/fgx.db`); transcripts are stored next to the
+   database automatically.
+5. Deploy. Verify with `GET /health`.
 
 ### VPS (Oracle Cloud free tier, any Linux VM)
 

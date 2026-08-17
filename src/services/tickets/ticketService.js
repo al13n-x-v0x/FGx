@@ -21,6 +21,7 @@ const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { ticketsRepo } = require('../../database/repos/community');
 const { logAudit } = require('../logging/auditLogger');
 const { logger } = require('../../utils/logger');
+const { env } = require('../../config/env');
 
 /**
  * Full ticket system: panels, private channels, claiming, transcripts, logs.
@@ -28,7 +29,11 @@ const { logger } = require('../../utils/logger');
  */
 
 function transcriptDir() {
-  const dir = path.resolve('data/transcripts');
+  // Keep transcripts alongside the database so a single persistent volume
+  // (e.g. Render's /data disk) holds all state.
+  const dbPath = path.resolve(env.DATABASE_PATH);
+  const base = env.DATABASE_PATH === ':memory:' ? path.resolve('data') : path.dirname(dbPath);
+  const dir = path.join(base, 'transcripts');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }

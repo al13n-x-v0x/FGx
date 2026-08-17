@@ -38,8 +38,11 @@ function start(client) {
     res.end('Not found');
   });
 
-  server.listen(Number(env.WEBHOOK_PORT), '0.0.0.0', () => {
-    logger.info(`dashboard: health endpoint on :${env.WEBHOOK_PORT}/health`);
+  // Standard PaaS convention: hosts like Render inject PORT. Fall back to
+  // WEBHOOK_PORT for self-hosted/VPS setups.
+  const port = Number(process.env.PORT || env.WEBHOOK_PORT);
+  server.listen(port, '0.0.0.0', () => {
+    logger.info(`dashboard: health endpoint on :${port}/health`);
   });
   return server;
 }

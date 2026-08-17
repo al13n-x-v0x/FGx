@@ -1,0 +1,50 @@
+# Render Blueprint — deploys FGx with one click.
+# How to use: Render dashboard → New → Blueprint → pick this repo (FGx).
+# Render reads this file and creates the web service + disk automatically.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: fgx
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Persistent SQLite database lives on the attached disk.
+      - key: DATABASE_PATH
+        value: /data/fgx.db
+      # 'basic' runs without privileged intents. Flip to 'full' after enabling
+      # Server Members + Message Content intents in the Discord Developer Portal.
+      - key: DISCORD_INTENTS
+        value: basic
+      # AI: Gemini primary, Groq (2 keys x 2 models) as automatic fallback.
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash
+      - key: GROQ_MODELS
+        value: groq/compound,groq/compound-mini
+      - key: AI_FAILOVER_MODE
+        value: shuffle
+      - key: AI_ACTION_MODE
+        value: LOG
+      - key: AI_TIMEOUT_MS
+        value: '30000'
+      # Secrets — after the blueprint creates the service, open the Environment
+      # tab, fill these in, and Save (triggers an automatic redeploy).
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: CLIENT_ID
+        sync: false
+      - key: GEMINI_KEYS
+        sync: false
+      - key: GROQ_KEYS
+        sync: false
+    disk:
+      name: fgx-data
+      mountPath: /data
+      sizeGB: 1
