@@ -1,0 +1,11 @@
+# FGx code ownership
+# Replace @FGx/maintainers with your actual GitHub team before enabling
+# required reviews. Create the team at
+# https://github.com/orgs/<your-org>/teams/maintainers
+
+*                                       @FGx/maintainers
+
+/src/services/security/                 @FGx/maintainers
+/src/services/ai/                       @FGx/maintainers
+/src/database/                          @FGx/maintainers
+/.github/workflows/                     @FGx/maintainers

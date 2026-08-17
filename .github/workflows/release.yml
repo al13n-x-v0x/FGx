@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: Verify before release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run validate
+
+  draft-release:
+    name: Draft GitHub release
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Check tag matches package.json
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "${{ steps.version.outputs.version }}" != "$PKG_VERSION" ]; then
+            echo "::error::Tag v${{ steps.version.outputs.version }} does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+          echo "Version matches: $PKG_VERSION"
+      - name: Draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: FGx ${{ github.ref_name }}
+          body: |
+            ## ${{ github.ref_name }}
+
+            See [CHANGELOG.md](CHANGELOG.md) for changes.
+
+            ### Deployment notes
+            - Requires Node.js >= 22.5 (uses built-in `node:sqlite` — no native dependencies).
+            - `npm install` then `npm start`.
+            - Set environment variables per `.env.example`; never commit secrets.
+            - Database migrations run automatically at startup. Back up `data/` before upgrading.
+            - Health check: `GET /health`.
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Lint, test & validate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Node version requirement
+        run: node -e "const p=require('./package.json'); const v=process.versions.node; if (parseInt(v.split('.')[0],10) < 22) { throw new Error('Node >= 22 required'); } console.log('Node OK:', v)"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Startup validation (env, DB, imports, commands, secrets)
+        run: npm run validate
+
+      - name: Secret scan (basic)
+        run: |
+          if grep -rE '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,})' --include='*.js' --include='*.md' --include='*.json' --include='*.yml' --include='*.yaml' .; then
+            echo "::error::Possible secret found. Do not commit secrets."
+            exit 1
+          fi
+          echo "No obvious secrets found."
