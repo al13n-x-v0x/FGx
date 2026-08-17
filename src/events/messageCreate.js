@@ -10,12 +10,8 @@ const { guildConfigRepo } = require('../database/repos/guildConfig');
 const { antispam, lockdown } = require('../services/security');
 const { awardForMessage } = require('../services/community/xpService');
 const { analyzeMessage } = require('../services/ai/securityEngine');
-const { RateLimiter } = require('../utils/ratelimit');
 const { logger } = require('../utils/logger');
 const { logAudit } = require('../services/logging/auditLogger');
-
-/** Per-user AI analysis limiter (protects the API budget). */
-const aiLimiter = new RateLimiter({ max: 5, windowMs: 60_000 });
 
 function register(client) {
   client.on(Events.MessageCreate, async (message) => {
@@ -64,9 +60,9 @@ function register(client) {
         }
       }
 
-      // AI security layer (analyzeMessage gates on its own heuristics; the
-      // limiter protects the API budget from spam floods).
-      if (config.ai.securityEnabled && aiLimiter.allow(message.author.id)) {
+      // AI security layer (profanity fast-path is free; the paid AI
+      // classification is rate-limited inside analyzeMessage).
+      if (config.ai.securityEnabled) {
         await analyzeMessage(client, message);
       }
 

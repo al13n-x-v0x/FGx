@@ -158,6 +158,9 @@ const linksRepo = {
   listVerified(guildId) {
     return db.all("SELECT * FROM links WHERE guild_id = ? AND status = 'verified'", guildId);
   },
+  listPending(guildId) {
+    return db.all("SELECT * FROM links WHERE guild_id = ? AND status = 'pending' ORDER BY created_at ASC", guildId);
+  },
 };
 
 const xpRepo = {

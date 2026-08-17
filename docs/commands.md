@@ -38,7 +38,9 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | --- | --- |
 | `/profile [user]` | FGx player profile (stats, rank, rating) |
 | `/player [user]` | Alias of `/profile` |
-| `/link <username>` | Link your BloxStrike username (pending verification) |
+| `/link submit <username>` | Link your BloxStrike username (pending staff verification) |
+| `/link verify <user>` | Verify a member's link (staff: Captain+ or ManageGuild) |
+| `/link list` | List pending verifications (staff) |
 | `/unlink` | Remove your BloxStrike link |
 | `/level [user]` / `/rank [user]` | Community XP and level |
 | `/leaderboard <category>` | Rating / kills / K-D / streak / wins / matches (paginated) |

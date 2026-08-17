@@ -49,5 +49,5 @@ test('guild config defaults merge cleanly', () => {
   const config = guildConfigRepo.get('g1');
   assert.equal(config.clan.rating.winGain, 40); // from previous test
   assert.equal(config.antispam.maxMessages, 5); // default preserved
-  assert.equal(config.ai.actionMode, 'LOG');
+  assert.equal(config.ai.actionMode, 'MODERATE');
 });

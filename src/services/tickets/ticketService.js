@@ -43,7 +43,7 @@ async function createPanel(guild) {
   const config = guildConfigRepo.get(guild.id);
   const tickets = config.tickets;
   if (!tickets.enabled || !tickets.categoryId) {
-    throw new Error('Tickets are not configured. Set a category with /config tickets first.');
+    throw new Error('Tickets are not configured. Run `/setup` (admin) or set a category with `/config tickets` first.');
   }
 
   const channel = tickets.panelChannelId

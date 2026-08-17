@@ -37,6 +37,7 @@ const RANKS = Object.freeze([
   'Manager',
   'Co-Leader',
   'Leader',
+  'Co-Owner',
   'Owner',
 ]);
 
@@ -48,7 +49,7 @@ const RANK_ORDER = Object.freeze(
 );
 
 /** Staff-only ranks. */
-const STAFF_RANKS = Object.freeze(['captain', 'manager', 'co-leader', 'leader', 'owner']);
+const STAFF_RANKS = Object.freeze(['captain', 'manager', 'co-leader', 'leader', 'co-owner', 'owner']);
 
 /** FGx competitive rating tiers (internal, NOT an official BloxStrike ranking). */
 const RATING_TIERS = Object.freeze([

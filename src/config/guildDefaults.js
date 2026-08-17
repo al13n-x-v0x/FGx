@@ -86,7 +86,10 @@ const DEFAULT_GUILD_CONFIG = Object.freeze({
   ai: Object.freeze({
     securityEnabled: true,
     assistantEnabled: true,
-    actionMode: 'LOG',
+    // MODERATE enforces: DM + warning + 5-min timeout on profanity and
+    // HIGH-risk AI classifications. Change per guild with /config ai
+    // (LOG = log only, RECOMMEND = notify staff instead of punishing).
+    actionMode: 'MODERATE',
     securityConfidence: 0.85,
     moderateConfidence: 0.9,
     systemPrompt: DEFAULT_AI_PROMPT,
