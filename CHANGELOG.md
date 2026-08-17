@@ -3,19 +3,6 @@
 All notable changes to FGx are documented here, following
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
-
-### Added
-- `/setup` — one-command full server setup: creates/reuses channels, roles,
-  and categories; configures welcome, verification, tickets, logging, and
-  clan roles; posts the verification + ticket panels and a welcome preview
-- Multi-provider AI: Google Gemini and Groq in addition to OpenAI-compatible
-  endpoints; select with `AI_PROVIDER` or auto-detect from `GEMINI_API_KEY` /
-  `GROQ_API_KEY` / `AI_API_KEY`; `/status` shows the active provider
-- `/shuffle` — random even team splits for player lists, scrim rosters
-  (honors formats like `5v5`), and event participants; shuffle button on
-  scrim announcements
-
 ## [1.0.0] - 2026
 
 ### Added
@@ -40,6 +27,9 @@ All notable changes to FGx are documented here, following
 - FGx community assistant: `/ask`, `/ai` with per-guild system prompt,
   verified-context answers, and rate limiting
 - BloxStrike assistant: `/bloxai` with strict no-fabrication guardrails
+- Multi-provider support: OpenAI-compatible endpoints, Google Gemini and
+  Groq; select with `AI_PROVIDER` or auto-detect from `GEMINI_API_KEY` /
+  `GROQ_API_KEY` / `AI_API_KEY`; `/status` shows the active provider
 
 **Community**
 - Welcome system with configurable channel, message template, auto-role
@@ -59,8 +49,14 @@ All notable changes to FGx are documented here, following
 - Achievements with unlock evaluation on recorded matches
 - Staff-only analysis: `/analysis player|team|match`
 - `/bloxstrike` interactive hub
+- `/shuffle` — random even team splits for player lists, scrim rosters
+  (honors formats like `5v5`), and event participants; shuffle button on
+  scrim announcements
 
 **Platform**
+- `/setup` — one-command full server setup: creates/reuses channels, roles,
+  and categories; configures welcome, verification, tickets, logging, and
+  clan roles; posts the verification + ticket panels and a welcome preview
 - Per-guild configuration dashboard: `/config` (menu → edit modal) and `/automod`
 - `/status` health panel, `/help`, `/ping`
 - Built-in `/health` HTTP endpoint for deployment checks
