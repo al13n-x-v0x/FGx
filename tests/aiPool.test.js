@@ -7,7 +7,7 @@ process.env.DISCORD_TOKEN = 'test-token';
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { env, keyList, modelList, aiSummary } = require('../src/config/env');
+const { env, keyList, modelList, aiSummary, configuredProviders, fallbackProviders } = require('../src/config/env');
 const { buildPool, candidateOrder } = require('../src/services/ai/client');
 
 test('keyList parses comma-separated keys with fallback to single key', () => {
@@ -83,6 +83,37 @@ test('aiSummary reflects key/model counts', () => {
     assert.ok(summary.includes('2 models'));
     assert.ok(summary.includes('2 keys'));
     assert.ok(summary.includes('shuffle'));
+  } finally {
+    Object.assign(env, original);
+  }
+});
+
+test('configuredProviders lists only providers with keys, in auto-detect order', () => {
+  const original = { ...env };
+  try {
+    env.AI_PROVIDER = '';
+    env.AI_KEYS = '';
+    env.AI_API_KEY = '';
+    env.GROQ_KEYS = 'g1';
+    env.GROQ_API_KEY = '';
+    env.GEMINI_KEYS = '';
+    env.GEMINI_API_KEY = 'gem1';
+    assert.deepEqual(configuredProviders(), ['groq', 'gemini']);
+  } finally {
+    Object.assign(env, original);
+  }
+});
+
+test('fallbackProviders excludes the resolved primary', () => {
+  const original = { ...env };
+  try {
+    env.AI_PROVIDER = 'gemini';
+    env.GROQ_KEYS = 'g1';
+    env.GROQ_API_KEY = '';
+    env.GEMINI_KEYS = '';
+    env.GEMINI_API_KEY = 'gem1';
+    assert.deepEqual(fallbackProviders(), ['groq']);
+    assert.ok(aiSummary().includes('fallback: Groq'));
   } finally {
     Object.assign(env, original);
   }

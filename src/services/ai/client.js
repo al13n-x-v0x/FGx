@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-const { env, aiConfigured, aiTimeoutMs, resolveProvider, keyList, modelList } = require('../../config/env');
+const { env, aiConfigured, aiTimeoutMs, resolveProvider, fallbackProviders, keyList, modelList } = require('../../config/env');
 const { logger } = require('../../utils/logger');
 
 /**
@@ -24,8 +24,10 @@ const { logger } = require('../../utils/logger');
  *  - roundrobin rotate the starting candidate per call
  *  - shuffle    pick a random starting candidate per call
  * On a failed candidate (network error, timeout, 4xx/5xx, empty reply) the
- * next candidate is tried automatically. Keys are never logged — only
- * provider, model, and key index.
+ * next candidate is tried automatically. When the whole pool of one provider
+ * is exhausted, every other configured provider is tried as a fallback
+ * (AI_PROVIDER picks the primary; the rest are fallbacks automatically).
+ * Keys are never logged — only provider, model, and key index.
  */
 
 class AIUnavailableError extends Error {
@@ -165,42 +167,55 @@ function candidateOrder(count, mode, roundIndex = 0) {
 async function chatCompletion({ system, messages, maxTokens = 800, temperature = 0.3 }) {
   if (!aiConfigured()) throw new AIUnavailableError();
 
-  const provider = resolveProvider();
-  const pool = buildPool(provider);
-  if (pool.length === 0) {
-    throw new AIUnavailableError(`No API keys configured for ${provider}.`);
-  }
-
+  // Primary provider first (AI_PROVIDER or auto-detect), then every other
+  // configured provider as automatic fallback.
+  const providers = [resolveProvider(), ...fallbackProviders()];
   const mode = env.AI_FAILOVER_MODE;
-  const cursor = roundRobinCursors.get(provider) ?? 0;
-  const order = candidateOrder(pool.length, mode, cursor);
-  roundRobinCursors.set(provider, cursor + 1);
-
   let lastError = null;
-  for (const index of order) {
-    const entry = pool[index];
-    try {
-      const result =
-        provider === 'gemini'
-          ? await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature })
-          : await callOpenAiCompatible(
-              provider === 'groq' ? 'https://api.groq.com/openai/v1' : env.AI_BASE_URL,
-              entry.key,
-              entry.model,
-              { system, messages, maxTokens, temperature },
-            );
-      logger.debug('ai request ok', { provider, model: entry.model, keyIndex: index + 1 });
-      return result;
-    } catch (err) {
-      lastError = err;
-      if (pool.length > 1) {
-        logger.warn('ai candidate failed, trying next', {
-          provider,
-          model: entry.model,
-          keyIndex: index + 1,
-          error: err.message,
-        });
+
+  for (const provider of providers) {
+    const pool = buildPool(provider);
+    if (pool.length === 0) continue; // e.g. explicit AI_PROVIDER without a key
+
+    const cursor = roundRobinCursors.get(provider) ?? 0;
+    const order = candidateOrder(pool.length, mode, cursor);
+    roundRobinCursors.set(provider, cursor + 1);
+
+    for (const index of order) {
+      const entry = pool[index];
+      try {
+        const result =
+          provider === 'gemini'
+            ? await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature })
+            : await callOpenAiCompatible(
+                provider === 'groq' ? 'https://api.groq.com/openai/v1' : env.AI_BASE_URL,
+                entry.key,
+                entry.model,
+                { system, messages, maxTokens, temperature },
+              );
+        if (provider !== providers[0]) {
+          logger.warn('ai provider fallback used', { provider, model: entry.model });
+        } else {
+          logger.debug('ai request ok', { provider, model: entry.model, keyIndex: index + 1 });
+        }
+        return result;
+      } catch (err) {
+        lastError = err;
+        if (pool.length > 1) {
+          logger.warn('ai candidate failed, trying next', {
+            provider,
+            model: entry.model,
+            keyIndex: index + 1,
+            error: err.message,
+          });
+        }
       }
+    }
+    if (providers.length > 1) {
+      logger.warn('ai provider pool exhausted, trying next provider', {
+        provider,
+        error: lastError?.message,
+      });
     }
   }
   throw lastError ?? new AIUnavailableError('The AI service is temporarily unavailable.');

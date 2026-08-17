@@ -150,6 +150,24 @@ function aiConfigured() {
   return resolveProvider() !== null;
 }
 
+/** Auto-detect priority: first provider with a key wins. */
+const AUTO_DETECT_ORDER = ['openai', 'groq', 'gemini'];
+
+/** All providers that have at least one key, in auto-detect priority order. */
+function configuredProviders() {
+  return AUTO_DETECT_ORDER.filter((p) => keyList(p).length > 0);
+}
+
+/**
+ * Providers configured with keys but not the resolved primary.
+ * Used as automatic fallbacks when the primary provider's key/model pool
+ * is exhausted (rate-limited, down, or empty).
+ */
+function fallbackProviders() {
+  const primary = resolveProvider();
+  return configuredProviders().filter((p) => p !== primary);
+}
+
 /** Human label for /status, e.g. "Gemini". */
 function providerLabel() {
   const provider = resolveProvider();
@@ -169,14 +187,18 @@ function keyCount() {
   return provider ? keyList(provider).length : 0;
 }
 
-/** Short status line for /status, e.g. "Gemini • gemini-3.6-flash • 1 key • failover". */
+/** Short status line for /status, e.g. "Gemini • gemini-3.6-flash • 1 key • failover • fallback: Groq". */
 function aiSummary() {
   const provider = resolveProvider();
   if (!provider) return 'not configured';
   const models = modelList(provider);
   const keys = keyList(provider).length;
   const model = models.length > 1 ? `${models.length} models` : models[0];
-  return `${providerLabel()} • ${model} • ${keys} key${keys === 1 ? '' : 's'} • ${env.AI_FAILOVER_MODE}`;
+  const fb = fallbackProviders()
+    .map((p) => (p === 'openai' ? 'OpenAI' : p === 'gemini' ? 'Gemini' : 'Groq'))
+    .join(', ');
+  const fallback = fb ? ` • fallback: ${fb}` : '';
+  return `${providerLabel()} • ${model} • ${keys} key${keys === 1 ? '' : 's'} • ${env.AI_FAILOVER_MODE}${fallback}`;
 }
 
 /** Number of milliseconds to wait before aborting AI API calls. */
@@ -199,4 +221,6 @@ module.exports = {
   modelList,
   keyCount,
   aiSummary,
+  configuredProviders,
+  fallbackProviders,
 };

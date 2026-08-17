@@ -38,6 +38,12 @@ AI layer can rotate through them when one is rate-limited or down:
 | `roundrobin` | Rotate the starting candidate on every request |
 | `shuffle` | Pick a random key+model per request |
 
+**Cross-provider fallback:** when one provider's whole pool is exhausted
+(every key rate-limited or down), FGx automatically tries every *other*
+configured provider in order. `AI_PROVIDER` picks the primary (or
+auto-detect picks the first configured key); the rest act as automatic
+fallbacks — e.g. Gemini primary with Groq as a live reserve.
+
 Defaults: `GEMINI_MODEL=gemini-3.6-flash`, `GROQ_MODEL=groq/compound`,
 `AI_MODEL=gpt-4o-mini`, `AI_TIMEOUT_MS=30000`, `AI_FAILOVER_MODE=failover`.
 (Model names are provider-specific and change over time — check the
