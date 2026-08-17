@@ -12,14 +12,21 @@ const db = require('./database');
 const { loadCommands, loadEvents, registerCommands } = require('./utils/registry');
 const dashboard = require('./dashboard/server');
 
+// Gateway intents. 'full' (default) needs the privileged intents enabled in
+// the Discord Developer Portal; 'basic' drops them so the bot can run on a
+// fresh application — welcome/anti-raid events and message-content scanning
+// degrade, everything else works.
+const intents = [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.GuildModeration,
+];
+if (env.DISCORD_INTENTS !== 'basic') {
+  intents.push(GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent);
+}
+
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildModeration,
-  ],
+  intents,
   partials: [Partials.Channel, Partials.Message, Partials.GuildMember, Partials.User],
 });
 
@@ -71,7 +78,15 @@ async function main() {
 }
 
 main().catch((err) => {
-  logger.error('fatal startup error', { error: err.message, stack: err.stack });
+  if (/disallowed intents/i.test(err.message)) {
+    logger.error('gateway refused: privileged intents are not enabled for this application', {
+      hint: 'Enable Server Members + Message Content intents in the Discord Developer Portal ' +
+        '(Applications > your app > Bot > Privileged Gateway Intents), or set DISCORD_INTENTS=basic ' +
+        'to run without them.',
+    });
+  } else {
+    logger.error('fatal startup error', { error: err.message, stack: err.stack });
+  }
   process.exit(1);
 });
 

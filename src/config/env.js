@@ -22,14 +22,17 @@ const OPTIONAL_DEFAULTS = {
   AI_BASE_URL: 'https://api.openai.com/v1',
   AI_MODEL: 'gpt-4o-mini',
   GEMINI_API_KEY: '',
-  GEMINI_MODEL: 'gemini-2.0-flash',
+  GEMINI_MODEL: 'gemini-3.6-flash',
   GROQ_API_KEY: '',
-  GROQ_MODEL: 'llama-3.3-70b-versatile',
+  GROQ_MODEL: 'groq/compound',
   AI_TIMEOUT_MS: '15000',
   AI_ACTION_MODE: 'LOG',
   WEBHOOK_PORT: '3000',
   LOG_LEVEL: 'info',
   NODE_ENV: 'production',
+  // Discord gateway intents: 'full' (privileged intents; needs Developer Portal
+  // toggles) or 'basic' (runs without them, degrades welcome/raid/AI-on-content).
+  DISCORD_INTENTS: 'full',
 };
 
 /** @type {Record<string, string>} */
@@ -72,6 +75,12 @@ if (!Number.isInteger(webhookPort) || webhookPort < 1 || webhookPort > 65535) {
 env.WEBHOOK_PORT = String(webhookPort);
 
 const AI_PROVIDERS = ['openai', 'gemini', 'groq'];
+
+/** Discord gateway intents: 'full' requires privileged intents enabled in the Developer Portal. */
+const DISCORD_INTENTS_MODES = ['full', 'basic'];
+if (!DISCORD_INTENTS_MODES.includes(env.DISCORD_INTENTS.toLowerCase())) {
+  throw new Error(`DISCORD_INTENTS must be one of: ${DISCORD_INTENTS_MODES.join(', ')}. Got: ${env.DISCORD_INTENTS}`);
+}
 
 /**
  * Resolve which AI provider is configured.
@@ -123,6 +132,7 @@ module.exports = {
   aiTimeoutMs,
   AI_ACTION_MODES,
   AI_PROVIDERS,
+  DISCORD_INTENTS_MODES,
   resolveProvider,
   providerLabel,
   resolvedModel,

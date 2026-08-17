@@ -31,10 +31,15 @@ Never commit real values; use the host's secret store.
 1. <https://discord.com/developers/applications> → **New Application**.
 2. **Bot** → **Reset Token** → copy to `DISCORD_TOKEN`.
 3. Copy the **Application ID** to `CLIENT_ID`.
-4. Enable **Message Content Intent** (required for anti-spam and AI scanning).
-5. **OAuth2 → URL Generator** → scope `bot`, permissions `Administrator`
+4. Enable **Server Members Intent** (member tracking, welcome, anti-raid) and
+   **Message Content Intent** (anti-spam and AI scanning) under
+   **Privileged Gateway Intents**.
+5. If the privileged intents are not (or cannot be) enabled, the bot can still
+   run with `DISCORD_INTENTS=basic` — it connects immediately, and only
+   real-time join events and message-content scanning degrade.
+6. **OAuth2 → URL Generator** → scope `bot`, permissions `Administrator`
    (or the exact moderation/permission set you need) → invite.
-6. For testing in one server, set `GUILD_ID`; for production leave it empty
+7. For testing in one server, set `GUILD_ID`; for production leave it empty
    so commands are global.
 
 ## Cloud hosting

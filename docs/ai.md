@@ -20,8 +20,10 @@ Provider selection:
 - Leave it empty to **auto-detect**: the first configured key wins
   (`AI_API_KEY` → `GROQ_API_KEY` → `GEMINI_API_KEY`).
 
-Defaults: `GEMINI_MODEL=gemini-2.0-flash`, `GROQ_MODEL=llama-3.3-70b-versatile`,
+Defaults: `GEMINI_MODEL=gemini-3.6-flash`, `GROQ_MODEL=groq/compound`,
 `AI_MODEL=gpt-4o-mini`, `AI_TIMEOUT_MS=15000`.
+(Model names are provider-specific and change over time — check the
+provider's current model list if you get `HTTP 404`.)
 
 When no provider key is configured, AI commands reply with a clear
 "not configured" message and the AI security engine simply doesn't run —

@@ -195,6 +195,7 @@ See [docs/configuration.md](docs/configuration.md).
 | `DISCORD_TOKEN` | ✅ | Bot token (Developer Portal) |
 | `CLIENT_ID` | ✅ | Application client ID |
 | `GUILD_ID` | optional | Guild for scoped command registration (empty = global) |
+| `DISCORD_INTENTS` | optional | `full` (default, needs portal toggles) or `basic` (runs without privileged intents) |
 | `DATABASE_PATH` | optional | SQLite file path (default `data/fgx.db`) |
 | `AI_PROVIDER` | optional | `openai` \| `gemini` \| `groq` (empty = auto-detect from keys) |
 | `AI_API_KEY` | optional | OpenAI-compatible API key |
