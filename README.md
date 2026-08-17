@@ -301,6 +301,13 @@ See [LICENSE](LICENSE), [COPYRIGHT.md](COPYRIGHT.md), and [NOTICE.md](NOTICE.md)
 See [NOTICE.md](NOTICE.md) for third-party attribution. FGx does not claim
 ownership of Discord, BloxStrike, discord.js, Node.js, or any AI provider.
 
+## Roadmap
+
+See [docs/roadmap.md](docs/roadmap.md) for the spec-to-status map and the
+staged plan for PostgreSQL, the REST API, the Discord-OAuth dashboard, and
+WebSockets. The PostgreSQL migration interface is detailed in
+[docs/postgres.md](docs/postgres.md).
+
 ## Support
 
 - Commands: `/help` in Discord, or [docs/commands.md](docs/commands.md).

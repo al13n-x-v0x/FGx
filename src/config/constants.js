@@ -70,6 +70,7 @@ const TICKET_TYPES = Object.freeze({
   '🐛 Bug Report': 'bug',
   '🤝 Partnership': 'partnership',
   '🚨 Player Report': 'player-report',
+  '⚖️ Appeal': 'appeal',
 });
 
 /** Event categories. */

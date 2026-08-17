@@ -33,6 +33,9 @@ jobs:
       - name: Tests
         run: npm test
 
+      - name: Build (syntax gate)
+        run: npm run build
+
       - name: Startup validation (env, DB, imports, commands, secrets)
         run: npm run validate
 

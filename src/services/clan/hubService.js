@@ -12,10 +12,12 @@ const {
   EmbedBuilder,
   StringSelectMenuBuilder,
 } = require('discord.js');
-const { BRAND, RANKS } = require('../../config/constants');
+const { BRAND, RANKS, TICKET_TYPES } = require('../../config/constants');
 const { profilesRepo } = require('../../database/repos/profiles');
 const { scrimsRepo, eventsRepo, clanWarsRepo, matchesRepo } = require('../../database/repos/competitive');
 const { tryoutsRepo } = require('../../database/repos/community');
+const { guildConfigRepo } = require('../../database/repos/guildConfig');
+const { aiSummary } = require('../../config/env');
 const rosterService = require('./rosterService');
 const { winRate } = require('../../utils/format');
 
@@ -34,16 +36,20 @@ const OPTIONS = [
   { value: 'events', label: '📅 Events', description: 'Upcoming events' },
   { value: 'stats', label: '📊 Statistics', description: 'FGx competitive record' },
   { value: 'loadouts', label: '🎒 Loadouts', description: 'BloxStrike buy & role guide' },
+  { value: 'support', label: '🎫 Support', description: 'Tickets & help' },
+  { value: 'ai', label: '🤖 FGx AI', description: 'Assistant status & usage' },
+  { value: 'security', label: '🛡️ Security', description: 'Protection status' },
 ];
 
-function mainEmbed() {
+function mainEmbed({ title = 'FGx • BloxStrike Command Hub' } = {}) {
   return new EmbedBuilder()
     .setColor(BRAND.colors.primary)
-    .setTitle('FGx • BloxStrike Command Hub')
+    .setTitle(title)
     .setDescription(
       'Select a section below.\n\n' +
         '👤 Profile\n⚔️ Roster\n🏆 Leaderboards\n🎯 Tryouts\n' +
-        '🔥 Scrims\n⚔️ Clan Wars\n📅 Events\n📊 Statistics\n🎒 Loadouts',
+        '🔥 Scrims\n⚔️ Clan Wars\n📅 Events\n📊 Statistics\n🎒 Loadouts\n' +
+        '🎫 Support\n🤖 FGx AI\n🛡️ Security',
     )
     .setFooter({ text: BRAND.footer });
 }
@@ -167,6 +173,58 @@ function renderSection(guild, userId, section) {
         .setColor(BRAND.colors.primary)
         .setTitle('📅 FGx Events')
         .setDescription(lines.join('\n') || 'No upcoming events.');
+      return { embeds: [embed], components: [navRow(true)] };
+    }
+
+    case 'support': {
+      const tickets = guildConfigRepo.get(guild.id).tickets;
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('🎫 FGx Support')
+        .setDescription(
+          tickets.enabled && tickets.panelChannelId
+            ? `Open the ticket panel in <#${tickets.panelChannelId}> and pick a category — a private channel opens for you and staff.`
+            : 'Tickets are not configured yet. Staff: run `/setup` to create the ticket system.'
+        )
+        .addFields(
+          { name: 'Categories', value: Object.keys(TICKET_TYPES).join('\n'), inline: true },
+          { name: 'Staff', value: tickets.staffRoleIds.length > 0 ? 'Configured' : 'Not configured (staff = Manage Channels)', inline: true },
+        )
+        .setFooter({ text: `${BRAND.footer} • Claim / Close / Transcript built in` });
+      return { embeds: [embed], components: [navRow(true)] };
+    }
+
+    case 'ai': {
+      const ai = guildConfigRepo.get(guild.id).ai;
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('🤖 FGx AI')
+        .setDescription(
+          `**Assistant:** ${ai.assistantEnabled ? 'Enabled' : 'Disabled'}\n` +
+            `**Security analysis:** ${ai.securityEnabled ? 'Enabled' : 'Disabled'} (mode ${ai.actionMode})\n` +
+            `**Provider pool:** ${aiSummary()}\n\n` +
+            'Ask me anything with `/ask`, `/ai`, or `/bloxai` — loadouts, clan info, scrims, and more. ' +
+            'I never reveal secrets and never invent statistics.'
+        )
+        .setFooter({ text: `${BRAND.footer} • Rate-limited 5 calls/min` });
+      return { embeds: [embed], components: [navRow(true)] };
+    }
+
+    case 'security': {
+      const config = guildConfigRepo.get(guild.id);
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('🛡️ FGx Security')
+        .setDescription(
+          `**Protection mode:** ${config.security.lockdown ? '🟢 ACTIVE' : '⚪ Inactive'}\n` +
+            `**Anti-spam:** ${config.antispam.enabled ? 'Enabled' : 'Disabled'} (action ${config.antispam.action})\n` +
+            `**Anti-raid:** ${config.antiraid.enabled ? 'Enabled' : 'Disabled'} (threshold ${config.antiraid.joinThreshold}/${config.antiraid.windowSeconds}s)\n` +
+            `**Anti-nuke:** ${config.antinuke.enabled ? 'Enabled' : 'Disabled'} (${config.antinuke.channelDeleteLimit} deletions/min)\n` +
+            `**AI moderation:** ${config.ai.securityEnabled ? 'Enabled' : 'Disabled'} (mode ${config.ai.actionMode})\n` +
+            `**Verification:** ${config.verification.enabled ? 'Enabled' : 'Disabled'}\n\n` +
+            'Staff: manage everything with `/security` and `/automod`. Incident alerts post to the log channel.'
+        )
+        .setFooter({ text: `${BRAND.footer} • Progressive enforcement, never blind punishment` });
       return { embeds: [embed], components: [navRow(true)] };
     }
 

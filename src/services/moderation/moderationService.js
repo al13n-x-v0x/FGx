@@ -53,7 +53,7 @@ async function warn(client, interaction, { target, reason }) {
       {
         color: COLORS.warn,
         title: `Warning ${count} for ${member.user.username}`,
-        description: reason,
+        description: `**Case #${warning.id}** — ${reason}`,
       },
     ],
   });
