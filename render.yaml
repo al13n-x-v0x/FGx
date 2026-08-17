@@ -1,6 +1,6 @@
 # Render Blueprint — deploys FGx with one click.
 # How to use: Render dashboard → New → Blueprint → pick this repo (FGx).
-# Render reads this file and creates the web service + disk automatically.
+# Render reads this file and creates the web service automatically.
 # Docs: https://render.com/docs/blueprint-spec
 services:
   - type: web
@@ -14,9 +14,13 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Persistent SQLite database lives on the attached disk.
+      # Free-tier Render has NO persistent disks, so the SQLite DB lives on
+      # ephemeral storage: it survives spin-up/down (keep the service awake
+      # with UptimeRobot) but resets on every redeploy. For permanent data,
+      # upgrade to a paid instance, then add a disk mounted at /data and set
+      # DATABASE_PATH=/data/fgx.db.
       - key: DATABASE_PATH
-        value: /data/fgx.db
+        value: data/fgx.db
       # 'basic' runs without privileged intents. Flip to 'full' after enabling
       # Server Members + Message Content intents in the Discord Developer Portal.
       - key: DISCORD_INTENTS
@@ -44,7 +48,3 @@ services:
         sync: false
       - key: GROQ_KEYS
         sync: false
-    disk:
-      name: fgx-data
-      mountPath: /data
-      sizeGB: 1

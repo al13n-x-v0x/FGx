@@ -52,7 +52,7 @@ env var names, and a persistent disk for the SQLite database.
 
 1. Push the latest code (`git push origin main`).
 2. Render dashboard → **New → Blueprint** → pick the **FGx** repo.
-3. Render reads `render.yaml` and creates the `fgx` web service + disk.
+3. Render reads `render.yaml` and creates the `fgx` web service.
 4. Open the service → **Environment** tab → fill the four secrets
    (`DISCORD_TOKEN`, `CLIENT_ID`, `GEMINI_KEYS`, `GROQ_KEYS`) → **Save**
    (triggers an automatic redeploy).
@@ -60,8 +60,16 @@ env var names, and a persistent disk for the SQLite database.
    `{ "status": "ok", "service": "FGx", "database": "ok" }`.
 
 Without the Blueprint, the manual settings are: runtime **Node**, build
-`npm install`, start `npm start`, health check `/health`, `DATABASE_PATH`
-`/data/fgx.db`, and a **disk** mounted at `/data`.
+`npm install`, start `npm start`, health check `/health`.
+
+**Free tier = no persistent disk.** Render's free plan explicitly does not
+support persistent disks, so the SQLite database lives on ephemeral
+storage. It survives normal spin-up/spin-down cycles (see the keep-alive
+below), but **every redeploy resets it** — guild configs, warnings, and
+tickets start fresh (migrations rebuild the schema automatically). This is
+fine for testing, not for permanent community data. For persistence, either
+upgrade to a paid instance (then add a disk mounted at `/data` and set
+`DATABASE_PATH=/data/fgx.db`), or move to a VPS (`deploy/` kit).
 
 **Keep it awake:** Render's free tier spins the service down after 15 min
 without inbound traffic, which would disconnect the Discord gateway. Point
