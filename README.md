@@ -199,13 +199,20 @@ See [docs/configuration.md](docs/configuration.md).
 | `DATABASE_PATH` | optional | SQLite file path (default `data/fgx.db`) |
 | `AI_PROVIDER` | optional | `openai` \| `gemini` \| `groq` (empty = auto-detect from keys) |
 | `AI_API_KEY` | optional | OpenAI-compatible API key |
+| `AI_KEYS` | optional | Comma-separated OpenAI keys for key shuffling |
 | `AI_BASE_URL` | optional | API base URL (default `https://api.openai.com/v1`) |
 | `AI_MODEL` | optional | OpenAI-compatible model (default `gpt-4o-mini`) |
+| `AI_MODELS` | optional | Comma-separated OpenAI models for model shuffling |
 | `GEMINI_API_KEY` | optional | Google Gemini API key |
-| `GEMINI_MODEL` | optional | Gemini model (default `gemini-2.0-flash`) |
+| `GEMINI_KEYS` | optional | Comma-separated Gemini keys for key shuffling |
+| `GEMINI_MODEL` | optional | Gemini model (default `gemini-3.6-flash`) |
+| `GEMINI_MODELS` | optional | Comma-separated Gemini models for model shuffling |
 | `GROQ_API_KEY` | optional | Groq API key |
-| `GROQ_MODEL` | optional | Groq model (default `llama-3.3-70b-versatile`) |
-| `AI_TIMEOUT_MS` | optional | AI request timeout (default `15000`) |
+| `GROQ_KEYS` | optional | Comma-separated Groq keys for key shuffling |
+| `GROQ_MODEL` | optional | Groq model (default `groq/compound`) |
+| `GROQ_MODELS` | optional | Comma-separated Groq models for model shuffling |
+| `AI_FAILOVER_MODE` | optional | `failover` (default) \| `roundrobin` \| `shuffle` |
+| `AI_TIMEOUT_MS` | optional | AI request timeout (default `30000`) |
 | `AI_ACTION_MODE` | optional | `LOG` \| `RECOMMEND` \| `MODERATE` (default `LOG`) |
 | `WEBHOOK_PORT` | optional | Health endpoint port (default `3000`) |
 | `LOG_LEVEL` | optional | `debug` \| `info` \| `warn` \| `error` |

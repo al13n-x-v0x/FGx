@@ -5,11 +5,11 @@
  * All rights reserved.
  */
 
-const { env, aiConfigured, aiTimeoutMs, resolveProvider } = require('../../config/env');
+const { env, aiConfigured, aiTimeoutMs, resolveProvider, keyList, modelList } = require('../../config/env');
 const { logger } = require('../../utils/logger');
 
 /**
- * Provider-agnostic AI client (fetch-based, no SDK).
+ * Provider-agnostic AI client (fetch-based, no SDK) with resilience.
  *
  * Supported providers (selected by AI_PROVIDER or auto-detected from keys):
  *  - openai : OpenAI-compatible /chat/completions (OpenAI, OpenRouter, Azure,
@@ -17,7 +17,15 @@ const { logger } = require('../../utils/logger');
  *  - gemini : Google Gemini generateContent API
  *  - groq   : Groq (OpenAI-compatible)
  *
- * API keys come from the environment and are never logged.
+ * Key & model shuffling: each provider can have multiple API keys
+ * (AI_KEYS / GEMINI_KEYS / GROQ_KEYS) and multiple models (AI_MODELS /
+ * GEMINI_MODELS / GROQ_MODELS). AI_FAILOVER_MODE controls selection:
+ *  - failover   (default) always try the primary first, then the next on error
+ *  - roundrobin rotate the starting candidate per call
+ *  - shuffle    pick a random starting candidate per call
+ * On a failed candidate (network error, timeout, 4xx/5xx, empty reply) the
+ * next candidate is tried automatically. Keys are never logged — only
+ * provider, model, and key index.
  */
 
 class AIUnavailableError extends Error {
@@ -111,12 +119,42 @@ function providerHttpError(status) {
   let detail = `HTTP ${status}`;
   if (status === 401) detail = 'AI provider rejected the API key';
   if (status === 403) detail = 'AI provider denied access (check key permissions)';
+  if (status === 404) detail = 'AI provider does not know that model';
   if (status === 429) detail = 'AI provider rate limit hit';
   return new AIUnavailableError(`AI request failed (${detail}).`);
 }
 
+/** Per-provider round-robin cursor. */
+const roundRobinCursors = new Map();
+
 /**
- * Send a chat completion request using the resolved provider.
+ * Build the candidate pool for a provider: key[i] paired with model[i % n].
+ * A single key with several models (or several keys with one model) both work.
+ */
+function buildPool(provider) {
+  const keys = keyList(provider);
+  const models = modelList(provider);
+  const pool = [];
+  for (let i = 0; i < keys.length; i += 1) {
+    pool.push({ key: keys[i], model: models[i % models.length] });
+  }
+  return pool;
+}
+
+/** Order of candidate indices to try, given the failover mode. */
+function candidateOrder(count, mode, roundIndex = 0) {
+  const start =
+    mode === 'roundrobin'
+      ? roundIndex % count
+      : mode === 'shuffle'
+        ? Math.floor(Math.random() * count)
+        : 0; // failover: always primary first
+  return Array.from({ length: count }, (_, i) => (start + i) % count);
+}
+
+/**
+ * Send a chat completion request using the resolved provider, with
+ * automatic key/model failover and optional rotation.
  * @param {object} options
  * @param {string} options.system System prompt.
  * @param {Array<{role: string, content: string}>} options.messages Conversation messages.
@@ -128,38 +166,44 @@ async function chatCompletion({ system, messages, maxTokens = 800, temperature =
   if (!aiConfigured()) throw new AIUnavailableError();
 
   const provider = resolveProvider();
-  try {
-    if (provider === 'gemini') {
-      return await callGemini(env.GEMINI_API_KEY, env.GEMINI_MODEL, {
-        system,
-        messages,
-        maxTokens,
-        temperature,
-      });
-    }
-    if (provider === 'groq') {
-      return await callOpenAiCompatible('https://api.groq.com/openai/v1', env.GROQ_API_KEY, env.GROQ_MODEL, {
-        system,
-        messages,
-        maxTokens,
-        temperature,
-      });
-    }
-    return await callOpenAiCompatible(env.AI_BASE_URL, env.AI_API_KEY, env.AI_MODEL, {
-      system,
-      messages,
-      maxTokens,
-      temperature,
-    });
-  } catch (err) {
-    if (err.name === 'AbortError' || err.name === 'TimeoutError') {
-      logger.warn('ai request timed out', { provider, timeoutMs: aiTimeoutMs() });
-      throw new AIUnavailableError('The AI request timed out. Please try again later.');
-    }
-    if (err instanceof AIUnavailableError) throw err;
-    logger.error('ai request failed', { provider, error: err.message });
-    throw new AIUnavailableError('The AI service is temporarily unavailable.');
+  const pool = buildPool(provider);
+  if (pool.length === 0) {
+    throw new AIUnavailableError(`No API keys configured for ${provider}.`);
   }
+
+  const mode = env.AI_FAILOVER_MODE;
+  const cursor = roundRobinCursors.get(provider) ?? 0;
+  const order = candidateOrder(pool.length, mode, cursor);
+  roundRobinCursors.set(provider, cursor + 1);
+
+  let lastError = null;
+  for (const index of order) {
+    const entry = pool[index];
+    try {
+      const result =
+        provider === 'gemini'
+          ? await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature })
+          : await callOpenAiCompatible(
+              provider === 'groq' ? 'https://api.groq.com/openai/v1' : env.AI_BASE_URL,
+              entry.key,
+              entry.model,
+              { system, messages, maxTokens, temperature },
+            );
+      logger.debug('ai request ok', { provider, model: entry.model, keyIndex: index + 1 });
+      return result;
+    } catch (err) {
+      lastError = err;
+      if (pool.length > 1) {
+        logger.warn('ai candidate failed, trying next', {
+          provider,
+          model: entry.model,
+          keyIndex: index + 1,
+          error: err.message,
+        });
+      }
+    }
+  }
+  throw lastError ?? new AIUnavailableError('The AI service is temporarily unavailable.');
 }
 
 /**
@@ -212,4 +256,4 @@ function extractJson(text) {
   return null;
 }
 
-module.exports = { chatCompletion, classify, extractJson, AIUnavailableError };
+module.exports = { chatCompletion, classify, extractJson, AIUnavailableError, buildPool, candidateOrder };

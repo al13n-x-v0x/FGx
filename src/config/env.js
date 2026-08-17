@@ -18,14 +18,24 @@ const OPTIONAL_DEFAULTS = {
   DATABASE_PATH: 'data/fgx.db',
   // AI provider: '' (auto-detect) | 'openai' | 'gemini' | 'groq'
   AI_PROVIDER: '',
+  // Single-key vars (kept for compatibility) plus comma-separated key/model
+  // lists for key shuffling and model shuffling.
   AI_API_KEY: '',
+  AI_KEYS: '',
   AI_BASE_URL: 'https://api.openai.com/v1',
   AI_MODEL: 'gpt-4o-mini',
+  AI_MODELS: '',
   GEMINI_API_KEY: '',
+  GEMINI_KEYS: '',
   GEMINI_MODEL: 'gemini-3.6-flash',
+  GEMINI_MODELS: '',
   GROQ_API_KEY: '',
+  GROQ_KEYS: '',
   GROQ_MODEL: 'groq/compound',
-  AI_TIMEOUT_MS: '15000',
+  GROQ_MODELS: '',
+  // failover (default) | roundrobin | shuffle
+  AI_FAILOVER_MODE: 'failover',
+  AI_TIMEOUT_MS: '30000',
   AI_ACTION_MODE: 'LOG',
   WEBHOOK_PORT: '3000',
   LOG_LEVEL: 'info',
@@ -51,6 +61,14 @@ for (const key of REQUIRED) {
 for (const [key, fallback] of Object.entries(OPTIONAL_DEFAULTS)) {
   const value = process.env[key];
   env[key] = value && value.trim() ? value.trim() : fallback;
+}
+
+/** Validate AI failover mode. */
+const AI_FAILOVER_MODES = ['failover', 'roundrobin', 'shuffle'];
+if (!AI_FAILOVER_MODES.includes(env.AI_FAILOVER_MODE)) {
+  throw new Error(
+    `AI_FAILOVER_MODE must be one of: ${AI_FAILOVER_MODES.join(', ')}. Got: ${env.AI_FAILOVER_MODE}`,
+  );
 }
 
 /** Validate AI action mode is one of the allowed values. */
@@ -83,8 +101,34 @@ if (!DISCORD_INTENTS_MODES.includes(env.DISCORD_INTENTS.toLowerCase())) {
 }
 
 /**
+ * Comma-separated list of API keys for a provider (plural var wins, falls
+ * back to the single-key var). Returns a non-empty array or throws.
+ */
+function keyList(provider) {
+  const raw =
+    provider === 'gemini'
+      ? env.GEMINI_KEYS || env.GEMINI_API_KEY
+      : provider === 'groq'
+        ? env.GROQ_KEYS || env.GROQ_API_KEY
+        : env.AI_KEYS || env.AI_API_KEY;
+  const list = (raw || '').split(',').map((s) => s.trim()).filter(Boolean);
+  return list;
+}
+
+/** Comma-separated list of models for a provider (plural var wins). */
+function modelList(provider) {
+  const raw =
+    provider === 'gemini'
+      ? env.GEMINI_MODELS || env.GEMINI_MODEL
+      : provider === 'groq'
+        ? env.GROQ_MODELS || env.GROQ_MODEL
+        : env.AI_MODELS || env.AI_MODEL;
+  return (raw || '').split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+/**
  * Resolve which AI provider is configured.
- * Explicit AI_PROVIDER wins; otherwise the first available key is used.
+ * Explicit AI_PROVIDER wins; otherwise the first provider with a key is used.
  * Returns one of 'openai' | 'gemini' | 'groq' | null.
  */
 function resolveProvider() {
@@ -95,9 +139,9 @@ function resolveProvider() {
     }
     return explicit;
   }
-  if (env.AI_API_KEY) return 'openai';
-  if (env.GROQ_API_KEY) return 'groq';
-  if (env.GEMINI_API_KEY) return 'gemini';
+  if (keyList('openai').length > 0) return 'openai';
+  if (keyList('groq').length > 0) return 'groq';
+  if (keyList('gemini').length > 0) return 'gemini';
   return null;
 }
 
@@ -116,9 +160,23 @@ function providerLabel() {
 /** The model name for the resolved provider. */
 function resolvedModel() {
   const provider = resolveProvider();
-  if (provider === 'gemini') return env.GEMINI_MODEL;
-  if (provider === 'groq') return env.GROQ_MODEL;
-  return env.AI_MODEL;
+  return modelList(provider)[0] ?? null;
+}
+
+/** Number of keys configured for the resolved provider. */
+function keyCount() {
+  const provider = resolveProvider();
+  return provider ? keyList(provider).length : 0;
+}
+
+/** Short status line for /status, e.g. "Gemini • gemini-3.6-flash • 1 key • failover". */
+function aiSummary() {
+  const provider = resolveProvider();
+  if (!provider) return 'not configured';
+  const models = modelList(provider);
+  const keys = keyList(provider).length;
+  const model = models.length > 1 ? `${models.length} models` : models[0];
+  return `${providerLabel()} • ${model} • ${keys} key${keys === 1 ? '' : 's'} • ${env.AI_FAILOVER_MODE}`;
 }
 
 /** Number of milliseconds to wait before aborting AI API calls. */
@@ -131,9 +189,14 @@ module.exports = {
   aiConfigured,
   aiTimeoutMs,
   AI_ACTION_MODES,
+  AI_FAILOVER_MODES,
   AI_PROVIDERS,
   DISCORD_INTENTS_MODES,
   resolveProvider,
   providerLabel,
   resolvedModel,
+  keyList,
+  modelList,
+  keyCount,
+  aiSummary,
 };

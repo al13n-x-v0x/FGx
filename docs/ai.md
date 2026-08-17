@@ -10,9 +10,9 @@ FGx supports three providers, all through the same code path
 
 | Provider | Env vars | Notes |
 | --- | --- | --- |
-| OpenAI-compatible | `AI_API_KEY`, `AI_BASE_URL`, `AI_MODEL` | OpenAI, OpenRouter, Azure, local Ollama, … |
-| Google Gemini | `GEMINI_API_KEY`, `GEMINI_MODEL` | Google AI Studio keys |
-| Groq | `GROQ_API_KEY`, `GROQ_MODEL` | Very fast open models |
+| OpenAI-compatible | `AI_API_KEY`/`AI_KEYS`, `AI_BASE_URL`, `AI_MODEL`/`AI_MODELS` | OpenAI, OpenRouter, Azure, local Ollama, … |
+| Google Gemini | `GEMINI_API_KEY`/`GEMINI_KEYS`, `GEMINI_MODEL`/`GEMINI_MODELS` | Google AI Studio keys |
+| Groq | `GROQ_API_KEY`/`GROQ_KEYS`, `GROQ_MODEL`/`GROQ_MODELS` | Very fast open models |
 
 Provider selection:
 
@@ -20,14 +20,33 @@ Provider selection:
 - Leave it empty to **auto-detect**: the first configured key wins
   (`AI_API_KEY` → `GROQ_API_KEY` → `GEMINI_API_KEY`).
 
+### Key & model shuffling
+
+Each provider accepts **comma-separated lists** of keys and models, so the
+AI layer can rotate through them when one is rate-limited or down:
+
+- `AI_KEYS=key1,key2` / `GEMINI_KEYS=...` / `GROQ_KEYS=...` — plural var
+  wins; falls back to the single-key var (`AI_API_KEY`, …).
+- `AI_MODELS=model1,model2` / `GEMINI_MODELS=...` / `GROQ_MODELS=...` —
+  same fallback logic against the single model var.
+- The pool pairs keys with models by index (models repeat when fewer than
+  keys), and `AI_FAILOVER_MODE` selects the rotation strategy:
+
+| Mode | Behavior |
+| --- | --- |
+| `failover` (default, safest) | Always start with the primary key+model; fall through the pool on errors |
+| `roundrobin` | Rotate the starting candidate on every request |
+| `shuffle` | Pick a random key+model per request |
+
 Defaults: `GEMINI_MODEL=gemini-3.6-flash`, `GROQ_MODEL=groq/compound`,
-`AI_MODEL=gpt-4o-mini`, `AI_TIMEOUT_MS=15000`.
+`AI_MODEL=gpt-4o-mini`, `AI_TIMEOUT_MS=30000`, `AI_FAILOVER_MODE=failover`.
 (Model names are provider-specific and change over time — check the
 provider's current model list if you get `HTTP 404`.)
 
 When no provider key is configured, AI commands reply with a clear
 "not configured" message and the AI security engine simply doesn't run —
-the rest of the bot is unaffected. `/status` shows the active provider.
+the rest of the bot is unaffected. `/status` shows the active provider and
+a summary of the active pool (e.g. `Groq • 2 models • 2 keys • shuffle`).
 
 ## Security engine (`services/ai/securityEngine.js`)
 

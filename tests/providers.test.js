@@ -30,8 +30,11 @@ test('auto-detect prefers the first configured key', () => {
   try {
     env.AI_PROVIDER = '';
     env.AI_API_KEY = '';
+    env.AI_KEYS = '';
     env.GROQ_API_KEY = 'gsk_test';
+    env.GROQ_KEYS = '';
     env.GEMINI_API_KEY = '';
+    env.GEMINI_KEYS = '';
     assert.equal(resolveProvider(), 'groq');
     assert.equal(providerLabel(), 'Groq');
 
