@@ -57,34 +57,28 @@ Never commit real values; use the host's secret store.
 { "status": "ok", "service": "FGx", "version": "1.0.0", "database": "ok" }
 ```
 
-### VPS
+### VPS (Oracle Cloud free tier, any Linux VM)
+
+The repo ships a complete deploy kit in [`deploy/`](../deploy/README.md): a
+hardened systemd unit (`fgx.service`) and a one-command setup script
+(`setup.sh`) that installs Node 22, creates an unprivileged `fgx` user,
+installs locked deps, configures the environment file, and enables
+auto-restart. Oracle Cloud's **Always Free** ARM VM (2 OCPU / 12 GB RAM) is
+genuinely free forever and more than enough for FGx (~300 MB RAM).
 
 ```bash
-# as a non-root user
-git clone <repo-url> /opt/fgx && cd /opt/fgx
-npm ci
-cp .env.example .env        # edit values; chmod 600 .env
-# run with a process manager, e.g. pm2 or systemd
+sudo bash deploy/setup.sh /path/to/fgx-src   # copy the folder over first
+sudo nano /opt/fgx/.env                      # real secrets
+sudo systemctl enable --now fgx
+curl localhost:3000/health
 ```
 
-systemd unit example (`/etc/systemd/system/fgx.service`):
+For a private repo, copy the code with `rsync` (see `deploy/README.md`) or
+add a read-only **deploy key** and use the `git@github.com:...` URL.
 
-```ini
-[Unit]
-Description=FGx Discord bot
-After=network.target
-
-[Service]
-User=fgx
-WorkingDirectory=/opt/fgx
-ExecStart=/usr/bin/node src/index.js
-Restart=always
-RestartSec=5
-EnvironmentFile=/opt/fgx/.env
-
-[Install]
-WantedBy=multi-user.target
-```
+Render's free tier is an alternative but **spins down after 15 min without
+inbound traffic** — keep it awake by pointing UptimeRobot at `/health` every
+5 minutes (details in `deploy/README.md`).
 
 ## Updating
 

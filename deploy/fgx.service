@@ -1,0 +1,25 @@
+[Unit]
+Description=FGx Discord bot (BloxStrike clan platform)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fgx
+Group=fgx
+WorkingDirectory=/opt/fgx
+EnvironmentFile=/opt/fgx/.env
+ExecStart=/usr/bin/node src/index.js
+Restart=always
+RestartSec=5
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/fgx/data
+# The gateway needs a healthy descriptor budget
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
