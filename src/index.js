@@ -13,10 +13,7 @@ const { loadCommands, loadEvents, registerCommands } = require('./utils/registry
 const privateServerService = require('./services/clan/privateServerService');
 const dashboard = require('./dashboard/server');
 
-// Gateway intents. 'full' (default) needs the privileged intents enabled in
-// the Discord Developer Portal; 'basic' drops them so the bot can run on a
-// fresh application — welcome/anti-raid events and message-content scanning
-// degrade, everything else works.
+// Gateway intents.
 const intents = [
   GatewayIntentBits.Guilds,
   GatewayIntentBits.GuildMessages,
@@ -33,7 +30,7 @@ const client = new Client({
 
 let shuttingDown = false;
 
-/** Graceful shutdown: close the gateway, DB, and dashboard. */
+/** Graceful shutdown. */
 async function shutdown(signal) {
   if (shuttingDown) return;
   shuttingDown = true;
@@ -53,14 +50,14 @@ async function shutdown(signal) {
 async function main() {
   logger.info(`FGx v${require('../package.json').version} starting`, { node: process.version, env: env.NODE_ENV });
 
-  // Database first — everything depends on it.
+  // Database first.
   db.init();
 
   // Load commands and event handlers.
   client.commands = loadCommands();
   loadEvents(client);
 
-  // Global error boundaries — a single failure must never kill the bot.
+  // Global error boundaries.
   process.on('unhandledRejection', (reason) => {
     logger.error('unhandled rejection', { error: reason instanceof Error ? reason.message : String(reason) });
   });
@@ -70,43 +67,39 @@ async function main() {
   process.on('SIGINT', () => shutdown('SIGINT'));
   process.on('SIGTERM', () => shutdown('SIGTERM'));
 
-  // Start the health-check endpoint BEFORE Discord login so Render's
-  // health probe never sees 'no host' during the gateway handshake.
+  // Start health-check endpoint BEFORE Discord login.
   dashboard.start(client);
   logger.info('Web dashboard server started');
 
-  // Register slash commands.
-  await registerCommands(client);
-
-  // Attempt Discord login without blocking the port listener
+  // ✅ Connect to Discord FIRST — don't let registerCommands block this.
   try {
     await client.login(env.DISCORD_TOKEN);
     logger.info('Discord client logged in successfully');
 
-    // Clean up private servers that expired while the bot was offline.
+    // ✅ Register slash commands AFTER login, non-blocking.
+    registerCommands(client)
+      .then(() => logger.info('Slash commands registered'))
+      .catch((err) => logger.error('Failed to register slash commands', { error: err.message }));
+
+    // Clean up expired private servers.
     privateServerService.sweep(client).catch((err) =>
       logger.warn('private server sweep failed', { error: err.message }),
     );
   } catch (err) {
     if (/disallowed intents/i.test(err.message)) {
-      logger.error('gateway refused: privileged intents are not enabled for this application', {
-        hint: 'Enable Server Members + Message Content intents in the Discord Developer Portal ' +
-          '(Applications > your app > Bot > Privileged Gateway Intents), or set DISCORD_INTENTS=basic ' +
-          'to run without them.',
+      logger.error('gateway refused: privileged intents not enabled', {
+        hint: 'Enable Server Members + Message Content intents in the Discord Developer Portal, or set DISCORD_INTENTS=basic',
       });
     } else {
       logger.error('Discord login error', { error: err.message, stack: err.stack });
     }
-    // We do not process.exit(1) here so the web port stays open,
-    // letting Render deployment pass and leaving the container running for logs.
   }
 
   // Auto-sweep expired Roblox verification codes every 2 minutes.
   const robloxService = require('./services/community/robloxService');
   setInterval(() => robloxService.sweepExpiredCodes(), 2 * 60 * 1000);
 
-  // Self-pinger: keep the Render free-tier service awake by hitting our own
-  // /health endpoint every minute (free tier spins down after 15 min).
+  // Self-pinger: keep Render free-tier awake.
   const PING_INTERVAL_MS = 1 * 60 * 1000;
   setInterval(() => {
     const port = Number(process.env.PORT || env.WEBHOOK_PORT);
