@@ -9,6 +9,7 @@ const { Events } = require('discord.js');
 const { guildConfigRepo } = require('../database/repos/guildConfig');
 const { antispam, lockdown } = require('../services/security');
 const { awardForMessage } = require('../services/community/xpService');
+const chatCommands = require('../services/community/chatCommands');
 const { analyzeMessage } = require('../services/ai/securityEngine');
 const { logger } = require('../utils/logger');
 const { logAudit } = require('../services/logging/auditLogger');
@@ -58,6 +59,11 @@ function register(client) {
             },
           });
         }
+      }
+
+      // OwO-style chat commands: `fgx daily`, `fgx coinflip 50`, …
+      if (await chatCommands.handle(client, message)) {
+        return;
       }
 
       // AI security layer (profanity fast-path is free; the paid AI

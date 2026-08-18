@@ -48,6 +48,9 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/roblox leaderboard [page]` | First members to verify Roblox (👑 = first 50 Pioneers) |
 | `/roblox list [page]` | Paginated list of verified Roblox members (staff) |
 | `/roblox panel` | Create the Roblox verification panel (staff) |
+| `fgx daily` / `fgx weekly` (chat) | OwO-style chat commands — mention works too (`@FGx daily`) | Anyone |
+| `fgx coinflip <amount/all>` / `fgx transfer @user <amount>` (chat) | Coinflip and transfers straight from chat | Anyone |
+| `fgx wallet [user]` / `fgx top` (chat) | Balances and richest members from chat | Anyone |
 | `/fgxcoin wallet [user]` | Your (or a member's) ₣Ԡ🇽 balance, lifetime earned, daily streak | Anyone |
 | `/fgxcoin daily` | Claim the daily ₣Ԡ🇽 reward — streak grows +25/day up to 500 | Anyone |
 | `/fgxcoin weekly` | Claim the weekly ₣Ԡ🇽 reward | Anyone |
