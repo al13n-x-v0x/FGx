@@ -16,7 +16,7 @@ const { RateLimiter } = require('../../utils/ratelimit');
  * All income is tracked in `lifetime` for the leaderboard's tiebreak.
  */
 
-const CURRENCY = 'FGx';
+const CURRENCY = '₣Ԡ🇽';
 const DAILY_BASE = 100;
 const DAILY_STREAK_BONUS = 25;
 const DAILY_MAX = 500;
@@ -105,12 +105,12 @@ async function weekly(guildId, userId) {
 async function transfer(guildId, fromId, toId, amount) {
   const amt = Math.floor(Number(amount));
   if (!Number.isFinite(amt) || amt < 1) {
-    const err = new Error('Amount must be a whole number of at least **1** FGx.');
+    const err = new Error('Amount must be a whole number of at least **1** ₣Ԡ🇽.');
     err.code = 'INVALID_AMOUNT';
     throw err;
   }
   if (fromId === toId) {
-    const err = new Error('You cannot transfer FGx to yourself.');
+    const err = new Error('You cannot transfer ₣Ԡ🇽 to yourself.');
     err.code = 'SELF_TRANSFER';
     throw err;
   }

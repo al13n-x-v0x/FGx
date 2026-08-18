@@ -38,7 +38,7 @@ function formatLine(category, row, index) {
     case 'matches':
       return `${medal} <@${row.user_id}> — ${row.matches} matches`;
     case 'coins':
-      return `${medal} <@${row.user_id}> — 💰 ${(row.balance ?? 0).toLocaleString('en-US')} FGx`;
+      return `${medal} <@${row.user_id}> — 💰 ${(row.balance ?? 0).toLocaleString('en-US')} ₣Ԡ🇽`;
     default:
       return '';
   }

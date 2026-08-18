@@ -18,21 +18,21 @@ const economy = require('../../services/community/economyService');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('fgxcoin')
-    .setDescription('FGx economy — earn, transfer and gamble FGx coins.')
+    .setDescription('FGx economy — earn, transfer and gamble ₣Ԡ🇽 coins.')
     .addSubcommand((s) =>
       s
         .setName('wallet')
-        .setDescription('Show your (or a member\'s) FGx balance')
+        .setDescription('Show your (or a member\'s) ₣Ԡ🇽 balance')
         .addUserOption((o) => o.setName('user').setDescription('Member (default: you)').setRequired(false)),
     )
-    .addSubcommand((s) => s.setName('daily').setDescription('Claim your daily FGx reward (streak bonus!)'))
-    .addSubcommand((s) => s.setName('weekly').setDescription('Claim your weekly FGx reward'))
+    .addSubcommand((s) => s.setName('daily').setDescription('Claim your daily ₣Ԡ🇽 reward (streak bonus!)'))
+    .addSubcommand((s) => s.setName('weekly').setDescription('Claim your weekly ₣Ԡ🇽 reward'))
     .addSubcommand((s) =>
       s
         .setName('transfer')
-        .setDescription('Send FGx to another member (5% tax)')
+        .setDescription('Send ₣Ԡ🇽 to another member (5% tax)')
         .addUserOption((o) => o.setName('user').setDescription('Recipient').setRequired(true))
-        .addIntegerOption((o) => o.setName('amount').setDescription('Amount of FGx').setMinValue(1).setRequired(true)),
+        .addIntegerOption((o) => o.setName('amount').setDescription('Amount of ₣Ԡ🇽').setMinValue(1).setRequired(true)),
     )
     .addSubcommand((s) =>
       s
@@ -51,7 +51,7 @@ module.exports = {
       const rank = economyRepoRank(guildId, target.id);
       const embed = {
         color: BRAND.colors.primary,
-        title: `💰 FGx Wallet — ${target.username}`,
+        title: `💰 ₣Ԡ🇽 Wallet — ${target.username}`,
         description:
           `**Balance:** ${economy.format(row.balance ?? 0)}\\n` +
           `**Lifetime earned:** ${economy.format(row.lifetime ?? 0)}\\n` +
@@ -94,7 +94,7 @@ module.exports = {
         const result = await economy.transfer(guildId, userId, target.id, amount);
         const embed = {
           color: BRAND.colors.success,
-          title: '💸 FGx transferred',
+          title: '💸 ₣Ԡ🇽 transferred',
           description:
             `Sent **${economy.format(result.received)}** to **${target.username}** (${economy.format(result.tax)} tax).\\n` +
             `**Your balance:** ${economy.format(result.balance)}`,

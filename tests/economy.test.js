@@ -19,7 +19,7 @@ test('wallet starts at zero and formats nicely', () => {
   const row = economy.balance('g1', 'u1');
   assert.equal(row.balance, 0);
   assert.equal(row.lifetime, 0);
-  assert.equal(economy.format(1234), '1,234 FGx');
+  assert.equal(economy.format(1234), '1,234 ₣Ԡ🇽');
 });
 
 test('daily claim pays base and logs a transaction', async () => {
