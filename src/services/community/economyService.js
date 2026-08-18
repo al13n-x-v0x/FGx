@@ -10,6 +10,7 @@ const { RateLimiter } = require('../../utils/ratelimit');
 const { Cooldown } = require('../../utils/cooldown');
 const minigames = require('../../data/minigames');
 const zoo = require('./zooService');
+const { verificationService } = require('./verificationService');
 
 /**
  * FGx economy — an OwO-style server currency.
@@ -28,6 +29,7 @@ const TRANSFER_TAX = 0.05;
 const MATCH_WIN_REWARD = 250;
 const MATCH_DRAW_REWARD = 50;
 const WEEK_MS = 7 * 24 * 3_600_000;
+const VIP_DAILY_AMOUNT = 250;
 
 /** Injectable RNG for tests (defaults to Math.random). */
 let rng = () => Math.random();
@@ -116,6 +118,28 @@ async function weekly(guildId, userId) {
   economyRepo.logTx(guildId, userId, 'weekly', WEEKLY_AMOUNT, 'Weekly claim');
   const updated = economyRepo.get(guildId, userId);
   return { amount: WEEKLY_AMOUNT, balance: updated.balance, row: updated };
+}
+
+/**
+ * VIP daily — 250 ₣Ԡ🇽 per day, ONLY for fully verified members
+ * (BloxStrike link approved AND Roblox verified). Claim window is tracked
+ * via the transaction log so no schema change is needed.
+ */
+async function vipDaily(guildId, userId) {
+  verificationService.requireFull(guildId, userId);
+  const today = new Date().toISOString().slice(0, 10);
+  const already = economyRepo
+    .recentTx(guildId, userId, 100)
+    .some((t) => t.kind === 'vip' && String(t.created_at ?? '').startsWith(today));
+  if (already) {
+    const err = new Error('You already claimed your 👑 VIP daily today. Come back tomorrow!');
+    err.code = 'ALREADY_CLAIMED';
+    throw err;
+  }
+  economyRepo.updateBalance(guildId, userId, VIP_DAILY_AMOUNT);
+  economyRepo.logTx(guildId, userId, 'vip', VIP_DAILY_AMOUNT, 'VIP daily bonus (fully verified)');
+  const updated = economyRepo.get(guildId, userId);
+  return { amount: VIP_DAILY_AMOUNT, balance: updated.balance, row: updated };
 }
 
 /**
@@ -312,6 +336,7 @@ module.exports = {
   leaderboard,
   daily,
   weekly,
+  vipDaily,
   transfer,
   coinflip,
   gamble,

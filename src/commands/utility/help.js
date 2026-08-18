@@ -13,6 +13,7 @@ const GROUPS = [
   { name: 'Security', icon: '🔐', commands: ['/security', '/automod'] },
   { name: 'Community', icon: '👥', commands: ['/profile', '/link', '/roblox', '/level', '/leaderboard', '/achievements', '/verify', '/ticket'] },
   { name: 'FGx Coins', icon: '💰', commands: ['/fgxcoin wallet', '/fgxcoin daily', '/fgxcoin weekly', '/fgxcoin transfer', '/fgxcoin gamble', '/fgxcoin history', '/fgxcoin zoo', '/fgxcoin sell', '/fgxcoin pray', '/fgxcoin crate', 'chat: !daily / !hunt / !battle / !zoo / !coinflip 50 heads'] },
+  { name: 'VIP', icon: '👑', commands: ['/vip status', '/vip check', '/vip daily (250 ₣Ԡ🇽, needs full verification)', 'chat: !vip / !vip daily'] },
   { name: 'Socials', icon: '🖐️', commands: ['/social <kind> <user> (slap, clap, hug, boop, +11 more)', '/social stats', '/social top', 'chat: !slap @user / !socialtop clap'] },
   { name: 'BloxStrike', icon: '⚔️', commands: ['/fgx', '/bloxstrike', '/private', '/loadout', '/roster', '/tryout', '/evaluate', '/scrim', '/match', '/event', '/clanwar', '/training', '/analysis', '/bloxai'] },
   { name: 'Roblox', icon: '🟥', commands: ['/roblox verify', '/roblox status', '/roblox unlink', '/roblox leaderboard', '/roblox list', '/roblox panel'] },

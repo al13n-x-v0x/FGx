@@ -23,6 +23,7 @@ const privateServerService = require('./privateServerService');
 const economy = require('../community/economyService');
 const { aiSummary } = require('../../config/env');
 const rosterService = require('./rosterService');
+const { verificationService } = require('../community/verificationService');
 const { winRate } = require('../../utils/format');
 
 /**
@@ -46,6 +47,7 @@ const OPTIONS = [
   { value: 'support', label: '🎫 Support', description: 'Tickets & help' },
   { value: 'ai', label: '🤖 FGx AI', description: 'Assistant status & usage' },
   { value: 'security', label: '🛡️ Security', description: 'Protection status' },
+  { value: 'vip', label: '👑 VIP', description: 'Locked perks for fully verified members' },
 ];
 
 /** Quick-action buttons (customId bloxstrike:btn:<section>). */
@@ -61,6 +63,7 @@ const QUICK_ACTIONS = [
   ['private', '🎮', 'Private'],
   ['support', '🎫', 'Support'],
   ['ai', '🤖', 'AI'],
+  ['vip', '👑', 'VIP'],
 ];
 
 function mainEmbed({ title = 'FGx • BloxStrike Command Hub' } = {}) {
@@ -71,7 +74,7 @@ function mainEmbed({ title = 'FGx • BloxStrike Command Hub' } = {}) {
       'Select a section below — or use the quick buttons.\n\n' +
         '👤 Profile\n⚔️ Roster\n🏆 Leaderboards\n🎯 Tryouts\n' +
         '🔥 Scrims\n⚔️ Clan Wars\n📅 Events\n📊 Statistics\n🎒 Loadouts\n' +
-        '🟥 Roblox\n🎮 Private Server\n💰 FGx Coins\n🎫 Support\n🤖 FGx AI\n🛡️ Security',
+        '🟥 Roblox\n🎮 Private Server\n💰 FGx Coins\n🎫 Support\n🤖 FGx AI\n🛡️ Security\n👑 VIP',
     )
     .setFooter({ text: BRAND.footer });
 }
@@ -133,6 +136,11 @@ function renderSection(guild, userId, section) {
           { name: 'Matches', value: String(profile.matches ?? 0), inline: true },
           { name: 'Win Rate', value: winRate(profile.wins ?? 0, profile.matches ?? 0), inline: true },
           { name: 'FGx Rating', value: String(profile.rating ?? 0), inline: true },
+          {
+            name: 'VIP',
+            value: verificationService.status(guild.id, userId).full ? '👑 Unlocked' : '🔒 Locked',
+            inline: true,
+          },
         )
         .setFooter({ text: `${BRAND.footer} • FGx Competitive Rating` });
       return { embeds: [embed], components: hubComponents(true) };
@@ -365,7 +373,8 @@ function renderSection(guild, userId, section) {
     }
 
     case 'loadouts': {
-      const { ROLES, BUY_SITUATIONS } = require('../../data/bloxstrike');
+      const { ROLES, VIP_ROLES, BUY_SITUATIONS } = require('../../data/bloxstrike');
+      const vip = verificationService.status(guild.id, userId).full;
       const embed = new EmbedBuilder()
         .setColor(BRAND.colors.primary)
         .setTitle('🎒 BloxStrike Loadout Guide')
@@ -379,8 +388,31 @@ function renderSection(guild, userId, section) {
             name: '🎭 Roles',
             value: ROLES.map((r) => `**${r.role}** — ${r.loadout}`).join('\n'),
           },
+          {
+            name: vip ? '👑 VIP Pro Loadouts' : '🔒 VIP Pro Loadouts (locked)',
+            value: vip
+              ? VIP_ROLES.map((r) => `**${r.role}** — ${r.loadout}\n*${r.tips}*`).join('\n')
+              : 'Fully verify — `/link` (staff approval) **and** `/roblox verify` — to unlock 4 pro loadouts: clutch tech, entry primetime, eco baron strats and impossible-to-rush anchors.',
+          },
         )
         .setFooter({ text: `${BRAND.footer} • Ask /bloxai for tailored advice` });
+      return { embeds: [embed], components: hubComponents(true) };
+    }
+
+    case 'vip': {
+      const s = verificationService.status(guild.id, userId);
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle(s.full ? '👑 VIP — Unlocked' : '🔒 VIP — Locked')
+        .setDescription(
+          verificationService.statusLines(s).join('\n') +
+            '\n\n**Perks when unlocked**\n' +
+            '• 👑 `!vip daily` — 250 ₣Ԡ🇽 extra every day\n' +
+            '• 🎒 4 pro loadouts in the Loadouts guide\n' +
+            '• 🏅 Crown badge on your profile\n' +
+            '• 🎮 Priority access to private match servers',
+        )
+        .setFooter({ text: `${BRAND.footer} • Verify both to unlock` });
       return { embeds: [embed], components: hubComponents(true) };
     }
 

@@ -61,6 +61,30 @@ const ROLES = [
   },
 ];
 
+/** VIP-only pro loadouts — unlocked for fully verified members only. */
+const VIP_ROLES = [
+  {
+    role: 'Clutch Master (VIP)',
+    loadout: 'deagle (1-tap class) + full armor + flash — play the retake clock, not the fight',
+    tips: 'VIP tech: save your flash for the last 10 seconds, jiggle-peek to bait the swing, and always hold the tightest angle on site.',
+  },
+  {
+    role: 'Entry Prime (VIP)',
+    loadout: 'rifle + molotov + flash + smoke — you go first, EVERY round',
+    tips: 'VIP tech: pop-flash your own entry, prefire the two most common angles, and trade yourself immediately — your death is a win if the site opens.',
+  },
+  {
+    role: 'Eco Baron (VIP)',
+    loadout: 'p250/deagle + armor — turns losing rounds into money factories',
+    tips: 'VIP tech: buy exactly 1 deagle + armor on full eco, take one opening duel, and if you lose it, save the gun. Anti-eco wins fund the next 3 buys.',
+  },
+  {
+    role: 'Site Anchor Prime (VIP)',
+    loadout: 'shotgun + smoke + molotov — impossible to rush',
+    tips: 'VIP tech: molotov the main choke, smoke the second, and play the corner that forces a 1v1. You stall until rotates — you never need to win the 1v2.',
+  },
+];
+
 const BUY_SITUATIONS = [
   {
     situation: 'Pistol round (round 1)',
@@ -135,6 +159,7 @@ function systemPromptSection() {
 module.exports = {
   OVERVIEW,
   ROLES,
+  VIP_ROLES,
   BUY_SITUATIONS,
   UTILITY,
   ECONOMY,

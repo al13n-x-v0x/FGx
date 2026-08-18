@@ -147,6 +147,7 @@ const TX_LABELS = {
   battle_loss: '💀 Battle loss',
   match_win: '🏆 Match win',
   match_draw: '🤝 Match draw',
+  vip: '👑 VIP daily',
 };
 
 function txLabel(kind) {

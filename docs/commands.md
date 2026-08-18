@@ -61,6 +61,9 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/social <kind> <user>` | Slash versions of every social interaction | Anyone |
 | `/social stats [user]` | Slash version of interaction stats | Anyone |
 | `/social top [kind]` | Slash version of the interaction leaderboard | Anyone |
+| `/vip status` / `/vip check [user]` | 👑 VIP panel — verification progress and what unlocks | Anyone |
+| `/vip daily` / `!vip daily` | Claim 250 ₣Ԡ🇽 per day — **requires full verification** (link approved + Roblox verified) | Fully verified |
+| `!vip` / `!vip check @user` (chat) | VIP status from chat | Anyone |
 | `fgx coinflip <amount/all> [heads|tails]` / `fgx transfer @user <amount>` (chat) | Coinflip and transfers straight from chat | Anyone |
 | `fgx wallet [user]` / `fgx top` (chat) | Balances and richest members from chat | Anyone |
 | `/fgxcoin wallet [user]` | Your (or a member's) ₣Ԡ🇽 balance, lifetime earned, daily streak | Anyone |

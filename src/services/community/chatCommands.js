@@ -13,6 +13,7 @@ const { economyRepo } = require('../../database/repos/economy');
 const zoo = require('./zooService');
 const { socialService } = require('./socialService');
 const socialViews = require('./socialViews');
+const vipViews = require('./vipViews');
 const { healthCheck } = require('../../database/index');
 const { RateLimiter } = require('../../utils/ratelimit');
 const { logger } = require('../../utils/logger');
@@ -155,6 +156,12 @@ function parseCommand(line, mentionIds = []) {
     const kind = rest[0]?.toLowerCase() ?? 'slap';
     return { type: 'socialTop', kind, n: 5 };
   }
+  if (cmd === 'vip' || cmd === 'premium') {
+    const sub = (rest[0] ?? '').toLowerCase();
+    if (sub === 'daily') return { type: 'vipDaily' };
+    if (sub === 'check' || sub === 'status') return { type: 'vipCheck', targetId: mentionIds[0] ?? null };
+    return { type: 'vipStatus' };
+  }
 
   if (cmd === 'history' || cmd === 'logs' || cmd === 'tx') {
     const countText = rest.filter((t) => !/^<@!?\d+>$/.test(t) && !/^@.+/.test(t))[0] ?? '';
@@ -204,6 +211,10 @@ function helpEmbed() {
       '• `!slap` / `!clap` / `!pat` / `!hug` / `!kiss` / `!tickle` / `!poke` / `!cuddle` / `!stare` / `!boop` / `!feed` / `!highfive` / `!punch` / `!bite` / `!dance` — all with @user, counts grow\n' +
       '• `!social [@user]` — interaction stats\n' +
       '• `!socialtop [kind]` — who leads each interaction\n\n' +
+      '**VIP (locked until fully verified)**\n' +
+      '• `!vip` — status & how to unlock\n' +
+      '• `!vip daily` — 250 ₣Ԡ🇽 extra daily (needs link + Roblox verified)\n' +
+      '• `!vip check @user` — someone else\'s status\n\n' +
       '**Server**\n' +
       '• `fgx profile [@user]` — player profile\n' +
       '• `fgx stats` / `fgx roster` / `fgx leaderboard` — competitive\n' +
@@ -425,6 +436,31 @@ async function handle(client, message) {
         return true;
       }
 
+      case 'vipStatus': {
+        await message.reply({ embeds: [vipViews.vipPanelEmbed(userId, guildId, message.author.username)] });
+        return true;
+      }
+
+      case 'vipCheck': {
+        const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) ?? message.author : message.author;
+        await message.reply({ embeds: [vipViews.vipPanelEmbed(target.id, guildId, target.username)] });
+        return true;
+      }
+
+      case 'vipDaily': {
+        try {
+          const result = await economy.vipDaily(guildId, userId);
+          await message.reply({ embeds: [vipViews.vipDailyEmbed(result)] });
+        } catch (err) {
+          if (err.code === 'VIP_LOCKED' || err.code === 'ALREADY_CLAIMED') {
+            await message.reply({ embeds: [views.warnEmbed('👑 VIP Daily', err.message)] });
+            return true;
+          }
+          throw err;
+        }
+        return true;
+      }
+
       case 'top': {
         const rows = economy.leaderboard(guildId, parsed.count);
         const embed = {
@@ -450,7 +486,7 @@ async function handle(client, message) {
         return true;
     }
   } catch (err) {
-    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN', 'UNKNOWN_ANIMAL', 'NOT_OWNED', 'UNKNOWN_KIND'];
+    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN', 'UNKNOWN_ANIMAL', 'NOT_OWNED', 'UNKNOWN_KIND', 'VIP_LOCKED'];
     if (codes.includes(err.code)) {
       await message.reply({ embeds: [views.warnEmbed('FGx coins', err.message)] }).catch(() => {});
       return true;
