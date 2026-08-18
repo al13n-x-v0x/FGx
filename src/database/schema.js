@@ -282,6 +282,22 @@ const MIGRATIONS = [
   CREATE INDEX IF NOT EXISTS idx_economy_balance ON economy (guild_id, balance DESC);
   CREATE INDEX IF NOT EXISTS idx_economy_tx_user ON economy_tx (guild_id, user_id, created_at);
   `,
+
+  // Migration 5 — animal collection (OwO-style zoo).
+  // Hunted animals are kept here; duplicates stack as counts.
+  `
+  CREATE TABLE IF NOT EXISTS animals (
+    guild_id      TEXT NOT NULL,
+    user_id       TEXT NOT NULL,
+    animal_id     TEXT NOT NULL,
+    count         INTEGER NOT NULL DEFAULT 1,
+    first_found_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (guild_id, user_id, animal_id)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_animals_user ON animals (guild_id, user_id);
+  `,
 ];
 
 module.exports = { MIGRATIONS };

@@ -10,6 +10,7 @@ const economy = require('./economyService');
 const views = require('./economyViews');
 const hubService = require('../clan/hubService');
 const { economyRepo } = require('../../database/repos/economy');
+const zoo = require('./zooService');
 const { healthCheck } = require('../../database/index');
 const { RateLimiter } = require('../../utils/ratelimit');
 const { logger } = require('../../utils/logger');
@@ -133,6 +134,14 @@ function parseCommand(line, mentionIds = []) {
 
   if (cmd === 'hunt') return { type: 'hunt' };
   if (cmd === 'battle' || cmd === 'fight') return { type: 'battle' };
+  if (cmd === 'pray') return { type: 'pray' };
+  if (cmd === 'crate' || cmd === 'lootbox' || cmd === 'box') return { type: 'crate' };
+  if (cmd === 'zoo' || cmd === 'pets' || cmd === 'animals' || cmd === 'collection') {
+    return { type: 'zoo', targetId: mentionIds[0] ?? null };
+  }
+  if (cmd === 'sell') {
+    return { type: 'sell', key: rest.join(' ').trim() };
+  }
 
   if (cmd === 'history' || cmd === 'logs' || cmd === 'tx') {
     const countText = rest.filter((t) => !/^<@!?\d+>$/.test(t) && !/^@.+/.test(t))[0] ?? '';
@@ -170,8 +179,12 @@ function helpEmbed() {
       '• `fgx wallet [@user]` / `!bal` — check a balance\n' +
       '• `fgx transfer @user <amount>` — send ₣Ԡ🇽 (5% tax)\n' +
       '• `fgx coinflip <amount|all> [heads|tails]` / `!coinflip 50 heads` — 50/50 gamble\n' +
-      '• `fgx hunt` / `!hunt` — find animals for coins (60s cooldown)\n' +
+      '• `fgx hunt` / `!hunt` — hunt animals for coins, they join your zoo (60s)\n' +
+      '• `fgx zoo` / `!zoo` — your collected animals\n' +
+      '• `fgx sell <animal>` / `!sell fox` — sell a duplicate for coins\n' +
       '• `fgx battle` / `!battle` — fight enemies, win big or lose 10% (120s)\n' +
+      '• `fgx pray` / `!pray` — a big coin blessing (2h cooldown)\n' +
+      '• `fgx crate` / `!crate` — open a loot crate (250 ₣Ԡ🇽)\n' +
       '• `fgx history [@user] [count]` / `!history` — last transactions\n' +
       '• `fgx top` — richest members\n\n' +
       '**Server**\n' +
@@ -300,6 +313,36 @@ async function handle(client, message) {
         return true;
       }
 
+      case 'zoo': {
+        const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) ?? message.author : message.author;
+        const s = zoo.stats(guildId, target.id);
+        const rows = zoo.collection(guildId, target.id);
+        await message.reply({ embeds: [views.zooEmbed(target.username, s, rows)] });
+        return true;
+      }
+
+      case 'sell': {
+        if (!parsed.key) {
+          await message.reply({ embeds: [views.warnEmbed('Sell what?', '`fgx sell <animal>` — e.g. `!sell fox`')] });
+          return true;
+        }
+        const result = zoo.sell(guildId, userId, parsed.key);
+        await message.reply({ embeds: [views.sellEmbed(result)] });
+        return true;
+      }
+
+      case 'pray': {
+        const result = await economy.pray(guildId, userId);
+        await message.reply({ embeds: [views.prayEmbed(result)] });
+        return true;
+      }
+
+      case 'crate': {
+        const result = await economy.crate(guildId, userId);
+        await message.reply({ embeds: [views.crateEmbed(result)] });
+        return true;
+      }
+
       case 'history': {
         const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) ?? message.author : message.author;
         const rows = economyRepo.recentTx(guildId, target.id, parsed.count);
@@ -347,7 +390,7 @@ async function handle(client, message) {
         return true;
     }
   } catch (err) {
-    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN'];
+    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN', 'UNKNOWN_ANIMAL', 'NOT_OWNED'];
     if (codes.includes(err.code)) {
       await message.reply({ embeds: [views.warnEmbed('FGx coins', err.message)] }).catch(() => {});
       return true;

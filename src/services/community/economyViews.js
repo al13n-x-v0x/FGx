@@ -80,14 +80,45 @@ function coinflipEmbed(result) {
 }
 
 function huntEmbed(result) {
+  const newTag = result.isNew ? ' 🆕 NEW!' : '';
   return {
     color: BRAND.colors.success,
     title: `🏹 Hunt successful!`,
     description:
-      `You found a **${result.animal.emoji} ${result.animal.name}**!\n\n` +
-      `**+${economy.format(result.amount)}** — new balance **${economy.format(result.balance)}**.`,
+      `You found a **${result.animal.emoji} ${result.animal.name}**${newTag}!\n\n` +
+      `**+${economy.format(result.amount)}** — new balance **${economy.format(result.balance)}**.\n` +
+      `**Collection:** ${result.count} × ${result.animal.name}`, 
     footer: { text: `${BRAND.footer} • Hunt again in 60s` },
   };
+}
+
+function prayEmbed(result) {
+  return {
+    color: BRAND.colors.success,
+    title: '🙏 Prayer answered',
+    description:
+      `The FGx gods bless you with **${economy.format(result.amount)}**.\n\n` +
+      `**New balance:** ${economy.format(result.balance)}.`,
+    footer: { text: `${BRAND.footer} • Pray again in 2h` },
+  };
+}
+
+function crateEmbed(result) {
+  const newTag = result.isNew ? ' 🆕 NEW!' : '';
+  return {
+    color: BRAND.colors.primary,
+    title: '📦 Crate opened',
+    description:
+      `You open the crate and find a **${result.animal.emoji} ${result.animal.name}**${newTag}!\n` +
+      `Plus **${economy.format(result.bonus)}** bonus coins.\n\n` +
+      `**Collection:** ${result.count} × ${result.animal.name} • **Balance:** ${economy.format(result.balance)}.`,
+    footer: { text: `${BRAND.footer} • Crate cost: ${economy.format(minigamesCost())}` },
+  };
+}
+
+function minigamesCost() {
+  // Lazy require avoids a circular import at module load.
+  return require('../../data/minigames').CRATE_COST;
 }
 
 function battleEmbed(result) {
@@ -143,6 +174,37 @@ function historyEmbed(targetName, rows) {
   return embed;
 }
 
+function zooEmbed(targetName, statsInfo, rows) {
+  const embed = {
+    color: BRAND.colors.primary,
+    title: `🦁 Zoo — ${targetName}`,
+    description:
+      rows.length > 0
+        ? rows
+            .map((r) => {
+              const rarity = require('../../data/minigames').RARITY[r.animal.rarity];
+              const star = r.count > 1 ? ` ×**${r.count}**` : '';
+              return `${rarity.emoji} ${r.animal.emoji} **${r.animal.name}**${star}`;
+            })
+            .join('\n')
+        : 'Your zoo is empty — go hunting with `fgx hunt`!',
+    footer: { text: `${BRAND.footer} • ${statsInfo.total} animals, ${statsInfo.species} species • Sell dupes: fgx sell <animal>` },
+  };
+  return embed;
+}
+
+function sellEmbed(result) {
+  const left = result.remaining > 0 ? `\n**Remaining:** ${result.remaining} × ${result.animal.name}` : '\nYou sold your last one!'; 
+  return {
+    color: BRAND.colors.success,
+    title: '💸 Sold',
+    description:
+      `You sold a **${result.animal.emoji} ${result.animal.name}** for **${economy.format(result.price)}**.${left}\n` +
+      `**Balance:** ${economy.format(result.balance)}.`,
+    footer: { text: BRAND.footer },
+  };
+}
+
 function warnEmbed(title, description) {
   return { color: BRAND.colors.warn, title, description, footer: { text: BRAND.footer } };
 }
@@ -155,6 +217,10 @@ module.exports = {
   coinflipEmbed,
   huntEmbed,
   battleEmbed,
+  prayEmbed,
+  crateEmbed,
+  zooEmbed,
+  sellEmbed,
   historyEmbed,
   txLabel,
   TX_LABELS,

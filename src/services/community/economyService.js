@@ -9,6 +9,7 @@ const { economyRepo } = require('../../database/repos/economy');
 const { RateLimiter } = require('../../utils/ratelimit');
 const { Cooldown } = require('../../utils/cooldown');
 const minigames = require('../../data/minigames');
+const zoo = require('./zooService');
 
 /**
  * FGx economy — an OwO-style server currency.
@@ -42,7 +43,7 @@ function format(amount) {
 /** Per-user gamble limiter (anti-farm). */
 const gambleLimiter = new RateLimiter({ max: 5, windowMs: 60_000 });
 
-/** Per-user minigame cooldowns (hunt 60s, battle 120s). */
+/** Per-user minigame cooldowns (hunt 60s, battle 120s, pray 2h). */
 const minigameCooldown = new Cooldown();
 
 function huntCooldownLeft(guildId, userId) {
@@ -51,6 +52,10 @@ function huntCooldownLeft(guildId, userId) {
 
 function battleCooldownLeft(guildId, userId) {
   return minigameCooldown.remaining(`battle:${guildId}:${userId}`);
+}
+
+function prayCooldownLeft(guildId, userId) {
+  return minigameCooldown.remaining(`pray:${guildId}:${userId}`);
 }
 
 function balance(guildId, userId) {
@@ -189,6 +194,46 @@ async function gamble(guildId, userId, amount) {
 }
 
 /**
+ * Pray — a big coin blessing on a 2-hour cooldown.
+ */
+async function pray(guildId, userId) {
+  const key = `pray:${guildId}:${userId}`;
+  const left = minigameCooldown.remaining(key);
+  if (left > 0) {
+    const err = new Error(`The gods are still listening from your last prayer. Try again in **${Math.ceil(left / 60_000)}m**.`);
+    err.code = 'PRAY_COOLDOWN';
+    throw err;
+  }
+  minigameCooldown.set(key, minigames.PRAY_COOLDOWN_MS);
+
+  const amount = minigames.range(1000, 3000, rng);
+  economyRepo.updateBalance(guildId, userId, amount);
+  economyRepo.logTx(guildId, userId, 'pray', amount, 'Prayer blessing');
+  const updated = economyRepo.get(guildId, userId);
+  return { amount, balance: updated.balance, row: updated };
+}
+
+/**
+ * Crate — costs coins, opens a random animal plus bonus coins.
+ */
+async function crate(guildId, userId) {
+  const row = economyRepo.ensure(guildId, userId);
+  if ((row.balance ?? 0) < minigames.CRATE_COST) {
+    const err = new Error(`A crate costs **${format(minigames.CRATE_COST)}** — you have ${format(row.balance ?? 0)}.`);
+    err.code = 'INSUFFICIENT';
+    throw err;
+  }
+  const animal = minigames.weightedPick(minigames.ANIMALS, rng);
+  const bonus = minigames.range(minigames.CRATE_BONUS_MIN, minigames.CRATE_BONUS_MAX, rng);
+  const { isNew, count } = zoo.addAnimal(guildId, userId, animal);
+  const net = bonus - minigames.CRATE_COST;
+  economyRepo.updateBalance(guildId, userId, net);
+  economyRepo.logTx(guildId, userId, 'crate', net, `Crate: ${animal.name}${isNew ? ' (NEW!)' : ''} + ${bonus} bonus`);
+  const updated = economyRepo.get(guildId, userId);
+  return { animal, isNew, count, bonus, balance: updated.balance, row: updated };
+}
+
+/**
  * Reward the FGx players from a recorded match (or clan war).
  * Winner 'fgx' pays each lineup player MATCH_WIN_REWARD; a draw pays a
  * small MATCH_DRAW_REWARD; losses pay nothing. Returns the payout summary.
@@ -226,10 +271,11 @@ async function hunt(guildId, userId) {
 
   const animal = minigames.weightedPick(minigames.ANIMALS, rng);
   const amount = minigames.range(animal.min, animal.max, rng);
+  const { isNew, count } = zoo.addAnimal(guildId, userId, animal);
   economyRepo.updateBalance(guildId, userId, amount);
-  economyRepo.logTx(guildId, userId, 'hunt', amount, `Hunted a ${animal.name}`);
+  economyRepo.logTx(guildId, userId, 'hunt', amount, `Hunted a ${animal.name}${isNew ? ' (NEW!)' : ''}`);
   const updated = economyRepo.get(guildId, userId);
-  return { animal, amount, balance: updated.balance, row: updated };
+  return { animal, amount, isNew, count, balance: updated.balance, row: updated };
 }
 
 /**
@@ -271,10 +317,13 @@ module.exports = {
   gamble,
   hunt,
   battle,
+  pray,
+  crate,
   rewardMatch,
   MATCH_WIN_REWARD,
   MATCH_DRAW_REWARD,
   huntCooldownLeft,
   battleCooldownLeft,
+  prayCooldownLeft,
   _setRng,
 };

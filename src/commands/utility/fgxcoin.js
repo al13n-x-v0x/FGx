@@ -49,6 +49,22 @@ module.exports = {
         .setDescription('Show your (or a member\'s) transaction history')
         .addUserOption((o) => o.setName('user').setDescription('Member (default: you)').setRequired(false))
         .addIntegerOption((o) => o.setName('limit').setDescription('How many transactions (max 1000, default 10)').setMinValue(1).setMaxValue(1000).setRequired(false)),
+    )
+    .addSubcommand((s) => s.setName('hunt').setDescription('Hunt animals — they join your zoo (60s cooldown)'))
+    .addSubcommand((s) => s.setName('battle').setDescription('Fight an enemy — win big or lose 10% (120s cooldown)'))
+    .addSubcommand((s) => s.setName('pray').setDescription('A big coin blessing (2h cooldown)'))
+    .addSubcommand((s) => s.setName('crate').setDescription('Open a loot crate for a random animal + bonus coins (250 ₣Ԡ🇽)'))
+    .addSubcommand((s) =>
+      s
+        .setName('zoo')
+        .setDescription('View your collected animals')
+        .addUserOption((o) => o.setName('user').setDescription('Member (default: you)').setRequired(false)),
+    )
+    .addSubcommand((s) =>
+      s
+        .setName('sell')
+        .setDescription('Sell a duplicate animal for coins')
+        .addStringOption((o) => o.setName('animal').setDescription('Animal id or name, e.g. fox').setRequired(true)),
     ),
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
@@ -57,6 +73,45 @@ module.exports = {
 
     if (sub === 'history') {
       return module.exports.handleHistory(interaction);
+    }
+
+    if (sub === 'hunt' || sub === 'battle' || sub === 'pray' || sub === 'crate') {
+      try {
+        const result = await economy[sub](guildId, userId);
+        const embed =
+          sub === 'hunt'
+            ? views.huntEmbed(result)
+            : sub === 'battle'
+              ? views.battleEmbed(result)
+              : sub === 'pray'
+                ? views.prayEmbed(result)
+                : views.crateEmbed(result);
+        return interaction.reply({ embeds: [embed] });
+      } catch (err) {
+        if (['INSUFFICIENT', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN'].includes(err.code)) {
+          return interaction.reply({ embeds: [views.warnEmbed('Minigame', err.message)], ephemeral: true });
+        }
+        throw err;
+      }
+    }
+
+    if (sub === 'zoo') {
+      const target = interaction.options.getUser('user') ?? interaction.user;
+      const s = require('../../services/community/zooService').stats(guildId, target.id);
+      const rows = require('../../services/community/zooService').collection(guildId, target.id);
+      return interaction.reply({ embeds: [views.zooEmbed(target.username, s, rows)] });
+    }
+
+    if (sub === 'sell') {
+      try {
+        const result = require('../../services/community/zooService').sell(guildId, userId, interaction.options.getString('animal', true));
+        return interaction.reply({ embeds: [views.sellEmbed(result)] });
+      } catch (err) {
+        if (['UNKNOWN_ANIMAL', 'NOT_OWNED'].includes(err.code)) {
+          return interaction.reply({ embeds: [views.warnEmbed('Sell failed', err.message)], ephemeral: true });
+        }
+        throw err;
+      }
     }
 
     if (sub === 'wallet') {

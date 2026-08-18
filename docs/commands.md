@@ -52,6 +52,9 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `!bal` / `!daily` (chat) | OwO-style bang commands — check balance, claim the 500 ₣Ԡ🇽 daily | Anyone |
 | `!coinflip <amount|all> [heads|tails]` (chat) | OwO coinflip with a spinning-coin animation — pick a side to double your bet | Anyone |
 | `!hunt` / `!battle` (chat) | OwO-style minigames — hunt animals for coins (60s cooldown), battle enemies to win big or lose 10% (120s cooldown) | Anyone |
+| `!zoo` / `!sell <animal>` (chat) | Collect animals from hunts into your zoo; sell duplicates for coins | Anyone |
+| `!pray` (chat) | 6h cooldown — pray for a random 15–150 ₣Ԡ🇽 blessing | Anyone |
+| `!crate` (chat) | 3h cooldown — open a crate for 200–800 ₣Ԡ🇽 (or 50/50 gamble for 2× / nothing) | Anyone |
 | `fgx coinflip <amount/all> [heads|tails]` / `fgx transfer @user <amount>` (chat) | Coinflip and transfers straight from chat | Anyone |
 | `fgx wallet [user]` / `fgx top` (chat) | Balances and richest members from chat | Anyone |
 | `/fgxcoin wallet [user]` | Your (or a member's) ₣Ԡ🇽 balance, lifetime earned, daily streak | Anyone |
