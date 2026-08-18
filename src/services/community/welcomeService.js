@@ -5,9 +5,10 @@
  * All rights reserved.
  */
 
-const { EmbedBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { BRAND } = require('../../config/constants');
 const { guildConfigRepo } = require('../../database/repos/guildConfig');
+const { robloxLinksRepo } = require('../../database/repos/roblox');
 const { logAudit } = require('../logging/auditLogger');
 const { logger } = require('../../utils/logger');
 
@@ -63,6 +64,31 @@ async function onJoin(client, member) {
       .setTimestamp(new Date());
 
     await channel.send({ embeds: [embed], content: `<@${member.id}>` });
+
+    // Bloxlink-style Roblox verification prompt — DM new members who aren't
+    // linked yet so verification starts on day one.
+    if (config.roblox.enabled && !robloxLinksRepo.get(member.guild.id, member.id)) {
+      const dmEmbed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('🟥 Verify your Roblox account')
+        .setDescription(
+          `Welcome to **${member.guild.name}**!\n\n` +
+            'Link your **Roblox account** to unlock your verification role — ' +
+            'Bloxlink-style, no password needed.\n\n' +
+            '1. Click **Verify with Roblox**\n' +
+            '2. Enter your Roblox username\n' +
+            '3. Put the code in your Roblox **About** section\n' +
+            '4. Press **Check** — done',
+        )
+        .setFooter({ text: `${BRAND.footer} • Powered by the Roblox public API` });
+      const dmRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('roblox:start')
+          .setStyle(ButtonStyle.Primary)
+          .setLabel('Verify with Roblox'),
+      );
+      await member.send({ embeds: [dmEmbed], components: [dmRow] }).catch(() => {});
+    }
 
     await logAudit(client, member.guild, {
       action: 'join',

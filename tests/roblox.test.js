@@ -129,3 +129,18 @@ test('username resolution returns null for unknown accounts', async () => {
     robloxService._setFetch(realFetch);
   }
 });
+
+test('verified list excludes pending links and orders by recency', () => {
+  // g3: u1 verified first, u2 pending, u3 verified second.
+  robloxLinksRepo.create('g3', 'u1', { robloxUsername: 'First', robloxId: 111, code: 'FGX-A' });
+  robloxLinksRepo.create('g3', 'u2', { robloxUsername: 'Pending', robloxId: 222, code: 'FGX-B' });
+  robloxLinksRepo.create('g3', 'u3', { robloxUsername: 'Second', robloxId: 333, code: 'FGX-C' });
+  robloxLinksRepo.verify('g3', 'u1');
+  robloxLinksRepo.verify('g3', 'u3');
+  const verified = robloxLinksRepo.listVerified('g3');
+  assert.equal(verified.length, 2);
+  // Most recently verified first.
+  assert.equal(verified[0].user_id, 'u3');
+  assert.equal(verified[1].user_id, 'u1');
+  assert.equal(robloxService.countVerified('g3'), 2);
+});

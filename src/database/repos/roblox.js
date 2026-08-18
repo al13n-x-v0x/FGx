@@ -78,7 +78,7 @@ const robloxLinksRepo = {
 
   listVerified(guildId) {
     return db.all(
-      "SELECT * FROM roblox_links WHERE guild_id = ? AND status = 'verified' ORDER BY verified_at DESC",
+      "SELECT * FROM roblox_links WHERE guild_id = ? AND status = 'verified' ORDER BY verified_at DESC, rowid DESC",
       guildId,
     );
   },

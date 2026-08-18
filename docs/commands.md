@@ -44,7 +44,8 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/unlink` | Remove your BloxStrike link |
 | `/roblox verify <username>` | Bloxlink-style Roblox verification (code goes in your Roblox About) |
 | `/roblox status` | Show your Roblox verification status |
-| `/roblox unlink` | Remove your Roblox link |
+| `/roblox unlink [user]` | Remove your Roblox link — or any member's as staff |
+| `/roblox list [page]` | Paginated list of verified Roblox members (staff) |
 | `/roblox panel` | Create the Roblox verification panel (staff) |
 | `/level [user]` / `/rank [user]` | Community XP and level |
 | `/leaderboard <category>` | Rating / kills / K-D / streak / wins / matches (paginated) |

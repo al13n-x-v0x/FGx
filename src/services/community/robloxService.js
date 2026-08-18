@@ -96,6 +96,15 @@ function linkStatus(guildId, userId) {
   }
 }
 
+/** Number of verified Roblox links in a guild (DB only). */
+function countVerified(guildId) {
+  try {
+    return robloxLinksRepo.countVerified(guildId);
+  } catch {
+    return 0;
+  }
+}
+
 /** The role granted on verification (roblox role, else generic verified role). */
 function verifiedRole(guild, config) {
   const roleId = config.roblox.roleId || config.verification.roleId;
@@ -375,6 +384,7 @@ module.exports = {
   resolveUsername,
   fetchBlurb,
   linkStatus,
+  countVerified,
   startVerification,
   checkVerification,
   unlink,

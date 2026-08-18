@@ -216,6 +216,7 @@ function renderSection(guild, userId, section) {
     case 'roblox': {
       const config = guildConfigRepo.get(guild.id);
       const link = robloxService.linkStatus(guild.id, userId);
+      const verified = robloxService.countVerified(guild.id);
       const role = config.roblox.roleId || config.verification.roleId;
       const roleLabel = role ? `<@&${role}>` : '(no role configured) — staff: `/config roblox`';
       const embed = new EmbedBuilder()
@@ -227,6 +228,7 @@ function renderSection(guild, userId, section) {
             : link && link.status === 'pending'
               ? `**Pending** — put the code from your verification message in your Roblox About section, then press **Check**.\n\n`
               : 'Not linked yet.\n\n') +
+            `**Verified members:** ${verified}${verified > 0 ? ' — staff: `/roblox list`' : ''}\n\n` +
             `Reward: **${roleLabel}**\n\n` +
             '**How it works (Bloxlink-style)**\n' +
             '1. Click **Verify with Roblox**\n' +

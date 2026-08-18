@@ -13,7 +13,7 @@ const GROUPS = [
   { name: 'Security', icon: '🔐', commands: ['/security', '/automod'] },
   { name: 'Community', icon: '👥', commands: ['/profile', '/link', '/roblox', '/level', '/leaderboard', '/achievements', '/verify', '/ticket'] },
   { name: 'BloxStrike', icon: '⚔️', commands: ['/fgx', '/bloxstrike', '/loadout', '/roster', '/tryout', '/evaluate', '/scrim', '/match', '/event', '/clanwar', '/training', '/analysis', '/bloxai'] },
-  { name: 'Roblox', icon: '🟥', commands: ['/roblox verify', '/roblox status', '/roblox unlink', '/roblox panel'] },
+  { name: 'Roblox', icon: '🟥', commands: ['/roblox verify', '/roblox status', '/roblox unlink', '/roblox list', '/roblox panel'] },
   { name: 'AI Assistant', icon: '🤖', commands: ['/ask', '/ai', '/bloxai'] },
   { name: 'Admin', icon: '⚙️', commands: ['/setup', '/config', '/status', '/help'] },
   { name: 'BloxStrike Tools', icon: '🔀', commands: ['/shuffle'] },
