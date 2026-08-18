@@ -25,7 +25,7 @@ const { logger } = require('../../utils/logger');
 /**
  * Bloxlink-style Roblox verification using Roblox's official public API:
  *   POST https://users.roblox.com/v1/usernames/users   (resolve username → id)
- *   GET  https://users.roblox.com/v1/users/{id}/profile (reads the About/blurb)
+ *   GET  https://users.roblox.com/v1/users/{id}        (reads the About/blurb)
  *
  * Flow: enter username → FGx issues a code → user puts the code in their
  * Roblox About section → press Check → the code match links the accounts.
@@ -71,9 +71,9 @@ async function resolveUsername(username) {
   return { id: match.id, name: match.name ?? username, displayName: match.displayName ?? username };
 }
 
-/** Fetch a user's About/blurb text. */
+/** Fetch a user's About/blurb text (from the public user profile endpoint). */
 async function fetchBlurb(userId) {
-  const res = await apiFetch(`${ROBLOX_API}/users/${userId}/profile`, {
+  const res = await apiFetch(`${ROBLOX_API}/users/${userId}`, {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(API_TIMEOUT_MS),
   });
