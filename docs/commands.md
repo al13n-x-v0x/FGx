@@ -39,7 +39,7 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/profile [user]` | FGx player profile (stats, rank, rating) |
 | `/player [user]` | Alias of `/profile` |
 | `/link submit <username>` | Link your BloxStrike username (pending staff verification) |
-| `/link verify <user>` | Verify a member's link (staff: Captain+ or ManageGuild) |
+| `/link verify <user>` | Verify a member's link (staff: Manage Messages / Manage Guild, or Captain+) |
 | `/link list` | List pending verifications (staff) |
 | `/unlink` | Remove your BloxStrike link |
 | `/roblox verify <username>` | Bloxlink-style Roblox verification (code goes in your Roblox About) |

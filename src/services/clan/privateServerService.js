@@ -42,9 +42,10 @@ function modeInfo(mode) {
   return MODES[mode] ?? null;
 }
 
-/** Staff check reused by the gate: Captain+ or ManageGuild. */
+/** Staff check reused by the gate: ManageGuild, Manage Messages, or Captain+. */
 function isStaff(member, config) {
   if (member?.permissions?.has('ManageGuild')) return true;
+  if (member?.permissions?.has('ManageMessages')) return true;
   if (member && config) return rosterHasStaff(member, config);
   return false;
 }

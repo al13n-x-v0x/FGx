@@ -42,16 +42,21 @@ function hasRank(member, minimum, config) {
   return RANK_ORDER[highest.toLowerCase()] >= RANK_ORDER[minimum.toLowerCase()];
 }
 
-/** Require a staff rank (Captain+) or ManageGuild. */
+/**
+ * Require staff: any permission that implies moderation — ManageGuild or
+ * ManageMessages ("delete others' messages") — or a Captain+ clan rank.
+ */
 function requireStaff(member, config) {
   if (member.permissions?.has('ManageGuild')) return;
+  if (member.permissions?.has('ManageMessages')) return;
   if (hasRank(member, 'Captain', config)) return;
-  throw new PermissionError('Only clan staff (Captain+) can do that.');
+  throw new PermissionError('Only staff can do that (Captain+ rank, or the Manage Messages permission).');
 }
 
-/** Require a leadership rank (Manager+) or ManageGuild. */
+/** Require a leadership rank (Manager+), ManageGuild, or Manage Messages. */
 function requireLeadership(member, config) {
   if (member.permissions?.has('ManageGuild')) return;
+  if (member.permissions?.has('ManageMessages')) return;
   if (hasRank(member, 'Manager', config)) return;
   throw new PermissionError('Only clan leadership (Manager+) can do that.');
 }
