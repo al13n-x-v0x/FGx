@@ -59,6 +59,26 @@ test('parseCommand clamps the top-count and rejects unknown commands', () => {
   assert.equal(parseCommand('hunt').type, 'unknown');
 });
 
+test('parseCommand maps server commands to hub sections', () => {
+  assert.deepEqual(parseCommand('scrims'), { type: 'section', section: 'scrims' });
+  assert.deepEqual(parseCommand('stats'), { type: 'section', section: 'stats' });
+  assert.deepEqual(parseCommand('roster'), { type: 'section', section: 'roster' });
+  assert.deepEqual(parseCommand('loadout'), { type: 'section', section: 'loadouts' });
+  assert.deepEqual(parseCommand('wars'), { type: 'section', section: 'clanwars' });
+  assert.deepEqual(parseCommand('events'), { type: 'section', section: 'events' });
+  assert.deepEqual(parseCommand('roblox'), { type: 'section', section: 'roblox' });
+  assert.deepEqual(parseCommand('security'), { type: 'section', section: 'security' });
+  assert.deepEqual(parseCommand('tryout'), { type: 'section', section: 'tryouts' });
+  assert.deepEqual(parseCommand('lb'), { type: 'section', section: 'leaderboards' });
+});
+
+test('parseCommand handles profile mentions, ping and status', () => {
+  assert.deepEqual(parseCommand('profile'), { type: 'profile', targetId: null });
+  assert.deepEqual(parseCommand('profile', ['u5']), { type: 'profile', targetId: 'u5' });
+  assert.deepEqual(parseCommand('ping'), { type: 'ping' });
+  assert.deepEqual(parseCommand('status'), { type: 'status' });
+});
+
 test('parseAmount accepts whole numbers only', () => {
   assert.equal(parseAmount('42'), 42);
   assert.equal(parseAmount('4,200'), 4200);

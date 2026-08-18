@@ -65,29 +65,10 @@ function warnEmbed(title, description) {
   return { color: BRAND.colors.warn, title, description, footer: { text: BRAND.footer } };
 }
 
-/** Quick guide shown by `fgx` / `fgx help` in chat. */
-function chatHelpEmbed() {
-  return {
-    color: BRAND.colors.primary,
-    title: '💰 FGx Coins — chat commands',
-    description:
-      'Type **`fgx <command>`** in chat — OwO style.\n\n' +
-      '• `fgx daily` — claim your daily reward (streak bonus!)\n' +
-      '• `fgx weekly` — claim your weekly reward\n' +
-      '• `fgx wallet` / `fgx wallet @user` — check a balance\n' +
-      '• `fgx transfer @user <amount>` — send ₣Ԡ🇽 (5% tax)\n' +
-      '• `fgx coinflip <amount>` / `fgx coinflip all` — 50/50 gamble\n' +
-      '• `fgx top` — richest members\n\n' +
-      'You can also mention the bot: `@FGx daily`',
-    footer: { text: `${BRAND.footer} • Slash versions: /fgxcoin` },
-  };
-}
-
 module.exports = {
   walletEmbed,
   claimEmbed,
   transferEmbed,
   gambleEmbed,
   warnEmbed,
-  chatHelpEmbed,
 };

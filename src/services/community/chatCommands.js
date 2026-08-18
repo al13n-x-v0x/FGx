@@ -8,22 +8,54 @@
 const { BRAND } = require('../../config/constants');
 const economy = require('./economyService');
 const views = require('./economyViews');
+const hubService = require('../clan/hubService');
 const { economyRepo } = require('../../database/repos/economy');
+const { healthCheck } = require('../../database/index');
 const { RateLimiter } = require('../../utils/ratelimit');
 const { logger } = require('../../utils/logger');
 
 /**
- * OwO-style chat commands for the FGx economy.
+ * OwO-style chat commands.
  *
  * In chat, type:  fgx daily | fgx coinflip 50 | fgx transfer @user 100 |
- *                 fgx wallet | fgx weekly | fgx top | fgx help
+ *                 fgx wallet | fgx weekly | fgx top
+ * Plus hub sections: fgx profile, fgx stats, fgx roster, fgx scrims,
+ *                 fgx events, fgx wars, fgx loadout, fgx leaderboard,
+ *                 fgx roblox, fgx security, fgx help, fgx ping, fgx status
  * Mentioning the bot works too:  @FGx daily
  *
- * Parsing is pure and unit-tested; execution mirrors /fgxcoin exactly
- * (same service, same embeds) so both entry points stay in sync.
+ * Parsing is pure and unit-tested; execution mirrors the slash commands
+ * and the /fgx hub (same services, same embeds).
  */
 
-const CHAT_RATE_LIMIT = new RateLimiter({ max: 5, windowMs: 60_000 });
+const CHAT_RATE_LIMIT = new RateLimiter({ max: 8, windowMs: 60_000 });
+
+/** Chat command → hub section value. */
+const SECTION_ALIASES = {
+  profile: 'profile',
+  stats: 'stats',
+  stat: 'stats',
+  roster: 'roster',
+  scrim: 'scrims',
+  scrims: 'scrims',
+  event: 'events',
+  events: 'events',
+  war: 'clanwars',
+  wars: 'clanwars',
+  clanwar: 'clanwars',
+  clanwars: 'clanwars',
+  loadout: 'loadouts',
+  loadouts: 'loadouts',
+  tryout: 'tryouts',
+  tryouts: 'tryouts',
+  leaderboard: 'leaderboards',
+  leaderboards: 'leaderboards',
+  lb: 'leaderboards',
+  roblox: 'roblox',
+  security: 'security',
+  coins: 'coins',
+  private: 'private',
+};
 
 /** Strip the prefix/mention and return the command line, or null. */
 function stripPrefix(content, clientId) {
@@ -59,7 +91,8 @@ function parseCommand(line, mentionIds = []) {
   const rest = tokens.slice(1);
 
   if (!cmd || cmd === 'help') return { type: 'help' };
-
+  if (cmd === 'ping') return { type: 'ping' };
+  if (cmd === 'status') return { type: 'status' };
   if (cmd === 'wallet' || cmd === 'bal' || cmd === 'balance') {
     return { type: 'wallet', targetId: mentionIds[0] ?? null };
   }
@@ -80,12 +113,50 @@ function parseCommand(line, mentionIds = []) {
     return { type: 'gamble', all, amount: all ? null : parseAmount(raw), raw };
   }
 
-  if (cmd === 'top' || cmd === 'leaderboard' || cmd === 'lb') {
+  if (cmd === 'top') {
     const n = parseAmount(rest[0] ?? '') ?? 10;
     return { type: 'top', count: Math.min(Math.max(n, 1), 15) };
   }
 
+  if (cmd === 'profile') {
+    return { type: 'profile', targetId: mentionIds[0] ?? null };
+  }
+
+  if (SECTION_ALIASES[cmd]) {
+    return { type: 'section', section: SECTION_ALIASES[cmd] };
+  }
+
   return { type: 'unknown', raw: line };
+}
+
+/** Render a hub section as plain embeds (no interactive components). */
+function sectionEmbeds(guild, userId, section) {
+  const rendered = hubService.renderSection(guild, userId, section);
+  return rendered.embeds;
+}
+
+/** General chat-command help embed. */
+function helpEmbed() {
+  return {
+    color: BRAND.colors.primary,
+    title: '💰 FGx — chat commands',
+    description:
+      'Type **`fgx <command>`** in chat (mentioning the bot works too: `@FGx daily`).\n\n' +
+      '**Economy**\n' +
+      '• `fgx daily` / `fgx weekly` — claim rewards\n' +
+      '• `fgx wallet [@user]` — check a balance\n' +
+      '• `fgx transfer @user <amount>` — send ₣Ԡ🇽 (5% tax)\n' +
+      '• `fgx coinflip <amount|all>` — 50/50 gamble\n' +
+      '• `fgx top` — richest members\n\n' +
+      '**Server**\n' +
+      '• `fgx profile [@user]` — player profile\n' +
+      '• `fgx stats` / `fgx roster` / `fgx leaderboard` — competitive\n' +
+      '• `fgx scrims` / `fgx events` / `fgx wars` — schedule & history\n' +
+      '• `fgx loadout` / `fgx tryouts` — guides\n' +
+      '• `fgx roblox` / `fgx security` — verification & protection\n' +
+      '• `fgx ping` / `fgx status` — bot health',
+    footer: { text: `${BRAND.footer} • Slash versions: /fgx, /fgxcoin` },
+  };
 }
 
 /**
@@ -103,14 +174,50 @@ async function handle(client, message) {
     return true;
   }
 
-  const parsed = parseCommand(line, [...(message.mentions.users?.values?.() ?? [])].map((u) => u.id));
+  const mentionIds = [...(message.mentions.users?.values?.() ?? [])].map((u) => u.id);
+  const parsed = parseCommand(line, mentionIds);
   const guildId = message.guild.id;
   const userId = message.author.id;
 
   try {
     switch (parsed.type) {
       case 'help':
-        await message.reply({ embeds: [views.chatHelpEmbed()] });
+        await message.reply({ embeds: [helpEmbed()] });
+        return true;
+
+      case 'ping': {
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '🏓 Pong!',
+          description: `Gateway latency: **${client.ws.ping}ms**`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'status': {
+        const embed = {
+          color: BRAND.colors.primary,
+          title: 'FGx Status',
+          description:
+            `Discord   🟢 (${client.guilds.cache.size} guild${client.guilds.cache.size === 1 ? '' : 's'}, ${client.ws.ping}ms)\n` +
+            `Database  ${healthCheck() ? '🟢' : '🔴'}\n` +
+            `Commands  ${client.commands?.size ?? 0} registered`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'profile': {
+        const targetId = parsed.targetId ?? userId;
+        await message.reply({ embeds: sectionEmbeds(message.guild, targetId, 'profile') });
+        return true;
+      }
+
+      case 'section':
+        await message.reply({ embeds: sectionEmbeds(message.guild, userId, parsed.section) });
         return true;
 
       case 'wallet': {
@@ -171,7 +278,9 @@ async function handle(client, message) {
       }
 
       default:
-        await message.reply({ embeds: [views.warnEmbed('Unknown command', 'Try `fgx help` — commands: daily, weekly, wallet, transfer, coinflip, top.')] });
+        await message.reply({
+          embeds: [views.warnEmbed('Unknown command', `\`fgx ${parsed.raw}\` isn't a thing. Try \`fgx help\` — or use \`/help\`.`)],
+        });
         return true;
     }
   } catch (err) {
@@ -185,4 +294,4 @@ async function handle(client, message) {
   }
 }
 
-module.exports = { handle, stripPrefix, parseCommand, parseAmount, CHAT_RATE_LIMIT };
+module.exports = { handle, stripPrefix, parseCommand, parseAmount, CHAT_RATE_LIMIT, helpEmbed, SECTION_ALIASES };
