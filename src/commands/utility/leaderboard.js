@@ -8,6 +8,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { BRAND } = require('../../config/constants');
 const { profilesRepo } = require('../../database/repos/profiles');
+const { economyRepo } = require('../../database/repos/economy');
 const { paginate } = require('../../utils/pagination');
 const { kdRatio, ratingTierIcon } = require('../../utils/format');
 
@@ -18,6 +19,7 @@ const CATEGORIES = {
   streak: { label: '🔥 Win Streak', field: 'streak' },
   wins: { label: '🏅 Wins', field: 'wins' },
   matches: { label: '🎯 Matches', field: 'matches' },
+  coins: { label: '💰 FGx Coins', field: 'coins' },
 };
 
 function formatLine(category, row, index) {
@@ -35,6 +37,8 @@ function formatLine(category, row, index) {
       return `${medal} <@${row.user_id}> — ${row.wins} wins`;
     case 'matches':
       return `${medal} <@${row.user_id}> — ${row.matches} matches`;
+    case 'coins':
+      return `${medal} <@${row.user_id}> — 💰 ${(row.balance ?? 0).toLocaleString('en-US')} FGx`;
     default:
       return '';
   }
@@ -53,7 +57,10 @@ module.exports = {
     ),
   async execute(interaction) {
     const category = interaction.options.getString('category', true);
-    const rows = profilesRepo.leaderboard(interaction.guild.id, category, 100);
+    const rows =
+      category === 'coins'
+        ? economyRepo.leaderboard(interaction.guild.id, 100)
+        : profilesRepo.leaderboard(interaction.guild.id, category, 100);
 
     const perPage = 10;
     const pages = [];

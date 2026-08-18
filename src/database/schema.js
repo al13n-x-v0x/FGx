@@ -251,6 +251,37 @@ const MIGRATIONS = [
   CREATE INDEX IF NOT EXISTS idx_private_servers_active ON private_servers (guild_id, status);
   CREATE INDEX IF NOT EXISTS idx_private_servers_expiry ON private_servers (status, expires_at);
   `,
+
+  // Migration 4 — FGx economy (OwO-style server currency).
+  // balance = spendable FGx, lifetime = total earned (never decreases),
+  // daily_streak tracks consecutive daily claims for the streak bonus.
+  `
+  CREATE TABLE IF NOT EXISTS economy (
+    guild_id      TEXT NOT NULL,
+    user_id       TEXT NOT NULL,
+    balance       INTEGER NOT NULL DEFAULT 0,
+    lifetime      INTEGER NOT NULL DEFAULT 0,
+    last_daily    TEXT,
+    daily_streak  INTEGER NOT NULL DEFAULT 0,
+    last_weekly   TEXT,
+    created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (guild_id, user_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS economy_tx (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id   TEXT NOT NULL,
+    user_id    TEXT NOT NULL,
+    kind       TEXT NOT NULL,
+    amount     INTEGER NOT NULL,
+    note       TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_economy_balance ON economy (guild_id, balance DESC);
+  CREATE INDEX IF NOT EXISTS idx_economy_tx_user ON economy_tx (guild_id, user_id, created_at);
+  `,
 ];
 
 module.exports = { MIGRATIONS };

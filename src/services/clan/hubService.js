@@ -20,6 +20,7 @@ const { tryoutsRepo } = require('../../database/repos/community');
 const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { privateServersRepo } = require('../../database/repos/privateServers');
 const privateServerService = require('./privateServerService');
+const economy = require('../community/economyService');
 const { aiSummary } = require('../../config/env');
 const rosterService = require('./rosterService');
 const { winRate } = require('../../utils/format');
@@ -41,6 +42,7 @@ const OPTIONS = [
   { value: 'loadouts', label: '🎒 Loadouts', description: 'BloxStrike buy & role guide' },
   { value: 'roblox', label: '🟥 Roblox', description: 'Bloxlink-style Roblox verification' },
   { value: 'private', label: '🎮 Private Server', description: 'Temporary match servers (1v1–6v6)' },
+  { value: 'coins', label: '💰 FGx Coins', description: 'Your FGx economy wallet' },
   { value: 'support', label: '🎫 Support', description: 'Tickets & help' },
   { value: 'ai', label: '🤖 FGx AI', description: 'Assistant status & usage' },
   { value: 'security', label: '🛡️ Security', description: 'Protection status' },
@@ -69,7 +71,7 @@ function mainEmbed({ title = 'FGx • BloxStrike Command Hub' } = {}) {
       'Select a section below — or use the quick buttons.\n\n' +
         '👤 Profile\n⚔️ Roster\n🏆 Leaderboards\n🎯 Tryouts\n' +
         '🔥 Scrims\n⚔️ Clan Wars\n📅 Events\n📊 Statistics\n🎒 Loadouts\n' +
-        '🟥 Roblox\n🎮 Private Server\n🎫 Support\n🤖 FGx AI\n🛡️ Security',
+        '🟥 Roblox\n🎮 Private Server\n💰 FGx Coins\n🎫 Support\n🤖 FGx AI\n🛡️ Security',
     )
     .setFooter({ text: BRAND.footer });
 }
@@ -287,6 +289,27 @@ function renderSection(guild, userId, section) {
           ),
       );
       return { embeds: [embed], components: [modeRow, navRow(true), ...quickActionRows()] };
+    }
+
+    case 'coins': {
+      const row = economy.balance(guild.id, userId);
+      const top = economy.leaderboard(guild.id, 5);
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('💰 FGx Coins')
+        .setDescription(
+          `**Your balance:** ${economy.format(row.balance ?? 0)}\n` +
+            `**Lifetime earned:** ${economy.format(row.lifetime ?? 0)}\n` +
+            `**Daily streak:** ${row.daily_streak ?? 0} day${(row.daily_streak ?? 0) === 1 ? '' : 's'}\n\n` +
+            '**How to earn & spend:**\n' +
+            '• `/fgxcoin daily` — daily reward (+streak bonus)\n' +
+            '• `/fgxcoin weekly` — weekly reward\n' +
+            '• `/fgxcoin transfer` — send to a friend (5% tax)\n' +
+            '• `/fgxcoin gamble` — 50/50 double-or-nothing\n\n' +
+            (top.length > 0 ? `**Top wallets:**\n${top.map((r, i) => `${['🥇', '🥈', '🥉'][i] ?? `${i + 1}.`} <@${r.user_id}> — ${economy.format(r.balance ?? 0)}`).join('\n')}` : 'No coins in circulation yet — claim your `/fgxcoin daily`.'),
+        )
+        .setFooter({ text: `${BRAND.footer} • FGx economy` });
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'support': {
