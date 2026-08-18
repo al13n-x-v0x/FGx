@@ -18,7 +18,7 @@ Status of the 2026 platform target, mapped to what ships today.
 | AutoMod | ✅ | spam, duplicates, flooding, mention/caps/emoji spam, invites, phishing, links; progressive warn → delete → timeout → escalation |
 | Anti-raid | ✅ | join velocity, new-account bursts, suspicious patterns, lockdown; `/security` commands |
 | Anti-nuke | ✅ | mass channel/role/bans/kicks/webhook/permission anomalies; owner alerts |
-| AI security | 🧪 | LOG / RECOMMEND / MODERATE modes; profanity fast-path (DM + warning + 5-min timeout); never punishes uncertain cases |
+| AI security | 🧪 | LOG / RECOMMEND / MODERATE modes; profanity is LOG-only by default (never auto-punishes swearing); MODERATE enforces only security threats (scams, phishing, malicious links, ad spam); never punishes uncertain cases |
 | AI assistant | 🧪 | `/ask` `/ai` `/bloxai`; BloxStrike knowledge base; guardrails; 5/min rate limit |
 | Profiles & linking | 🧪 | `/profile` `/player`; `/link submit|verify|list`; verified vs FGx-recorded data |
 | Clan management | ✅ | ranks Owner→Recruit (incl. Co-Owner); roster add/remove/promote/demote |

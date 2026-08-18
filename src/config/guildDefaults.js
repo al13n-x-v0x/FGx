@@ -94,10 +94,16 @@ const DEFAULT_GUILD_CONFIG = Object.freeze({
   ai: Object.freeze({
     securityEnabled: true,
     assistantEnabled: true,
-    // MODERATE enforces: DM + warning + 5-min timeout on profanity and
-    // HIGH-risk AI classifications. Change per guild with /config ai
+    // AI classification mode. MODERATE enforces only HIGH-risk security
+    // threats (phishing, scams, malicious links, severe harassment) with
+    // high confidence. Change per guild with /config ai
     // (LOG = log only, RECOMMEND = notify staff instead of punishing).
     actionMode: 'MODERATE',
+    // Profanity is LOG-only by default: casual swearing is recorded in the
+    // audit log but NEVER auto-punished. Anti-spam (flooding, dupes,
+    // mentions, invites, links) is the enforced layer. Staff can set this
+    // to RECOMMEND or MODERATE with /config ai profanityAction.
+    profanityAction: 'LOG',
     securityConfidence: 0.85,
     moderateConfidence: 0.9,
     systemPrompt: DEFAULT_AI_PROMPT,

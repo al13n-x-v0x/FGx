@@ -20,21 +20,35 @@ const { logger } = require('../../utils/logger');
  * AI security layer.
  *
  * Two paths:
- *  1. Profanity fast path — a deterministic local word-list match catches
- *     swearing instantly (no API call, no latency).
+ *  1. Profanity fast path — a deterministic local word-list match records
+ *     swearing instantly (no API call, no latency). LOG-only by default:
+ *     casual swearing is never auto-punished (profanityAction config).
  *  2. AI classification — messages that trigger heuristic suspicion
  *     (invites, links, phishing, all-caps) are classified by the AI model.
  *
- * Action modes (per guild, default MODERATE):
+ * Action modes (per guild, default MODERATE) apply to the AI layer only:
  *   LOG       → record the analysis only
  *   RECOMMEND → record + notify staff in the log channel with the recommendation
  *   MODERATE  → DM the author, record an official warning, delete the message,
- *               and apply a 5-minute timeout on HIGH risk (profanity or high
- *               confidence AI classification). BAN only when the AI
- *               explicitly suggests it.
+ *               and apply a 5-minute timeout on HIGH risk with high
+ *               confidence. BAN only when the AI explicitly suggests it.
  *
- * The AI NEVER punishes solely from an uncertain classification.
+ * The deterministic spam engine (flooding, dupes, mentions, invites, links,
+ * caps) is enforced separately in the message pipeline and is the primary
+ * auto-mod layer. The AI NEVER punishes solely from an uncertain
+ * classification.
  */
+
+/**
+ * Categories that may be auto-enforced in MODERATE mode. Everything else
+ * (toxicity, harassment, threats, hate, profanity) is logged or reported to
+ * staff — the bot never punishes speech without an explicit security threat.
+ */
+const SECURITY_CATEGORIES = /scam|phish|malicious|advert|spam|social engin|fraud|link/i;
+
+function isSecurityCategory(category) {
+  return SECURITY_CATEGORIES.test(String(category ?? ''));
+}
 
 /** Messages trigger AI review only when at least one heuristic fires. */
 function needsReview(message, _config) {
@@ -155,6 +169,8 @@ async function analyzeMessage(client, message) {
   const content = message.content ?? '';
 
   // Profanity fast path: deterministic local match — instant, no API cost.
+  // LOG-only by default: swearing is recorded but NEVER auto-punished.
+  // Staff can opt into RECOMMEND or MODERATE via /config ai profanityAction.
   if (hasProfanity(content)) {
     const result = {
       risk: 'HIGH',
@@ -164,9 +180,10 @@ async function analyzeMessage(client, message) {
       recommendedAction: 'TIMEOUT',
       suggestedPunishment: 'TIMEOUT',
     };
-    if (config.ai.actionMode === 'MODERATE') {
+    const profanityMode = config.ai.profanityAction ?? 'LOG';
+    if (profanityMode === 'MODERATE') {
       await enforce(client, message, result);
-    } else if (config.ai.actionMode === 'RECOMMEND') {
+    } else if (profanityMode === 'RECOMMEND') {
       await notifyStaff(client, message, result);
       await logAudit(client, message.guild, {
         action: 'ai',
@@ -249,11 +266,15 @@ async function analyzeMessage(client, message) {
       return result;
     }
 
-    // MODERATE: punish only HIGH risk with high confidence.
+    // MODERATE: auto-enforce only SECURITY threats (scams, phishing,
+    // malicious links, ad spam, social engineering) at high confidence.
+    // Toxicity/harassment/profanity categories are logged — never punished
+    // automatically — so casual swearing can't trigger enforcement.
     if (
       config.ai.actionMode === 'MODERATE' &&
       result.risk === 'HIGH' &&
-      result.confidence >= config.ai.moderateConfidence
+      result.confidence >= config.ai.moderateConfidence &&
+      isSecurityCategory(result.category)
     ) {
       const ban = result.suggestedPunishment === 'BAN';
       await enforce(client, message, result, { ban });
@@ -280,4 +301,4 @@ async function analyzeMessage(client, message) {
   }
 }
 
-module.exports = { analyzeMessage, needsReview };
+module.exports = { analyzeMessage, needsReview, isSecurityCategory };
