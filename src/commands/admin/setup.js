@@ -10,6 +10,7 @@ const { BRAND } = require('../../config/constants');
 const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { requireAdmin } = require('../../utils/permissions');
 const verificationService = require('../../services/community/verificationService');
+const robloxService = require('../../services/community/robloxService');
 const ticketService = require('../../services/tickets/ticketService');
 const { logger } = require('../../utils/logger');
 
@@ -110,6 +111,7 @@ module.exports = {
       }
       if (verifyChannel && verifiedRole) {
         patch.verification = { enabled: true, channel: verifyChannel.id, roleId: verifiedRole.id, cooldownMinutes: 0 };
+        patch.roblox = { enabled: true, channel: verifyChannel.id, roleId: verifiedRole.id, codeTtlMinutes: 15 };
       }
       if (ticketChannel && ticketCategory) {
         patch.tickets = { enabled: true, categoryId: ticketCategory.id, panelChannelId: ticketChannel.id, staffRoleIds: [] };
@@ -138,6 +140,8 @@ module.exports = {
       if (verifyChannel && verifiedRole) {
         const panel = await step('Verification panel', () => verificationService.createPanel(guild));
         void panel;
+        const robloxPanel = await step('Roblox verification panel', () => robloxService.createPanel(guild));
+        void robloxPanel;
       }
       if (welcomeChannel) {
         await welcomeChannel
@@ -173,6 +177,7 @@ module.exports = {
           `\n\n**Next steps**\n` +
           `• Review fine-tuning with \`/config\`\n` +
           `• Bind clan rank roles with \`/config clan\`\n` +
+          `• Link Roblox accounts with \`/roblox verify\` (Bloxlink-style)\n` +
           `• Set an AI provider key for \`/ask\`, \`/bloxai\` (see .env)\n` +
           `• Shuffle scrim teams with \`/shuffle scrim\``,
       )

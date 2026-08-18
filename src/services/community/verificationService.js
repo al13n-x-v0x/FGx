@@ -102,6 +102,8 @@ async function handleVerify(interaction) {
   }
 
   try {
+    // Role assignment + audit-log writes can exceed Discord's 3s window.
+    await interaction.deferReply({ ephemeral: true });
     await member.roles.add(role, 'FGx verification');
     await logAudit(interaction.client, interaction.guild, {
       action: 'verification',
@@ -109,16 +111,21 @@ async function handleVerify(interaction) {
       moderator: null,
       details: { role: role.name },
     });
-    await interaction.reply({
+    await interaction.editReply({
       content: `Verified. Welcome to FGx.`,
-      ephemeral: true,
     });
   } catch (err) {
     logger.warn('verification failed', { guildId: interaction.guild.id, error: err.message });
-    await interaction.reply({
-      content: 'Verification failed. Contact staff for help.',
-      ephemeral: true,
-    });
+    if (interaction.deferred) {
+      await interaction.editReply({
+        content: 'Verification failed. Contact staff for help.',
+      });
+    } else {
+      await interaction.reply({
+        content: 'Verification failed. Contact staff for help.',
+        ephemeral: true,
+      });
+    }
   }
 }
 

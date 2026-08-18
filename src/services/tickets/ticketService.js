@@ -217,9 +217,12 @@ async function handleClaim(interaction) {
     });
   }
   ticketsRepo.claim(interaction.guild.id, ticket.id, interaction.user.id);
+  // Channel renames are extra API round-trips — acknowledge before them so
+  // the button never reports "not responded" on a slow guild.
+  await interaction.deferReply();
   await interaction.channel.setName(`${interaction.channel.name}-claimed`).catch(() => {});
   await interaction.channel.setTopic(`Ticket ${ticket.id} • Claimed by ${interaction.user.username}`).catch(() => {});
-  await interaction.reply({ content: `Ticket claimed by ${interaction.user}.`, ephemeral: false });
+  await interaction.editReply({ content: `Ticket claimed by ${interaction.user}.` });
 }
 
 /** Handle the close button: transcript, log, then offer deletion. */
@@ -231,6 +234,10 @@ async function handleClose(interaction) {
   if (ticket.status !== 'open') {
     return interaction.reply({ content: 'This ticket is already closed.', ephemeral: true });
   }
+
+  // Building the transcript fetches up to 200 messages — acknowledge before
+  // that so closing a long ticket never shows "not responded".
+  await interaction.deferReply();
 
   // Fetch history for the transcript.
   let lines = [`FGx Ticket Transcript — ${ticket.id}`, `Type: ${ticket.type}`, `Owner: ${ticket.owner_id}`, `Closed by: ${interaction.user.username}`, ''.repeat(0) + '─'.repeat(40)];
@@ -259,7 +266,7 @@ async function handleClose(interaction) {
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId(`ticket:delete:${ticket.id}`).setStyle(ButtonStyle.Danger).setLabel('Delete channel'),
   );
-  await interaction.reply({
+  await interaction.editReply({
     content: `Ticket **${ticket.id}** closed. Transcript saved.\n\n**Transcript:**`,
     files: [{ attachment: filePath, name: `${ticket.id}.txt` }],
     components: [row],

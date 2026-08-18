@@ -210,6 +210,27 @@ const MIGRATIONS = [
   CREATE INDEX IF NOT EXISTS idx_matches_guild ON matches (guild_id, played_at);
   CREATE INDEX IF NOT EXISTS idx_tryouts_guild ON tryouts (guild_id, status);
   `,
+
+  // Migration 2 — Bloxlink-style Roblox verification.
+  // One Roblox account per guild can only be claimed by a single Discord user
+  // (UNIQUE(guild_id, roblox_id)) to prevent identity impersonation.
+  `
+  CREATE TABLE IF NOT EXISTS roblox_links (
+    guild_id       TEXT NOT NULL,
+    user_id        TEXT NOT NULL,
+    roblox_username TEXT NOT NULL,
+    roblox_id      INTEGER NOT NULL,
+    status         TEXT NOT NULL DEFAULT 'pending',
+    code           TEXT,
+    verified_at    TEXT,
+    created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (guild_id, user_id),
+    UNIQUE (guild_id, roblox_id)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_roblox_pending ON roblox_links (guild_id, status);
+  `,
 ];
 
 module.exports = { MIGRATIONS };

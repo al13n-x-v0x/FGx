@@ -12,6 +12,7 @@ const ticketService = require('../services/tickets/ticketService');
 const tryoutService = require('../services/clan/tryoutService');
 const rosterService = require('../services/clan/rosterService');
 const hubService = require('../services/clan/hubService');
+const robloxService = require('../services/community/robloxService');
 const { guildConfigRepo } = require('../database/repos/guildConfig');
 const { eventsRepo, scrimsRepo, trainingRepo } = require('../database/repos/competitive');
 const participation = require('../services/clan/participation');
@@ -23,6 +24,9 @@ const { ValidationError } = require('../utils/errors');
 
 /** Toggle a user in/out of an announcement-backed participation list. */
 async function toggleParticipation(interaction, repo, rowId, { join }) {
+  // Editing the announcement message can exceed Discord's 3s window when the
+  // message is not cached — acknowledge first, then finish with editReply.
+  await interaction.deferReply({ ephemeral: true });
   const kind = repo === eventsRepo ? 'events' : repo === scrimsRepo ? 'scrims' : 'training';
   const result = await participation.toggle(interaction.client, interaction, repo, kind, rowId, { join });
   if (!result.changed) {
@@ -31,11 +35,10 @@ async function toggleParticipation(interaction, repo, rowId, { join }) {
       'not-joined': 'You are not on that list.',
       full: 'That listing is full.',
     }[result.reason];
-    return interaction.reply({ content: text, ephemeral: true });
+    return interaction.editReply({ content: text });
   }
-  return interaction.reply({
+  return interaction.editReply({
     content: result.reason === 'joined' ? `You joined. **${result.participants.length}** total.` : `You left. **${result.participants.length}** total.`,
-    ephemeral: true,
   });
 }
 
@@ -57,6 +60,10 @@ async function handleTryoutReview(interaction) {
     statusMap[action],
   );
   const data = safeParse(next.data, {});
+
+  // Role changes, DMs and audit log happen after acknowledgement so the
+  // interaction never dies inside Discord's 3s window.
+  await interaction.deferUpdate();
 
   // On acceptance, move the applicant to Trial rank (best-effort).
   if (action === 'accept') {
@@ -87,7 +94,7 @@ async function handleTryoutReview(interaction) {
     )
     .setFooter({ text: BRAND.footer });
 
-  await interaction.update({ embeds: [embed], components: [] });
+  await interaction.editReply({ embeds: [embed], components: [] });
 
   await logAudit(interaction.client, interaction.guild, {
     action: 'tryout',
@@ -186,9 +193,14 @@ async function handleScrimShuffle(interaction) {
   await interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-/** Handle the /bloxstrike hub select menu + back button. */
+/** Handle the /bloxstrike + /fgx hub: select menu, back button, quick buttons. */
 async function handleHub(interaction) {
-  const section = interaction.isStringSelectMenu() ? interaction.values[0] : null;
+  let section = null;
+  if (interaction.isStringSelectMenu()) {
+    section = interaction.values[0] ?? null;
+  } else if (interaction.customId.startsWith('bloxstrike:btn:')) {
+    section = interaction.customId.split(':')[2] ?? null;
+  }
   if (interaction.isStringSelectMenu() && !section) {
     return interaction.reply({ content: 'Choose a section.', ephemeral: true });
   }
@@ -197,7 +209,10 @@ async function handleHub(interaction) {
     return interaction.update({ embeds: panel.embeds, components: panel.components });
   }
   // Back button
-  return interaction.update({ embeds: [hubService.mainEmbed()], components: [hubService.navRow(false)] });
+  return interaction.update({
+    embeds: [hubService.mainEmbed()],
+    components: hubService.hubComponents(false),
+  });
 }
 
 const configCommand = require('../commands/admin/config');
@@ -270,6 +285,11 @@ const handlers = [
   },
   { match: 'bloxstrike:menu', fn: (i) => handleHub(i) },
   { match: 'bloxstrike:back', fn: (i) => handleHub(i) },
+  { match: 'bloxstrike:btn:', fn: (i) => handleHub(i) },
+  { match: 'roblox:start', fn: (i) => robloxService.handleStart(i) },
+  { match: 'roblox:submit', fn: (i) => robloxService.handleSubmit(i), modal: true },
+  { match: 'roblox:check', fn: (i) => robloxService.handleCheck(i) },
+  { match: 'roblox:unlink', fn: (i) => robloxService.handleUnlink(i) },
   { match: 'config:edit:modal:', fn: (i) => handleConfigModal(i), modal: true },
   { match: 'config:edit:', fn: (i) => handleConfigEdit(i) },
   { match: 'config:menu', fn: (i) => handleConfigMenu(i) },

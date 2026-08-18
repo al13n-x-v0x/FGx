@@ -33,6 +33,7 @@ const CATEGORIES = {
   ai: { label: 'AI', icon: '🤖', description: 'AI assistant + AI security engine.' },
   logs: { label: 'Logging', icon: '📜', description: 'Log channel and logging toggle.' },
   verification: { label: 'Verification', icon: '✅', description: 'Verified role, cooldown, panel.' },
+  roblox: { label: 'Roblox', icon: '🟥', description: 'Bloxlink-style Roblox verification (code in About).' },
   tickets: { label: 'Tickets', icon: '🎫', description: 'Ticket category, staff roles, panel.' },
   clan: { label: 'Clan', icon: '⚔️', description: 'Rank roles and FGx rating algorithm.' },
   xp: { label: 'XP', icon: '📈', description: 'Community XP settings.' },
@@ -99,6 +100,12 @@ const KEY_DEFS = {
     ['verification.channel', 'snowflake'],
     ['verification.roleId', 'snowflake'],
     ['verification.cooldownMinutes', 'int'],
+  ],
+  roblox: [
+    ['roblox.enabled', 'boolean'],
+    ['roblox.channel', 'snowflake'],
+    ['roblox.roleId', 'snowflake'],
+    ['roblox.codeTtlMinutes', 'int'],
   ],
   tickets: [
     ['tickets.enabled', 'boolean'],
@@ -274,7 +281,13 @@ module.exports = {
     .addSubcommand((s) => s.setName('moderation').setDescription('Edit moderation / anti-spam / anti-raid / anti-nuke settings'))
     .addSubcommand((s) => s.setName('security').setDescription('Edit security settings'))
     .addSubcommand((s) => s.setName('ai').setDescription('Edit AI settings'))
-    .addSubcommand((s) => s.setName('logs').setDescription('Edit logging settings')),
+    .addSubcommand((s) => s.setName('logs').setDescription('Edit logging settings'))
+    .addSubcommand((s) => s.setName('verification').setDescription('Edit verification settings'))
+    .addSubcommand((s) => s.setName('roblox').setDescription('Edit Roblox verification settings'))
+    .addSubcommand((s) => s.setName('tickets').setDescription('Edit ticket settings'))
+    .addSubcommand((s) => s.setName('clan').setDescription('Edit clan ranks and rating algorithm'))
+    .addSubcommand((s) => s.setName('xp').setDescription('Edit XP settings'))
+    .addSubcommand((s) => s.setName('rules').setDescription('Edit community rules text')),
   async execute(interaction) {
     requireAdmin(interaction.member);
     const sub = interaction.options.getSubcommand();
@@ -292,7 +305,7 @@ module.exports = {
       return interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
-    if (sub === 'welcome' || sub === 'moderation' || sub === 'security' || sub === 'ai' || sub === 'logs') {
+    if (sub === 'welcome' || sub === 'moderation' || sub === 'security' || sub === 'ai' || sub === 'logs' || sub === 'verification' || sub === 'roblox' || sub === 'tickets' || sub === 'clan' || sub === 'xp' || sub === 'rules') {
       const category = sub;
       return interaction.reply({ embeds: [categoryEmbed(interaction.guild, category, config)], components: [categoryRow(category)] });
     }

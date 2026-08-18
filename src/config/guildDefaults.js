@@ -45,6 +45,14 @@ const DEFAULT_GUILD_CONFIG = Object.freeze({
     panelChannelId: null,
     panelMessageId: null,
   }),
+  roblox: Object.freeze({
+    enabled: true,
+    channel: null,
+    roleId: null,
+    codeTtlMinutes: 15,
+    panelChannelId: null,
+    panelMessageId: null,
+  }),
   antispam: Object.freeze({
     enabled: true,
     maxMessages: 5,

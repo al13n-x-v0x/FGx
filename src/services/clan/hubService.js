@@ -12,6 +12,7 @@ const {
   EmbedBuilder,
   StringSelectMenuBuilder,
 } = require('discord.js');
+const robloxService = require('../community/robloxService');
 const { BRAND, RANKS, TICKET_TYPES } = require('../../config/constants');
 const { profilesRepo } = require('../../database/repos/profiles');
 const { scrimsRepo, eventsRepo, clanWarsRepo, matchesRepo } = require('../../database/repos/competitive');
@@ -36,9 +37,24 @@ const OPTIONS = [
   { value: 'events', label: '📅 Events', description: 'Upcoming events' },
   { value: 'stats', label: '📊 Statistics', description: 'FGx competitive record' },
   { value: 'loadouts', label: '🎒 Loadouts', description: 'BloxStrike buy & role guide' },
+  { value: 'roblox', label: '🟥 Roblox', description: 'Bloxlink-style Roblox verification' },
   { value: 'support', label: '🎫 Support', description: 'Tickets & help' },
   { value: 'ai', label: '🤖 FGx AI', description: 'Assistant status & usage' },
   { value: 'security', label: '🛡️ Security', description: 'Protection status' },
+];
+
+/** Quick-action buttons (customId bloxstrike:btn:<section>). */
+const QUICK_ACTIONS = [
+  ['profile', '👤', 'Profile'],
+  ['roster', '⚔️', 'Roster'],
+  ['leaderboards', '🏆', 'Leaderboard'],
+  ['loadouts', '🎒', 'Loadouts'],
+  ['roblox', '🟥', 'Roblox'],
+  ['scrims', '🔥', 'Scrims'],
+  ['clanwars', '⚔️', 'Wars'],
+  ['events', '📅', 'Events'],
+  ['support', '🎫', 'Support'],
+  ['ai', '🤖', 'AI'],
 ];
 
 function mainEmbed({ title = 'FGx • BloxStrike Command Hub' } = {}) {
@@ -46,12 +62,28 @@ function mainEmbed({ title = 'FGx • BloxStrike Command Hub' } = {}) {
     .setColor(BRAND.colors.primary)
     .setTitle(title)
     .setDescription(
-      'Select a section below.\n\n' +
+      'Select a section below — or use the quick buttons.\n\n' +
         '👤 Profile\n⚔️ Roster\n🏆 Leaderboards\n🎯 Tryouts\n' +
         '🔥 Scrims\n⚔️ Clan Wars\n📅 Events\n📊 Statistics\n🎒 Loadouts\n' +
-        '🎫 Support\n🤖 FGx AI\n🛡️ Security',
+        '🟥 Roblox\n🎫 Support\n🤖 FGx AI\n🛡️ Security',
     )
     .setFooter({ text: BRAND.footer });
+}
+
+/** Quick-action button rows (2 rows × 5 buttons). */
+function quickActionRows() {
+  const [first, second] = [QUICK_ACTIONS.slice(0, 5), QUICK_ACTIONS.slice(5)];
+  return [first, second].map((group) =>
+    new ActionRowBuilder().addComponents(
+      group.map(([value, emoji, label]) =>
+        new ButtonBuilder()
+          .setCustomId(`bloxstrike:btn:${value}`)
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji(emoji)
+          .setLabel(label),
+      ),
+    ),
+  );
 }
 
 function navRow(back = false) {
@@ -66,6 +98,11 @@ function navRow(back = false) {
     );
   }
   return row;
+}
+
+/** Full component set: nav select (+ back) and quick-action buttons. */
+function hubComponents(back = false) {
+  return back ? [navRow(true), ...quickActionRows()] : [navRow(false), ...quickActionRows()];
 }
 
 /** Render a hub section. Returns { embeds, components }. */
@@ -92,7 +129,7 @@ function renderSection(guild, userId, section) {
           { name: 'FGx Rating', value: String(profile.rating ?? 0), inline: true },
         )
         .setFooter({ text: `${BRAND.footer} • FGx Competitive Rating` });
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'roster': {
@@ -114,7 +151,7 @@ function renderSection(guild, userId, section) {
         embed.addFields({ name: `${rank} (${members.length})`, value: lines.join('\n') || '—' });
       }
       embed.setFooter({ text: BRAND.footer });
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'leaderboards': {
@@ -127,7 +164,7 @@ function renderSection(guild, userId, section) {
         .setTitle('🏆 FGx Leaderboard — Rating')
         .setDescription(lines.join('\n') || 'No recorded matches yet.')
         .setFooter({ text: `${BRAND.footer} • FGx Competitive Rating` });
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'tryouts': {
@@ -139,7 +176,7 @@ function renderSection(guild, userId, section) {
           `Open applications: **${pending}**\n\n` +
             'Apply with `/tryout apply`. Staff review each application privately.',
         );
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'scrims': {
@@ -149,7 +186,7 @@ function renderSection(guild, userId, section) {
         .setColor(BRAND.colors.primary)
         .setTitle('🔥 FGx Scrims')
         .setDescription(lines.join('\n') || 'No scrims scheduled. Staff can create one with `/scrim create`.');
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'clanwars': {
@@ -163,7 +200,7 @@ function renderSection(guild, userId, section) {
           `Record: **${record?.wins ?? 0}W ${record?.losses ?? 0}L ${record?.draws ?? 0}D**\n\n` +
             (lines.join('\n') || 'No wars recorded yet.'),
         );
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'events': {
@@ -173,7 +210,40 @@ function renderSection(guild, userId, section) {
         .setColor(BRAND.colors.primary)
         .setTitle('📅 FGx Events')
         .setDescription(lines.join('\n') || 'No upcoming events.');
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
+    }
+
+    case 'roblox': {
+      const config = guildConfigRepo.get(guild.id);
+      const link = robloxService.linkStatus(guild.id, userId);
+      const role = config.roblox.roleId || config.verification.roleId;
+      const roleLabel = role ? `<@&${role}>` : '(no role configured) — staff: `/config roblox`';
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('🟥 FGx Roblox Verification')
+        .setDescription(
+          (link && link.status === 'verified'
+            ? `**Verified as** \`${link.roblox_username}\`${link.verified_at ? ` (${link.verified_at})` : ''}\n\n`
+            : link && link.status === 'pending'
+              ? `**Pending** — put the code from your verification message in your Roblox About section, then press **Check**.\n\n`
+              : 'Not linked yet.\n\n') +
+            `Reward: **${roleLabel}**\n\n` +
+            '**How it works (Bloxlink-style)**\n' +
+            '1. Click **Verify with Roblox**\n' +
+            '2. Enter your Roblox username\n' +
+            '3. Put the code FGx gives you in your Roblox **About** section\n' +
+            '4. Press **Check** — your Roblox account is linked to your Discord',
+        )
+        .setFooter({ text: `${BRAND.footer} • Uses Roblox public API — no password, no scraping` });
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('roblox:start').setStyle(ButtonStyle.Primary).setLabel('Verify with Roblox'),
+      );
+      if (link && link.status === 'verified') {
+        row.addComponents(
+          new ButtonBuilder().setCustomId('roblox:unlink').setStyle(ButtonStyle.Danger).setLabel('Unlink'),
+        );
+      }
+      return { embeds: [embed], components: [row, navRow(true)] };
     }
 
     case 'support': {
@@ -191,7 +261,7 @@ function renderSection(guild, userId, section) {
           { name: 'Staff', value: tickets.staffRoleIds.length > 0 ? 'Configured' : 'Not configured (staff = Manage Channels)', inline: true },
         )
         .setFooter({ text: `${BRAND.footer} • Claim / Close / Transcript built in` });
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'ai': {
@@ -207,7 +277,7 @@ function renderSection(guild, userId, section) {
             'I never reveal secrets and never invent statistics.'
         )
         .setFooter({ text: `${BRAND.footer} • Rate-limited 5 calls/min` });
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'security': {
@@ -225,7 +295,7 @@ function renderSection(guild, userId, section) {
             'Staff: manage everything with `/security` and `/automod`. Incident alerts post to the log channel.'
         )
         .setFooter({ text: `${BRAND.footer} • Progressive enforcement, never blind punishment` });
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'loadouts': {
@@ -245,7 +315,7 @@ function renderSection(guild, userId, section) {
           },
         )
         .setFooter({ text: `${BRAND.footer} • Ask /bloxai for tailored advice` });
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     case 'stats': {
@@ -260,11 +330,11 @@ function renderSection(guild, userId, section) {
               `**Win rate:** ${winRate(record.wins ?? 0, record.matches ?? 0)}`
             : 'No recorded competitive data yet. Staff record results with `/match result`.',
         );
-      return { embeds: [embed], components: [navRow(true)] };
+      return { embeds: [embed], components: hubComponents(true) };
     }
 
     default:
-      return { embeds: [mainEmbed()], components: [navRow(false)] };
+      return { embeds: [mainEmbed()], components: hubComponents(false) };
   }
 }
 
@@ -276,4 +346,4 @@ function safeParse(json, fallback) {
   }
 }
 
-module.exports = { mainEmbed, navRow, renderSection, OPTIONS };
+module.exports = { mainEmbed, navRow, hubComponents, quickActionRows, renderSection, OPTIONS };
