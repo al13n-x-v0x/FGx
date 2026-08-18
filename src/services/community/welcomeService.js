@@ -58,22 +58,48 @@ function buildWelcomeView({ member, message, memberCount, guildName, includeVeri
   const embed = new EmbedBuilder()
     .setColor(BRAND.colors.primary)
     .setAuthor({
-      name: `Welcome to ${guildName}`,
+      name: `⚔️ Welcome to ${guildName}`,
       iconURL: member.guild?.iconURL() ?? undefined,
     })
-    .setTitle(`👋 WELCOME, ${String(member.user?.username ?? 'NEW MEMBER').toUpperCase()}`)
+    .setTitle(`🎉 WELCOME, ${String(member.user?.username ?? 'NEW MEMBER').toUpperCase()}`)
     .setDescription(
-      `You've joined **${guildName}** — home of the **${BRAND.clan}**. 🎯\n\n` +
-        `${message ?? ''}\n\n` +
-        `**What you can do here**\n` +
-        `🔐 **Verify** — link your Roblox + BloxStrike account to unlock VIP perks\n` +
-        `💰 **Earn ₣Ԡ🇽** — daily rewards, hunts, battles & match payouts\n` +
-        `🏆 **Compete** — scrims, clan wars, tryouts and the leaderboard\n` +
-        `🖐️ **Have fun** — socials, games, and an AI assistant in /ask\n\n` +
-        `Member **#${memberCount}** — press **Verify** below to get started!`,
+      `> *You just joined the **${BRAND.clan}** — let's get you set up.*\n\n` +
+        (message ? `**${message}**\n\n` : ''),
+    )
+    .addFields(
+      {
+        name: '🔐 **Verify**',
+        value: 'Link your Roblox + BloxStrike account to unlock VIP perks, daily rewards, and the competitive roster.',
+        inline: true,
+      },
+      {
+        name: '💰 **Earn ₣Ԡ🇽**',
+        value: 'Daily rewards, hunts, battles & match payouts — the more active you are, the more you earn.',
+        inline: true,
+      },
+      {
+        name: '🏆 **Compete**',
+        value: 'Scrims, clan wars, tryouts, tournaments and the leaderboard await.',
+        inline: true,
+      },
+      {
+        name: '🖐️ **Have Fun**',
+        value: 'Socials, games, and an AI assistant — type `/ask` to chat.',
+        inline: true,
+      },
+      {
+        name: '\u200b',
+        value: '\u200b',
+        inline: true,
+      },
+      {
+        name: `📊 Member **#${memberCount}**`,
+        value: 'Press **Verify** below to get started!',
+        inline: true,
+      },
     )
     .setThumbnail(member.user?.displayAvatarURL({ size: 256 }) ?? undefined)
-    .setFooter({ text: `${BRAND.footer} • We're glad you're here` })
+    .setFooter({ text: `${BRAND.footer} • We're glad you're here 💜` })
     .setTimestamp(new Date());
 
   const rows = [];
@@ -83,13 +109,11 @@ function buildWelcomeView({ member, message, memberCount, guildName, includeVeri
         new ButtonBuilder()
           .setCustomId('roblox:start')
           .setStyle(ButtonStyle.Primary)
-          .setLabel('🟥 Verify with Roblox')
-          .setEmoji('🟥'),
+          .setLabel('🟥 Verify with Roblox'),
         new ButtonBuilder()
           .setCustomId('welcome:link')
           .setStyle(ButtonStyle.Success)
-          .setLabel('⚔️ Link BloxStrike')
-          .setEmoji('⚔️'),
+          .setLabel('⚔️ Link BloxStrike'),
       ),
     );
   }
@@ -137,15 +161,16 @@ async function onJoin(client, member) {
         .setColor(BRAND.colors.primary)
         .setTitle('🟥 Verify your Roblox account')
         .setDescription(
-          `Welcome to **${member.guild.name}**!\\n\\n` +
+          `Welcome to **${member.guild.name}**!\n\n` +
             'Link your **Roblox account** to unlock your verification role — ' +
-            'Bloxlink-style, no password needed.\\n\\n' +
-            '1. Click **Verify with Roblox**\\n' +
-            '2. Enter your Roblox username\\n' +
-            '3. Put the **one-time code** in your Roblox **About** section\\n' +
-            `4. Press **Check** within **5 minutes** — done\\n\\n` +
+            'Bloxlink-style, no password needed.\n\n' +
+            '1. Click **Verify with Roblox**\n' +
+            '2. Enter your Roblox username\n' +
+            '3. Put the **one-time code** in your Roblox **About** section\n' +
+            `4. Press **Check** within **5 minutes** — done\n\n` +
             'The code is single-use: the moment verification succeeds it is destroyed, ' +
-            'so nobody else can ever claim your account.',
+            'so nobody else can ever claim your account.\n\n' +
+            '*Don\'t want to verify right now? No worries \u2014 you can dismiss the prompt and verify later.*',
         )
         .setFooter({ text: `${BRAND.footer} • Powered by the Roblox public API` });
       const dmRow = new ActionRowBuilder().addComponents(

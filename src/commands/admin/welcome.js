@@ -30,7 +30,7 @@ module.exports = {
 
     if (sub === 'setup') {
       const channel = guildChannel(interaction.guild, interaction.options.getChannel('channel', true).id, 'channel');
-      const message = interaction.options.getString('message') ?? '🎯 Compete\n🏆 Improve\n⚔️ Represent FGx';
+      const message = interaction.options.getString('message') ?? '🎯 Compete · 🏆 Improve · ⚔️ Represent FGx';
       boundedString(message, { max: 1000, label: 'message' });
       const role = interaction.options.getRole('role');
 

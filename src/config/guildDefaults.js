@@ -34,7 +34,7 @@ const DEFAULT_GUILD_CONFIG = Object.freeze({
   welcome: Object.freeze({
     enabled: false,
     channel: null,
-    message: '🎯 Compete\n🏆 Improve\n⚔️ Represent FGx',
+    message: '🎯 Compete · 🏆 Improve · ⚔️ Represent FGx',
     autoRole: null,
   }),
   verification: Object.freeze({

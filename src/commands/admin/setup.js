@@ -22,7 +22,7 @@ const { logger } = require('../../utils/logger');
  * preview. Idempotent: existing FGx channels/roles are reused, never deleted.
  */
 
-const DEFAULT_WELCOME_MESSAGE = '🎯 Compete\n🏆 Improve\n⚔️ Represent FGx';
+const DEFAULT_WELCOME_MESSAGE = '🎯 Compete · 🏆 Improve · ⚔️ Represent FGx';
 
 /** Find a text channel by name or create it under the category. */
 async function ensureChannel(guild, name, { provided, parent } = {}) {

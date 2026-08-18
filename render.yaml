@@ -8,10 +8,15 @@ services:
     runtime: node
     plan: free
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node src/index.js
     healthCheckPath: /health
+    healthCheckPolicy:
+      responseTimeoutFailurePolicy:
+        maxFailureCount: 5
     autoDeploy: true
     envVars:
+      - key: PORT
+        value: '10000'
       - key: NODE_ENV
         value: production
       # Free-tier Render has NO persistent disks, so the SQLite DB lives on

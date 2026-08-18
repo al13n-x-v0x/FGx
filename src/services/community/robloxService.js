@@ -366,6 +366,7 @@ async function handleSubmit(interaction) {
       .setFooter({ text: `${BRAND.footer} • Bloxlink-style verification` });
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId('roblox:check').setStyle(ButtonStyle.Success).setLabel('✅ I added it — Check now'),
+      new ButtonBuilder().setCustomId('roblox:cancel').setStyle(ButtonStyle.Danger).setLabel('🚫 Cancel'),
     );
     await interaction.editReply({ embeds: [embed], components: [row] });
   } catch (err) {
@@ -377,6 +378,33 @@ async function handleSubmit(interaction) {
     throw err;
   }
   return undefined;
+}
+
+/** Cancel button → remove the pending verification code and dismiss the prompt. */
+async function handleCancel(interaction) {
+  await interaction.deferUpdate();
+  const link = robloxLinksRepo.get(interaction.guild.id, interaction.user.id);
+  if (link && link.status === 'pending') {
+    robloxLinksRepo.remove(interaction.guild.id, interaction.user.id);
+  }
+  const embed = new EmbedBuilder()
+    .setColor(BRAND.colors.neutral)
+    .setTitle('🚫 Verification cancelled')
+    .setDescription(
+      'Your verification code has been removed.\n\n' +
+        'Changed your mind? You can start again anytime with `/roblox verify`.',
+    )
+    .setFooter({ text: BRAND.footer });
+  return interaction.editReply({ embeds: [embed], components: [] });
+}
+
+/** Clean up expired pending codes (run on a timer). */
+function sweepExpiredCodes() {
+  try {
+    robloxLinksRepo.removeExpiredPending(DEFAULT_CODE_TTL_MINUTES);
+  } catch {
+    // best-effort — never crash the bot
+  }
 }
 
 /** Check button → confirm the code appears in the Roblox About section. */
@@ -466,6 +494,8 @@ module.exports = {
   handleStart,
   handleSubmit,
   handleCheck,
+  handleCancel,
   handleUnlink,
+  sweepExpiredCodes,
   _setFetch,
 };

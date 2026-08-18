@@ -362,6 +362,7 @@ const handlers = [
   { match: 'bloxstrike:back', fn: (i) => handleHub(i) },
   { match: 'bloxstrike:btn:', fn: (i) => handleHub(i) },
   { match: 'roblox:start', fn: (i) => robloxService.handleStart(i) },
+  { match: 'roblox:cancel', fn: (i) => robloxService.handleCancel(i) },
   {
     match: 'welcome:link',
     fn: (i) =>

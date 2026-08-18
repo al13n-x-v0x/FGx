@@ -70,21 +70,22 @@ async function main() {
   process.on('SIGINT', () => shutdown('SIGINT'));
   process.on('SIGTERM', () => shutdown('SIGTERM'));
 
-  // Register slash commands.
-  await registerCommands(client);
-
-  // START DASHBOARD FIRST: Allows Render port scans to succeed instantly
+  // Start the health-check endpoint BEFORE Discord login so Render's
+  // health probe never sees 'no host' during the gateway handshake.
   dashboard.start(client);
   logger.info('Web dashboard server started');
+
+  // Register slash commands.
+  await registerCommands(client);
 
   // Attempt Discord login without blocking the port listener
   try {
     await client.login(env.DISCORD_TOKEN);
     logger.info('Discord client logged in successfully');
-    
+
     // Clean up private servers that expired while the bot was offline.
-    privateServerService.sweep(client).catch((err) => 
-      logger.warn('private server sweep failed', { error: err.message })
+    privateServerService.sweep(client).catch((err) =>
+      logger.warn('private server sweep failed', { error: err.message }),
     );
   } catch (err) {
     if (/disallowed intents/i.test(err.message)) {
@@ -96,9 +97,13 @@ async function main() {
     } else {
       logger.error('Discord login error', { error: err.message, stack: err.stack });
     }
-    // We do not process.exit(1) here so the web port stays open, 
+    // We do not process.exit(1) here so the web port stays open,
     // letting Render deployment pass and leaving the container running for logs.
   }
+
+  // Auto-sweep expired Roblox verification codes every 2 minutes.
+  const robloxService = require('./services/community/robloxService');
+  setInterval(() => robloxService.sweepExpiredCodes(), 2 * 60 * 1000);
 
   logger.info('FGx startup complete');
 }

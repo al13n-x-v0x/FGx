@@ -76,6 +76,15 @@ const robloxLinksRepo = {
     db.run('DELETE FROM roblox_links WHERE guild_id = ? AND user_id = ?', guildId, userId);
   },
 
+  /** Remove all pending (unverified) codes older than `ttlMinutes` across all guilds. */
+  removeExpiredPending(ttlMinutes) {
+    const threshold = new Date(Date.now() - ttlMinutes * 60_000).toISOString();
+    db.run(
+      `DELETE FROM roblox_links WHERE status = 'pending' AND created_at < ?`,
+      threshold,
+    );
+  },
+
   listVerified(guildId) {
     return db.all(
       "SELECT * FROM roblox_links WHERE guild_id = ? AND status = 'verified' ORDER BY verified_at DESC, rowid DESC",
