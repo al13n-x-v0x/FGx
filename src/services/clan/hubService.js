@@ -18,6 +18,8 @@ const { profilesRepo } = require('../../database/repos/profiles');
 const { scrimsRepo, eventsRepo, clanWarsRepo, matchesRepo } = require('../../database/repos/competitive');
 const { tryoutsRepo } = require('../../database/repos/community');
 const { guildConfigRepo } = require('../../database/repos/guildConfig');
+const { privateServersRepo } = require('../../database/repos/privateServers');
+const privateServerService = require('./privateServerService');
 const { aiSummary } = require('../../config/env');
 const rosterService = require('./rosterService');
 const { winRate } = require('../../utils/format');
@@ -38,6 +40,7 @@ const OPTIONS = [
   { value: 'stats', label: '📊 Statistics', description: 'FGx competitive record' },
   { value: 'loadouts', label: '🎒 Loadouts', description: 'BloxStrike buy & role guide' },
   { value: 'roblox', label: '🟥 Roblox', description: 'Bloxlink-style Roblox verification' },
+  { value: 'private', label: '🎮 Private Server', description: 'Temporary match servers (1v1–6v6)' },
   { value: 'support', label: '🎫 Support', description: 'Tickets & help' },
   { value: 'ai', label: '🤖 FGx AI', description: 'Assistant status & usage' },
   { value: 'security', label: '🛡️ Security', description: 'Protection status' },
@@ -53,6 +56,7 @@ const QUICK_ACTIONS = [
   ['scrims', '🔥', 'Scrims'],
   ['clanwars', '⚔️', 'Wars'],
   ['events', '📅', 'Events'],
+  ['private', '🎮', 'Private'],
   ['support', '🎫', 'Support'],
   ['ai', '🤖', 'AI'],
 ];
@@ -65,7 +69,7 @@ function mainEmbed({ title = 'FGx • BloxStrike Command Hub' } = {}) {
       'Select a section below — or use the quick buttons.\n\n' +
         '👤 Profile\n⚔️ Roster\n🏆 Leaderboards\n🎯 Tryouts\n' +
         '🔥 Scrims\n⚔️ Clan Wars\n📅 Events\n📊 Statistics\n🎒 Loadouts\n' +
-        '🟥 Roblox\n🎫 Support\n🤖 FGx AI\n🛡️ Security',
+        '🟥 Roblox\n🎮 Private Server\n🎫 Support\n🤖 FGx AI\n🛡️ Security',
     )
     .setFooter({ text: BRAND.footer });
 }
@@ -246,6 +250,43 @@ function renderSection(guild, userId, section) {
         );
       }
       return { embeds: [embed], components: [row, navRow(true)] };
+    }
+
+    case 'private': {
+      const active = privateServersRepo.listActive(guild.id);
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('🎮 FGx Private Servers')
+        .setDescription(
+          'Temporary branded servers for **BloxStrike matches** — 1v1 through 6v6 and practice.\n\n' +
+            '• Requires **Roblox verification** (`/roblox verify`) unless staff\n' +
+            '• Auto-deletes after the timer (1–24h)\n' +
+            '• Full setup: match-chat, results, Main, Team 1/Team 2\n\n' +
+            (active.length > 0
+              ? `**Active:** ${active
+                  .map(
+                    (r) =>
+                      `#${r.id} ${privateServerService.MODES[r.mode]?.label ?? r.mode} — ` +
+                      `https://discord.gg/${r.invite_code ?? '—'} (until ${r.expires_at ?? '—'})`,
+                  )
+                  .join('\n')}`
+              : 'No active servers — pick a mode below to create one.') +
+            '\n\nChoose a mode:',
+        )
+        .setFooter({ text: `${BRAND.footer} • Managed by /private` });
+      const modeRow = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+          .setCustomId('private:mode')
+          .setPlaceholder('Choose a match mode…')
+          .addOptions(
+            Object.entries(privateServerService.MODES).map(([value, info]) => ({
+              value,
+              label: `FGx ${info.label}`,
+              description: value === 'practice' ? 'Free practice / aim server' : 'Team-based match server',
+            })),
+          ),
+      );
+      return { embeds: [embed], components: [modeRow, navRow(true), ...quickActionRows()] };
     }
 
     case 'support': {

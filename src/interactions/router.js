@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-const { EmbedBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { BRAND } = require('../config/constants');
 const verificationService = require('../services/community/verificationService');
 const ticketService = require('../services/tickets/ticketService');
@@ -13,6 +13,7 @@ const tryoutService = require('../services/clan/tryoutService');
 const rosterService = require('../services/clan/rosterService');
 const hubService = require('../services/clan/hubService');
 const robloxService = require('../services/community/robloxService');
+const privateServerService = require('../services/clan/privateServerService');
 const { guildConfigRepo } = require('../database/repos/guildConfig');
 const { eventsRepo, scrimsRepo, trainingRepo } = require('../database/repos/competitive');
 const participation = require('../services/clan/participation');
@@ -252,6 +253,74 @@ async function handleConfigModal(interaction) {
   return interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
+/** Hub Private Server: mode select → confirm with create button. */
+async function handlePrivateMode(interaction) {
+  const mode = interaction.values?.[0];
+  if (!mode || !privateServerService.modeInfo(mode)) {
+    throw new ValidationError('Unknown match mode.');
+  }
+  const info = privateServerService.modeInfo(mode);
+  const embed = new EmbedBuilder()
+    .setColor(BRAND.colors.primary)
+    .setTitle(`🎮 Confirm FGx ${info.label} server`)
+    .setDescription(
+      'Creating a temporary branded server with **match-chat**, **results**, **Main**, and team voice channels.\n\n' +
+        'It auto-deletes after **3 hours** (staff can adjust with `/private create`). Requires Roblox verification unless you are staff.',
+    )
+    .setFooter({ text: BRAND.footer });
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`private:create:${mode}`)
+      .setStyle(ButtonStyle.Success)
+      .setLabel(`Create ${info.label} server`),
+    new ButtonBuilder().setCustomId('private:cancel').setStyle(ButtonStyle.Secondary).setLabel('Cancel'),
+  );
+  await interaction.update({ embeds: [embed], components: [row] });
+}
+
+/** Hub Private Server: create button → actually create the server. */
+async function handlePrivateCreate(interaction) {
+  const mode = interaction.customId.split(':')[2];
+  const config = guildConfigRepo.get(interaction.guild.id);
+  await interaction.deferReply({ ephemeral: true });
+  try {
+    const { server, invite, info } = await privateServerService.create(
+      interaction.client,
+      interaction.guild,
+      interaction.user,
+      mode,
+      privateServerService.DEFAULT_HOURS,
+      { member: interaction.member, config },
+    );
+    return interaction.editReply({
+      embeds: [
+        {
+          color: BRAND.colors.success,
+          title: `🎮 FGx ${info.label} private server ready`,
+          description:
+            `**${server.name}** is live for **${privateServerService.DEFAULT_HOURS}h**.\n\n` +
+            `**Invite:** https://discord.gg/${invite.code}\n\n` +
+            'Share it with your opponents — the server auto-deletes when the timer expires.',
+          footer: { text: `${BRAND.footer} • Roblox-verified members only` },
+        },
+      ],
+    });
+  } catch (err) {
+    if (['INVALID_MODE', 'GUILD_LIMIT', 'OWNER_LIMIT', 'ROBLOX_REQUIRED'].includes(err.code)) {
+      return interaction.editReply({
+        embeds: [{ color: BRAND.colors.warn, title: 'Private server not created', description: err.message, footer: { text: BRAND.footer } }],
+      });
+    }
+    throw err;
+  }
+}
+
+/** Hub Private Server: cancel → back to the private section panel. */
+async function handlePrivateCancel(interaction) {
+  const section = await hubService.renderSection(interaction.guild, interaction.user.id, 'private');
+  await interaction.update({ embeds: section.embeds, components: section.components });
+}
+
 const handlers = [
   { match: 'verify:click', fn: (i) => verificationService.handleVerify(i) },
   { match: 'ticket:create', fn: (i) => ticketService.handleCreate(i) },
@@ -287,6 +356,9 @@ const handlers = [
   { match: 'bloxstrike:back', fn: (i) => handleHub(i) },
   { match: 'bloxstrike:btn:', fn: (i) => handleHub(i) },
   { match: 'roblox:start', fn: (i) => robloxService.handleStart(i) },
+  { match: 'private:mode', fn: (i) => handlePrivateMode(i) },
+  { match: 'private:create:', fn: (i) => handlePrivateCreate(i) },
+  { match: 'private:cancel', fn: (i) => handlePrivateCancel(i) },
   { match: 'roblox:submit', fn: (i) => robloxService.handleSubmit(i), modal: true },
   { match: 'roblox:check', fn: (i) => robloxService.handleCheck(i) },
   { match: 'roblox:unlink', fn: (i) => robloxService.handleUnlink(i) },

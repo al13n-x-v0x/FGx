@@ -36,6 +36,16 @@ jobs:
       - name: Build (syntax gate)
         run: npm run build
 
+      - name: Achievement assets are fresh
+        run: |
+          npm run assets >/dev/null
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Generated assets are out of date. Run 'npm run assets' and commit the result."
+            git status --porcelain
+            exit 1
+          fi
+          echo "Assets are up to date."
+
       - name: Startup validation (env, DB, imports, commands, secrets)
         run: npm run validate
 

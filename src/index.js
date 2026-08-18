@@ -10,6 +10,7 @@ const { env } = require('./config/env');
 const { logger } = require('./utils/logger');
 const db = require('./database');
 const { loadCommands, loadEvents, registerCommands } = require('./utils/registry');
+const privateServerService = require('./services/clan/privateServerService');
 const dashboard = require('./dashboard/server');
 
 // Gateway intents. 'full' (default) needs the privileged intents enabled in
@@ -72,6 +73,9 @@ async function main() {
   // Register slash commands, then connect.
   await registerCommands(client);
   await client.login(env.DISCORD_TOKEN);
+
+  // Clean up private servers that expired while the bot was offline.
+  privateServerService.sweep(client).catch((err) => logger.warn('private server sweep failed', { error: err.message }));
 
   dashboard.start(client);
   logger.info('FGx startup complete');

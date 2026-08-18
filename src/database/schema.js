@@ -231,6 +231,26 @@ const MIGRATIONS = [
 
   CREATE INDEX IF NOT EXISTS idx_roblox_pending ON roblox_links (guild_id, status);
   `,
+
+  // Migration 3 — temporary private servers for scrims, 1v1s, and 6v6s.
+  // Created by the bot via the Discord API and auto-deleted on expiry.
+  `
+  CREATE TABLE IF NOT EXISTS private_servers (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id    TEXT NOT NULL,
+    server_id   TEXT NOT NULL,
+    owner_id    TEXT NOT NULL,
+    mode        TEXT NOT NULL DEFAULT '5v5',
+    status      TEXT NOT NULL DEFAULT 'active',
+    invite_code TEXT,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    expires_at  TEXT,
+    ended_at    TEXT
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_private_servers_active ON private_servers (guild_id, status);
+  CREATE INDEX IF NOT EXISTS idx_private_servers_expiry ON private_servers (status, expires_at);
+  `,
 ];
 
 module.exports = { MIGRATIONS };
