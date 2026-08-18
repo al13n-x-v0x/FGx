@@ -36,6 +36,9 @@ const ROBLOX_API = 'https://users.roblox.com/v1';
 const API_TIMEOUT_MS = 8000;
 const MAX_ATTEMPTS = 3;
 
+/** Default code lifetime. Codes are single-use and expire after this. */
+const DEFAULT_CODE_TTL_MINUTES = 5;
+
 /** Characters excluded from codes to avoid confusion (0/O, 1/I). */
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -198,7 +201,7 @@ async function checkVerification(client, guild, user) {
   }
 
   const config = guildConfigRepo.get(guild.id);
-  const ttlMinutes = config.roblox.codeTtlMinutes > 0 ? config.roblox.codeTtlMinutes : 15;
+  const ttlMinutes = config.roblox.codeTtlMinutes > 0 ? config.roblox.codeTtlMinutes : DEFAULT_CODE_TTL_MINUTES;
   const ageMs = Date.now() - new Date(`${link.created_at} UTC`).getTime();
   if (Number.isFinite(ageMs) && ageMs > ttlMinutes * 60_000) {
     robloxLinksRepo.remove(guild.id, user.id);
@@ -281,11 +284,11 @@ async function createPanel(guild) {
     .setColor(BRAND.colors.primary)
     .setTitle('🟥 Roblox Verification')
     .setDescription(
-      'Link your **Roblox account** to your Discord (Bloxlink-style).\n\n' +
-        '• No password, no personal data\n' +
-        '• Your code goes in your Roblox **About** section\n' +
-        '• One Roblox account per Discord user\n\n' +
-        'Click **Verify with Roblox** to begin.',
+      'Link your **Roblox account** to your Discord (Bloxlink-style).\n\n' +          '• No password, no personal data\n' +
+          '• Your **one-time code** goes in your Roblox **About** section\n' +
+          '• Codes expire after **5 minutes** and self-destruct on success\n' +
+          '• One Roblox account per Discord user\n\n' +
+          'Click **Verify with Roblox** to begin.',
     )
     .setFooter({ text: `${BRAND.footer} • Powered by the Roblox public API` });
   const row = new ActionRowBuilder().addComponents(
@@ -345,7 +348,7 @@ async function handleSubmit(interaction) {
   try {
     const { link, resolved } = await startVerification(interaction.guild, interaction.user, username);
     const config = guildConfigRepo.get(interaction.guild.id);
-    const ttl = config.roblox.codeTtlMinutes > 0 ? config.roblox.codeTtlMinutes : 15;
+    const ttl = config.roblox.codeTtlMinutes > 0 ? config.roblox.codeTtlMinutes : DEFAULT_CODE_TTL_MINUTES;
     const bt = '`';
     const embed = new EmbedBuilder()
       .setColor(BRAND.colors.primary)
@@ -356,7 +359,8 @@ async function handleSubmit(interaction) {
           `${bt}${bt}${bt}\n${link.code}\n${bt}${bt}${bt}\n\n` +
           '• Open Roblox → your profile → **About**\n' +
           `• Paste **${link.code}** and save\n` +
-          `• Code expires in **${ttl} minutes**\n\n` +
+          `• Code is **one-time use** and expires in **${ttl} minutes**\n` +
+          '• It self-destructs the moment verification succeeds\n\n' +
           'Then press **Check** below.',
       )
       .setFooter({ text: `${BRAND.footer} • Bloxlink-style verification` });

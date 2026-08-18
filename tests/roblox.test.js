@@ -166,6 +166,21 @@ test('pioneer achievement unlocks only for the first 50 verifiers', () => {
   assert.equal(achievementsRepo.has('g4', 'p54', 'roblox_pioneer'), false);
 });
 
+test('roblox code TTL defaults to 5 minutes (single-use window)', () => {
+  const { DEFAULT_GUILD_CONFIG } = require('../src/config/guildDefaults');
+  assert.equal(DEFAULT_GUILD_CONFIG.roblox.codeTtlMinutes, 5);
+});
+
+test('expired verification codes are rejected and cleaned up (5-min TTL)', async () => {
+  robloxLinksRepo.create('g-exp', 'u1', { robloxUsername: 'Old', robloxId: 777, code: 'FGX-OLD' });
+  db.run("UPDATE roblox_links SET created_at = datetime('now', '-10 minutes') WHERE guild_id = 'g-exp' AND user_id = 'u1'");
+  await assert.rejects(
+    () => robloxService.checkVerification({}, { id: 'g-exp' }, { id: 'u1' }),
+    (err) => err.code === 'EXPIRED',
+  );
+  assert.equal(robloxLinksRepo.get('g-exp', 'u1'), undefined);
+});
+
 test('re-verification does not double-unlock achievements', () => {
   // p0 already has both achievements; unlocking again returns nothing new.
   const newly = robloxService.unlockRobloxAchievements('g4', 'p0');

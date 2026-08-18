@@ -49,7 +49,7 @@ const DEFAULT_GUILD_CONFIG = Object.freeze({
     enabled: true,
     channel: null,
     roleId: null,
-    codeTtlMinutes: 15,
+    codeTtlMinutes: 5,
     panelChannelId: null,
     panelMessageId: null,
   }),

@@ -42,7 +42,7 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/link verify <user>` | Verify a member's link (staff: Manage Messages / Manage Guild, or Captain+) |
 | `/link list` | List pending verifications (staff) |
 | `/unlink` | Remove your BloxStrike link |
-| `/roblox verify <username>` | Bloxlink-style Roblox verification (code goes in your Roblox About) |
+| `/roblox verify <username>` | Bloxlink-style Roblox verification — **one-time code** goes in your Roblox About, expires in **5 minutes**, self-destructs on success |
 | `/roblox status` | Show your Roblox verification status |
 | `/roblox unlink [user]` | Remove your Roblox link — or any member's as staff |
 | `/roblox leaderboard [page]` | First members to verify Roblox (👑 = first 50 Pioneers) |
@@ -78,7 +78,7 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/leaderboard <category>` | Rating / kills / K-D / streak / wins / matches (paginated) |
 | `/achievements [user]` | Achievement catalog with unlock state |
 | `/verify setup` | Create the verification panel (admin) |
-| `/welcome setup|disable` | Configure the welcome system (admin) |
+| `/welcome setup|disable` | Configure the welcome system — animated video + verify buttons included (admin) |
 
 ## Tickets
 

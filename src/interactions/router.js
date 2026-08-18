@@ -362,6 +362,26 @@ const handlers = [
   { match: 'bloxstrike:back', fn: (i) => handleHub(i) },
   { match: 'bloxstrike:btn:', fn: (i) => handleHub(i) },
   { match: 'roblox:start', fn: (i) => robloxService.handleStart(i) },
+  {
+    match: 'welcome:link',
+    fn: (i) =>
+      i.reply({
+        embeds: [
+          {
+            color: 0x2ecc71,
+            title: '⚔️ Link your BloxStrike account',
+            description:
+              'Linking your BloxStrike username puts you on the competitive roster and counts toward **full verification** (which unlocks 👑 VIP perks).\n\n' +
+              '1. Run **`/link submit username:<your-name>`** here in the server\n' +
+              '2. Staff verifies your username\n' +
+              '3. Combined with Roblox verification you reach **fully verified** — crown badge + VIP loadouts + 250 ₣Ԡ🇽 daily\n\n' +
+              'Do both verifications and the server fully unlocks for you. 🔓',
+            footer: { text: 'FGx • BloxStrike Clan' },
+          },
+        ],
+        ephemeral: true,
+      }),
+  },
   { match: 'private:mode', fn: (i) => handlePrivateMode(i) },
   { match: 'private:create:', fn: (i) => handlePrivateCreate(i) },
   { match: 'private:cancel', fn: (i) => handlePrivateCancel(i) },

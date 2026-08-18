@@ -11,6 +11,7 @@ const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { requireAdmin } = require('../../utils/permissions');
 const verificationService = require('../../services/community/verificationService');
 const robloxService = require('../../services/community/robloxService');
+const welcomeService = require('../../services/community/welcomeService');
 const ticketService = require('../../services/tickets/ticketService');
 const { logger } = require('../../utils/logger');
 
@@ -111,7 +112,7 @@ module.exports = {
       }
       if (verifyChannel && verifiedRole) {
         patch.verification = { enabled: true, channel: verifyChannel.id, roleId: verifiedRole.id, cooldownMinutes: 0 };
-        patch.roblox = { enabled: true, channel: verifyChannel.id, roleId: verifiedRole.id, codeTtlMinutes: 15 };
+        patch.roblox = { enabled: true, channel: verifyChannel.id, roleId: verifiedRole.id, codeTtlMinutes: 5 };
       }
       if (ticketChannel && ticketCategory) {
         patch.tickets = { enabled: true, categoryId: ticketCategory.id, panelChannelId: ticketChannel.id, staffRoleIds: [] };
@@ -144,23 +145,24 @@ module.exports = {
         void robloxPanel;
       }
       if (welcomeChannel) {
+        const { embed, rows } = welcomeService.buildWelcomeView({
+          member: {
+            guild: { name: guild.name, iconURL: () => guild.iconURL() },
+            user: { username: 'New Member', displayAvatarURL: ({ size }) => guild.iconURL({ size }) ?? undefined },
+          },
+          message: DEFAULT_WELCOME_MESSAGE,
+          memberCount: guild.memberCount,
+          guildName: guild.name,
+          includeVerify: true,
+        });
         await welcomeChannel
           .send({
-            content: '**Setup preview** — this is what new members see. Auto-role applies automatically.',
-            embeds: [
-              {
-                color: BRAND.colors.primary,
-                title: 'WELCOME TO FGx',
-                description:
-                  `Welcome **New Member**\n\n` +
-                  `**BloxStrike Clan Community**\n\n` +
-                  `${DEFAULT_WELCOME_MESSAGE}\n\n` +
-                  `Member **#${guild.memberCount}**`,
-                footer: { text: `${BRAND.footer} • Setup preview` },
-              },
-            ],
+            content: '**Setup preview** — this is what new members see, welcome animation included. Auto-role applies automatically.',
+            embeds: [embed],
+            components: rows,
+            files: [{ attachment: welcomeService.WELCOME_VIDEO, name: 'welcome.mp4' }],
           })
-          .then(() => results.push('✔ Welcome preview posted'))
+          .then(() => results.push('✔ Welcome preview posted (with animation)'))
           .catch(() => warnings.push('Welcome preview: could not post'));
       }
     } catch (err) {

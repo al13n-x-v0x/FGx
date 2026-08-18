@@ -47,6 +47,7 @@ const KEY_DEFS = {
     ['channel', 'snowflake'],
     ['message', 'string'],
     ['autoRole', 'snowflake'],
+    ['video', 'string'],
   ],
   moderation: [
     ['modLogChannel', 'snowflake'],
