@@ -110,6 +110,8 @@ const ACHIEVEMENTS = Object.freeze([
   { code: 'clanwar_veteran', name: 'Clan War Veteran', description: 'Participate in 5 clan wars.', icon: '⚔️' },
   { code: 'tournament_champion', name: 'Tournament Champion', description: 'Win a recorded tournament event.', icon: '👑' },
   { code: 'fgx_legend', name: 'FGx Legend', description: 'Reach the FGx Legend rating tier.', icon: '⭐' },
+  { code: 'roblox_verified', name: 'Roblox Verified', description: 'Link your Roblox account to Discord.', icon: '🟥' },
+  { code: 'roblox_pioneer', name: 'Roblox Pioneer', description: 'Be among the first 50 members to verify Roblox in the server.', icon: '🚀' },
 ]);
 
 module.exports = {

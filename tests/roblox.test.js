@@ -13,6 +13,7 @@ const db = require('../src/database');
 db.init();
 
 const { robloxLinksRepo } = require('../src/database/repos/roblox');
+const { achievementsRepo } = require('../src/database/repos/profiles');
 const robloxService = require('../src/services/community/robloxService');
 
 test('roblox link starts pending with a code', () => {
@@ -143,4 +144,29 @@ test('verified list excludes pending links and orders by recency', () => {
   assert.equal(verified[0].user_id, 'u3');
   assert.equal(verified[1].user_id, 'u1');
   assert.equal(robloxService.countVerified('g3'), 2);
+});
+
+test('pioneer achievement unlocks only for the first 50 verifiers', () => {
+  for (let i = 0; i < 55; i += 1) {
+    robloxLinksRepo.create('g4', `p${i}`, {
+      robloxUsername: `User${i}`,
+      robloxId: 2000 + i,
+      code: `FGX-P${i}`,
+    });
+    robloxLinksRepo.verify('g4', `p${i}`);
+    robloxService.unlockRobloxAchievements('g4', `p${i}`);
+  }
+  // Everyone gets roblox_verified; only ranks 1–50 get pioneer.
+  assert.ok(achievementsRepo.has('g4', 'p0', 'roblox_verified'));
+  assert.ok(achievementsRepo.has('g4', 'p54', 'roblox_verified'));
+  assert.ok(achievementsRepo.has('g4', 'p0', 'roblox_pioneer'));
+  assert.ok(achievementsRepo.has('g4', 'p49', 'roblox_pioneer'));
+  assert.equal(achievementsRepo.has('g4', 'p50', 'roblox_pioneer'), false);
+  assert.equal(achievementsRepo.has('g4', 'p54', 'roblox_pioneer'), false);
+});
+
+test('re-verification does not double-unlock achievements', () => {
+  // p0 already has both achievements; unlocking again returns nothing new.
+  const newly = robloxService.unlockRobloxAchievements('g4', 'p0');
+  assert.deepEqual(newly, []);
 });

@@ -45,6 +45,12 @@ module.exports = {
         .setDescription('List verified Roblox members (staff)')
         .addIntegerOption((o) => o.setName('page').setDescription('Page number').setMinValue(1).setRequired(false)),
     )
+    .addSubcommand((s) =>
+      s
+        .setName('leaderboard')
+        .setDescription('First members to verify Roblox in this server')
+        .addIntegerOption((o) => o.setName('page').setDescription('Page number').setMinValue(1).setRequired(false)),
+    )
     .addSubcommand((s) => s.setName('panel').setDescription('Create the Roblox verification panel (staff)')),
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
@@ -96,6 +102,37 @@ module.exports = {
         description:
           lines.length > 0 ? lines.join('\n') : 'No verified members yet — share the panel and run `/setup` to enable Roblox verification.',
         footer: { text: `${BRAND.footer} • Page ${page}/${totalPages} • ${rows.length} verified` },
+      };
+      return interaction.reply({ embeds: [embed], ephemeral: true });
+    }
+
+    if (sub === 'leaderboard') {
+      const page = Math.max(1, interaction.options.getInteger('page') ?? 1);
+      // Oldest verified first — the pioneers at the top.
+      const rows = robloxLinksRepo.listVerified(interaction.guild.id).reverse();
+      const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+      const slice = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+      const lines = slice.map((r, i) => {
+        const rank = (page - 1) * PAGE_SIZE + i + 1;
+        const member = interaction.guild.members.cache.get(r.user_id);
+        const who = member ? `**${member.user.username}**` : `<@${r.user_id}>`;
+        const pioneer = rank <= 50 ? '👑 ' : '';
+        return `${pioneer}**#${rank}** ${who} — \`${r.roblox_username}\` (${r.verified_at ?? '—'})`;
+      });
+      const myRank = rows.findIndex((r) => r.user_id === interaction.user.id);
+      const youLine =
+        myRank !== -1
+          ? `\n\n**Your rank:** #${myRank + 1} of ${rows.length} verified${myRank < 50 ? ' — 👑 Pioneer' : ''}`
+          : '\n\nNot verified yet — run `/roblox verify` to claim a spot.';
+      const embed = {
+        color: BRAND.colors.primary,
+        title: '🟥 Roblox Verification — First to Verify',
+        description:
+          (lines.length > 0 ? lines.join('\n') : 'No verified members yet.') +
+          youLine,
+        footer: {
+          text: `${BRAND.footer} • 👑 = first 50 (Pioneers) • Page ${page}/${totalPages}`, 
+        },
       };
       return interaction.reply({ embeds: [embed], ephemeral: true });
     }

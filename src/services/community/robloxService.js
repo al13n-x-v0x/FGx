@@ -14,9 +14,11 @@ const {
   TextInputBuilder,
   TextInputStyle,
 } = require('discord.js');
-const { BRAND } = require('../../config/constants');
+const { BRAND, ACHIEVEMENTS } = require('../../config/constants');
+const db = require('../../database/index');
 const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { robloxLinksRepo } = require('../../database/repos/roblox');
+const { achievementsRepo } = require('../../database/repos/profiles');
 const { logAudit } = require('../logging/auditLogger');
 const { logger } = require('../../utils/logger');
 
@@ -105,6 +107,38 @@ function countVerified(guildId) {
   }
 }
 
+/**
+ * Unlock Roblox achievements after a successful verification.
+ * - roblox_verified: always, on first verification.
+ * - roblox_pioneer: the first 50 verified members of the guild (ranked by
+ *   rowid = insertion order, so re-links cannot game it).
+ * Returns the newly unlocked achievement definitions.
+ */
+function unlockRobloxAchievements(guildId, userId) {
+  const newly = [];
+  if (!achievementsRepo.has(guildId, userId, 'roblox_verified')) {
+    achievementsRepo.unlock(guildId, userId, 'roblox_verified');
+    const def = ACHIEVEMENTS.find((a) => a.code === 'roblox_verified');
+    if (def) newly.push(def);
+  }
+  if (!achievementsRepo.has(guildId, userId, 'roblox_pioneer')) {
+    const me = db.get('SELECT rowid FROM roblox_links WHERE guild_id = ? AND user_id = ?', guildId, userId);
+    if (me) {
+      const row = db.get(
+        "SELECT COUNT(*) AS n FROM roblox_links WHERE guild_id = ? AND status = 'verified' AND rowid <= ?",
+        guildId,
+        me.rowid,
+      );
+      if ((row?.n ?? 0) <= 50) {
+        achievementsRepo.unlock(guildId, userId, 'roblox_pioneer');
+        const def = ACHIEVEMENTS.find((a) => a.code === 'roblox_pioneer');
+        if (def) newly.push(def);
+      }
+    }
+  }
+  return newly;
+}
+
 /** The role granted on verification (roblox role, else generic verified role). */
 function verifiedRole(guild, config) {
   const roleId = config.roblox.roleId || config.verification.roleId;
@@ -162,8 +196,9 @@ async function checkVerification(client, guild, user) {
     throw err;
   }
 
-  // Verified — persist, grant the role, log it, and notify the user.
+  // Verified — persist, grant the role, unlock achievements, log it.
   robloxLinksRepo.verify(guild.id, user.id);
+  const achievements = unlockRobloxAchievements(guild.id, user.id);
   const role = verifiedRole(guild, config);
   const member = guild.members.cache.get(user.id);
   if (role && member) {
@@ -173,10 +208,15 @@ async function checkVerification(client, guild, user) {
     action: 'verification',
     target: user,
     moderator: null,
-    details: { roblox: link.roblox_username, robloxId: link.roblox_id, role: role?.name ?? null },
+    details: {
+      roblox: link.roblox_username,
+      robloxId: link.roblox_id,
+      role: role?.name ?? null,
+      achievements: achievements.map((a) => a.code),
+    },
   });
   const fresh = robloxLinksRepo.get(guild.id, user.id);
-  return { link: fresh ?? link, role };
+  return { link: fresh ?? link, role, achievements };
 }
 
 /** Remove a verified/pending link (best-effort role removal). */
@@ -315,15 +355,19 @@ async function handleCheck(interaction) {
   // The Roblox API call may take a moment — acknowledge the click first.
   await interaction.deferUpdate();
   try {
-    const { link, role } = await checkVerification(interaction.client, interaction.guild, interaction.user);
+    const { link, role, achievements } = await checkVerification(interaction.client, interaction.guild, interaction.user);
     const bt = '`';
+    const achievementLine =
+      achievements.length > 0
+        ? `\n\n**Achievements unlocked:** ${achievements.map((a) => `${a.icon} ${a.name}`).join(' · ')}`
+        : '';
     const embed = new EmbedBuilder()
       .setColor(BRAND.colors.success)
       .setTitle('✅ Roblox Verified')
       .setDescription(
         `Your Discord account is now linked to **${link.roblox_username}** (id ${bt}${link.roblox_id}${bt}).\n\n` +
           (role ? `You received the **${role.name}** role.` : 'No verification role is configured yet.') +
-          '\n\nManage your link anytime with `/roblox`.',
+          `${achievementLine}\n\nManage your link anytime with ${bt}/roblox${bt}.`,
       )
       .setFooter({ text: `${BRAND.footer} • Verified via Roblox public API` });
     await interaction.editReply({ embeds: [embed], components: [] });
@@ -385,6 +429,7 @@ module.exports = {
   fetchBlurb,
   linkStatus,
   countVerified,
+  unlockRobloxAchievements,
   startVerification,
   checkVerification,
   unlink,

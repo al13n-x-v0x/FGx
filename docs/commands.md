@@ -45,6 +45,7 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/roblox verify <username>` | Bloxlink-style Roblox verification (code goes in your Roblox About) |
 | `/roblox status` | Show your Roblox verification status |
 | `/roblox unlink [user]` | Remove your Roblox link — or any member's as staff |
+| `/roblox leaderboard [page]` | First members to verify Roblox (👑 = first 50 Pioneers) |
 | `/roblox list [page]` | Paginated list of verified Roblox members (staff) |
 | `/roblox panel` | Create the Roblox verification panel (staff) |
 | `/level [user]` / `/rank [user]` | Community XP and level |
