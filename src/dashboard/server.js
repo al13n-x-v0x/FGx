@@ -6,10 +6,20 @@
  */
 
 const http = require('node:http');
+const { execSync } = require('node:child_process');
 const { env } = require('../config/env');
 const { healthCheck } = require('../database/index');
 const { BRAND } = require('../config/constants');
 const { logger } = require('../utils/logger');
+
+/** Short git commit of the running build (for deploy verification). */
+function runningCommit() {
+  try {
+    return execSync('git rev-parse --short HEAD', { timeout: 3000 }).toString().trim();
+  } catch {
+    return 'unknown';
+  }
+}
 
 /**
  * Minimal built-in HTTP endpoint for deployment health checks.
@@ -26,6 +36,8 @@ function start(client) {
         status: 'ok',
         service: BRAND.name,
         version: BRAND.version,
+        commit: runningCommit(),
+        commands: client.commands?.size ?? 0,
         uptimeSeconds: Math.floor(process.uptime()),
         guilds: client.guilds.cache.size,
         database: healthCheck() ? 'ok' : 'error',

@@ -34,6 +34,7 @@ const { logger } = require('../../utils/logger');
 
 const ROBLOX_API = 'https://users.roblox.com/v1';
 const API_TIMEOUT_MS = 8000;
+const MAX_ATTEMPTS = 3;
 
 /** Characters excluded from codes to avoid confusion (0/O, 1/I). */
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -43,6 +44,28 @@ let apiFetch = (...args) => globalThis.fetch(...args);
 
 function _setFetch(fn) {
   apiFetch = fn;
+}
+
+/**
+ * Fetch with retry + backoff. Retries on network failures and 429/5xx
+ * (rate limits and transient Roblox outages) so verification keeps working
+ * through hiccups instead of dying with a scary "API error".
+ */
+async function fetchWithRetry(url, options, { attempts = MAX_ATTEMPTS } = {}) {
+  let lastErr = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const res = await apiFetch(url, options);
+      if (res.status !== 429 && res.status < 500) return res;
+      lastErr = new Error(`Roblox API error (${res.status})`);
+    } catch (err) {
+      lastErr = err;
+    }
+    if (attempt < attempts) {
+      await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
+    }
+  }
+  throw lastErr ?? new Error('Roblox API unreachable');
 }
 
 /** Random verification code like FGX-K7M2QZ. */
@@ -56,14 +79,14 @@ function generateCode(length = 6) {
 
 /** Resolve a Roblox username to { id, name, displayName } or null. */
 async function resolveUsername(username) {
-  const res = await apiFetch(`${ROBLOX_API}/usernames/users`, {
+  const res = await fetchWithRetry(`${ROBLOX_API}/usernames/users`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ usernames: [username], excludeBannedUsers: true }),
     signal: AbortSignal.timeout(API_TIMEOUT_MS),
   });
   if (!res.ok) {
-    throw new Error(`Roblox API error (${res.status}) — try again in a moment.`);
+    throw new Error(`Roblox username lookup failed (${res.status}) — try again in a moment.`);
   }
   const json = await res.json();
   const match = json?.data?.[0];
@@ -73,12 +96,14 @@ async function resolveUsername(username) {
 
 /** Fetch a user's About/blurb text (from the public user profile endpoint). */
 async function fetchBlurb(userId) {
-  const res = await apiFetch(`${ROBLOX_API}/users/${userId}`, {
+  const res = await fetchWithRetry(`${ROBLOX_API}/users/${userId}`, {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(API_TIMEOUT_MS),
   });
   if (!res.ok) {
-    throw new Error(`Roblox API error (${res.status}) — try again in a moment.`);
+    throw new Error(
+      `Roblox profile lookup failed (${res.status}) — Roblox may be busy. Press **Check** again in a few seconds.`,
+    );
   }
   const json = await res.json();
   return typeof json?.description === 'string' ? json.description : '';

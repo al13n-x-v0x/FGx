@@ -109,6 +109,7 @@ test('username resolution parses the Roblox API response (injected fetch)', asyn
   const realFetch = globalThis.fetch;
   robloxService._setFetch(async () => ({
     ok: true,
+    status: 200,
     json: async () => ({ data: [{ id: 424242, name: 'TestUser', displayName: 'TestUser' }] }),
   }));
   try {
@@ -122,7 +123,7 @@ test('username resolution parses the Roblox API response (injected fetch)', asyn
 
 test('username resolution returns null for unknown accounts', async () => {
   const realFetch = globalThis.fetch;
-  robloxService._setFetch(async () => ({ ok: true, json: async () => ({ data: [] }) }));
+  robloxService._setFetch(async () => ({ ok: true, status: 200, json: async () => ({ data: [] }) }));
   try {
     const resolved = await robloxService.resolveUsername('Nobody_Has_This_Name');
     assert.equal(resolved, null);
@@ -169,4 +170,21 @@ test('re-verification does not double-unlock achievements', () => {
   // p0 already has both achievements; unlocking again returns nothing new.
   const newly = robloxService.unlockRobloxAchievements('g4', 'p0');
   assert.deepEqual(newly, []);
+});
+
+test('roblox API retries rate limits (429) instead of failing', async () => {
+  const realFetch = globalThis.fetch;
+  let calls = 0;
+  robloxService._setFetch(async () => {
+    calls += 1;
+    if (calls < 3) return { ok: false, status: 429 };
+    return { ok: true, status: 200, json: async () => ({ data: [{ id: 5151, name: 'Retry', displayName: 'Retry' }] }) };
+  });
+  try {
+    const resolved = await robloxService.resolveUsername('Retry');
+    assert.equal(resolved.id, 5151);
+    assert.equal(calls, 3, 'should have retried twice');
+  } finally {
+    robloxService._setFetch(realFetch);
+  }
 });
