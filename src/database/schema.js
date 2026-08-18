@@ -298,6 +298,22 @@ const MIGRATIONS = [
 
   CREATE INDEX IF NOT EXISTS idx_animals_user ON animals (guild_id, user_id);
   `,
+
+  // Migration 6 — social interactions (OwO-style slap/pat/hug/kiss/…).
+  // Per-actor→target counters; the same pair can build a long rivalry.
+  `
+  CREATE TABLE IF NOT EXISTS social_interactions (
+    guild_id   TEXT NOT NULL,
+    actor_id   TEXT NOT NULL,
+    target_id  TEXT NOT NULL,
+    kind       TEXT NOT NULL,
+    count      INTEGER NOT NULL DEFAULT 1,
+    last_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (guild_id, actor_id, target_id, kind)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_social_target ON social_interactions (guild_id, target_id, kind);
+  `,
 ];
 
 module.exports = { MIGRATIONS };

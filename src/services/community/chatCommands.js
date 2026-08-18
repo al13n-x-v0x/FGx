@@ -11,6 +11,8 @@ const views = require('./economyViews');
 const hubService = require('../clan/hubService');
 const { economyRepo } = require('../../database/repos/economy');
 const zoo = require('./zooService');
+const { socialService } = require('./socialService');
+const socialViews = require('./socialViews');
 const { healthCheck } = require('../../database/index');
 const { RateLimiter } = require('../../utils/ratelimit');
 const { logger } = require('../../utils/logger');
@@ -143,6 +145,13 @@ function parseCommand(line, mentionIds = []) {
     return { type: 'sell', key: rest.join(' ').trim() };
   }
 
+  if (cmd === 'slap' || cmd === 'pat' || cmd === 'hug' || cmd === 'kiss' || cmd === 'tickle' || cmd === 'poke') {
+    return { type: 'social', kind: cmd, targetId: mentionIds[0] ?? null };
+  }
+  if (cmd === 'social' || cmd === 'interactions') {
+    return { type: 'socialStats', targetId: mentionIds[0] ?? null };
+  }
+
   if (cmd === 'history' || cmd === 'logs' || cmd === 'tx') {
     const countText = rest.filter((t) => !/^<@!?\d+>$/.test(t) && !/^@.+/.test(t))[0] ?? '';
     const count = Math.min(25, Math.max(1, parseAmount(countText) ?? 10));
@@ -187,6 +196,9 @@ function helpEmbed() {
       '• `fgx crate` / `!crate` — open a loot crate (250 ₣Ԡ🇽)\n' +
       '• `fgx history [@user] [count]` / `!history` — last transactions\n' +
       '• `fgx top` — richest members\n\n' +
+      '**Socials** (chat only)\n' +
+      '• `!slap @user` / `!pat` / `!hug` / `!kiss` / `!tickle` / `!poke` — interact, counts grow\n' +
+      '• `!social [@user]` — interaction stats\n\n' +
       '**Server**\n' +
       '• `fgx profile [@user]` — player profile\n' +
       '• `fgx stats` / `fgx roster` / `fgx leaderboard` — competitive\n' +
@@ -365,6 +377,34 @@ async function handle(client, message) {
         return true;
       }
 
+      case 'social': {
+        if (!parsed.targetId) {
+          await message.reply({
+            embeds: [views.warnEmbed('Who?', `Mention someone: \`!${parsed.kind} @user\``)],
+          });
+          return true;
+        }
+        const target = message.mentions.users.get(parsed.targetId) ?? message.author;
+        // Slap/poke get a little wind-up animation, OwO-style.
+        if (parsed.kind === 'slap' || parsed.kind === 'poke') {
+          const spinner = await message.reply({ content: `${socialService.EMOJI[parsed.kind]} You wind up…` });
+          const result = socialService.interact(guildId, userId, target.id, parsed.kind, target.username);
+          await new Promise((resolve) => setTimeout(resolve, 1200));
+          await spinner.edit({ content: null, embeds: [socialViews.interactionEmbed(result, target.username)] }).catch(() => {});
+        } else {
+          const result = socialService.interact(guildId, userId, target.id, parsed.kind, target.username);
+          await message.reply({ embeds: [socialViews.interactionEmbed(result, target.username)] });
+        }
+        return true;
+      }
+
+      case 'socialStats': {
+        const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) ?? message.author : message.author;
+        const s = socialService.stats(guildId, target.id);
+        await message.reply({ embeds: [socialViews.statsEmbed(target.username, s)] });
+        return true;
+      }
+
       case 'top': {
         const rows = economy.leaderboard(guildId, parsed.count);
         const embed = {
@@ -390,7 +430,7 @@ async function handle(client, message) {
         return true;
     }
   } catch (err) {
-    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN', 'UNKNOWN_ANIMAL', 'NOT_OWNED'];
+    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN', 'UNKNOWN_ANIMAL', 'NOT_OWNED', 'UNKNOWN_KIND'];
     if (codes.includes(err.code)) {
       await message.reply({ embeds: [views.warnEmbed('FGx coins', err.message)] }).catch(() => {});
       return true;
