@@ -55,10 +55,12 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `!zoo` / `!sell <animal>` (chat) | Collect animals from hunts into your zoo; sell duplicates for coins | Anyone |
 | `!pray` (chat) | 6h cooldown — pray for a random 15–150 ₣Ԡ🇽 blessing | Anyone |
 | `!crate` (chat) | 3h cooldown — open a crate for 200–800 ₣Ԡ🇽 (or 50/50 gamble for 2× / nothing) | Anyone |
-| `!slap` / `!pat` / `!hug` / `!kiss` / `!tickle` / `!poke` (chat) | OwO-style socials — interact with members, per-pair counters grow | Anyone |
+| `!slap` / `!clap` / `!pat` / `!hug` / `!kiss` / `!tickle` / `!poke` / `!cuddle` / `!stare` / `!boop` / `!feed` / `!highfive` / `!punch` / `!bite` / `!dance` (chat) | OwO-style socials — interact with members, per-pair counters grow | Anyone |
 | `!social [@user]` (chat) | Interaction stats — dealt vs received per kind | Anyone |
-| `/social slap|pat|hug|kiss|tickle|poke <user>` | Slash versions of the social interactions | Anyone |
+| `!socialtop [kind]` (chat) | Who leads each interaction (top 5) | Anyone |
+| `/social <kind> <user>` | Slash versions of every social interaction | Anyone |
 | `/social stats [user]` | Slash version of interaction stats | Anyone |
+| `/social top [kind]` | Slash version of the interaction leaderboard | Anyone |
 | `fgx coinflip <amount/all> [heads|tails]` / `fgx transfer @user <amount>` (chat) | Coinflip and transfers straight from chat | Anyone |
 | `fgx wallet [user]` / `fgx top` (chat) | Balances and richest members from chat | Anyone |
 | `/fgxcoin wallet [user]` | Your (or a member's) ₣Ԡ🇽 balance, lifetime earned, daily streak | Anyone |

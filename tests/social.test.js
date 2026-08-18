@@ -51,10 +51,30 @@ test('self-interaction is allowed (OwO-style)', () => {
 });
 
 test('line selection is deterministic with injected rng', () => {
-  const zero = socialService.interact('g1', 'u1', 'u2', 'slap', 'Bob', () => 0);
-  const near = socialService.interact('g1', 'u1', 'u2', 'slap', 'Bob', () => 0.999);
+  const zero = socialService.interact('g1', 'u1', 'u2', 'slap', 'Bob', 'Alice', () => 0);
+  const near = socialService.interact('g1', 'u1', 'u2', 'slap', 'Bob', 'Alice', () => 0.999);
   assert.notEqual(zero.line, near.line);
-  assert.ok(zero.line.includes('Bob') && near.line.includes('Bob'));
+  assert.ok(zero.line.includes('Bob') && zero.line.includes('Alice'));
+  assert.ok(near.line.includes('Bob') && near.line.includes('Alice'));
+});
+
+test('all kinds have emoji and non-empty flavor lines mentioning both names', () => {
+  for (const kind of socialService.KINDS) {
+    const r = socialService.interact('g6', 'u1', 'u2', kind, 'Bob', 'Alice');
+    assert.equal(r.kind, kind);
+    assert.ok(r.emoji);
+    assert.ok(r.line.includes('Bob') && r.line.includes('Alice'), `${kind} line missing names`);
+    assert.equal(r.count, 1);
+  }
+});
+
+test('clap and other new kinds are tracked and ranked', () => {
+  socialService.interact('g7', 'u1', 'u2', 'clap', 'B', 'A');
+  socialService.interact('g7', 'u1', 'u3', 'clap', 'B', 'A');
+  socialService.interact('g7', 'u2', 'u1', 'clap', 'B', 'A');
+  const t = socialService.top('g7', 'clap');
+  assert.equal(t[0].actor_id, 'u1');
+  assert.equal(t[0].total, 2);
 });
 
 test('unknown kinds throw a typed error', () => {
@@ -83,11 +103,16 @@ test('views render counts and stats', () => {
 
 test('parseCommand recognizes social commands', () => {
   assert.deepEqual(parseCommand('slap @u', ['u7']), { type: 'social', kind: 'slap', targetId: 'u7' });
+  assert.deepEqual(parseCommand('clap @u', ['u7']), { type: 'social', kind: 'clap', targetId: 'u7' });
   assert.deepEqual(parseCommand('hug @u', ['u7']), { type: 'social', kind: 'hug', targetId: 'u7' });
   assert.deepEqual(parseCommand('kiss @u', ['u7']), { type: 'social', kind: 'kiss', targetId: 'u7' });
+  assert.deepEqual(parseCommand('boop @u', ['u7']), { type: 'social', kind: 'boop', targetId: 'u7' });
+  assert.deepEqual(parseCommand('highfive @u', ['u7']), { type: 'social', kind: 'highfive', targetId: 'u7' });
   assert.deepEqual(parseCommand('poke'), { type: 'social', kind: 'poke', targetId: null });
   assert.deepEqual(parseCommand('social @u', ['u7']), { type: 'socialStats', targetId: 'u7' });
   assert.deepEqual(parseCommand('social'), { type: 'socialStats', targetId: null });
+  assert.deepEqual(parseCommand('socialtop'), { type: 'socialTop', kind: 'slap', n: 5 });
+  assert.deepEqual(parseCommand('socialtop clap'), { type: 'socialTop', kind: 'clap', n: 5 });
 });
 
 test('socialRepo between exposes pair counts both ways', () => {
