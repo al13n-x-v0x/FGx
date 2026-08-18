@@ -49,7 +49,9 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/roblox list [page]` | Paginated list of verified Roblox members (staff) |
 | `/roblox panel` | Create the Roblox verification panel (staff) |
 | `fgx daily` / `fgx weekly` (chat) | OwO-style chat commands — mention works too (`@FGx daily`) | Anyone |
-| `fgx coinflip <amount/all>` / `fgx transfer @user <amount>` (chat) | Coinflip and transfers straight from chat | Anyone |
+| `!bal` / `!daily` (chat) | OwO-style bang commands — check balance, claim the 500 ₣Ԡ🇽 daily | Anyone |
+| `!coinflip <amount|all> [heads|tails]` (chat) | OwO coinflip with a spinning-coin animation — pick a side to double your bet | Anyone |
+| `fgx coinflip <amount/all> [heads|tails]` / `fgx transfer @user <amount>` (chat) | Coinflip and transfers straight from chat | Anyone |
 | `fgx wallet [user]` / `fgx top` (chat) | Balances and richest members from chat | Anyone |
 | `/fgxcoin wallet [user]` | Your (or a member's) ₣Ԡ🇽 balance, lifetime earned, daily streak | Anyone |
 | `/fgxcoin daily` | Claim the daily ₣Ԡ🇽 reward — streak grows +25/day up to 500 | Anyone |

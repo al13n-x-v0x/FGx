@@ -17,9 +17,9 @@ const { RateLimiter } = require('../../utils/ratelimit');
  */
 
 const CURRENCY = '₣Ԡ🇽';
-const DAILY_BASE = 100;
-const DAILY_STREAK_BONUS = 25;
-const DAILY_MAX = 500;
+const DAILY_BASE = 500;
+const DAILY_STREAK_BONUS = 50;
+const DAILY_MAX = 1000;
 const WEEKLY_AMOUNT = 500;
 const TRANSFER_TAX = 0.05;
 const WEEK_MS = 7 * 24 * 3_600_000;
@@ -133,8 +133,12 @@ async function transfer(guildId, fromId, toId, amount) {
   return { amount: amt, received, tax, balance: updated.balance, row: updated };
 }
 
-/** 50/50 coinflip — double or nothing. */
-async function gamble(guildId, userId, amount) {
+/**
+ * Coinflip — 50/50. With a `pick` (heads/tails) the user bets on a side
+ * and doubles their money if it lands there. Without a pick it's the plain
+ * double-or-nothing gamble. Validates balance, rate-limits, logs the tx.
+ */
+async function coinflip(guildId, userId, amount, pick = null) {
   const amt = Math.floor(Number(amount));
   const row = economyRepo.ensure(guildId, userId);
   if (!Number.isFinite(amt) || amt < 1 || amt > (row.balance ?? 0)) {
@@ -148,16 +152,31 @@ async function gamble(guildId, userId, amount) {
     throw err;
   }
 
-  const won = rng() < 0.5;
+  let side;
+  let won;
+  if (pick === 'heads' || pick === 'tails') {
+    side = rng() < 0.5 ? 'heads' : 'tails';
+    won = side === pick;
+  } else {
+    won = rng() < 0.5;
+    side = won ? 'heads' : 'tails';
+  }
   const delta = won ? amt : -amt;
   economyRepo.updateBalance(guildId, userId, delta);
-  economyRepo.logTx(guildId, userId, won ? 'gamble_win' : 'gamble_loss', delta, `Coinflip ${won ? 'win' : 'loss'}`);
+  economyRepo.logTx(guildId, userId, won ? 'gamble_win' : 'gamble_loss', delta, `Coinflip ${side} ${won ? 'win' : 'loss'}`);
   const updated = economyRepo.get(guildId, userId);
-  return { won, amount: amt, delta, balance: updated.balance, row: updated };
+  return { won, side, pick, amount: amt, delta, balance: updated.balance, row: updated };
+}
+
+/** Plain 50/50 double-or-nothing (no side picked). */
+async function gamble(guildId, userId, amount) {
+  return coinflip(guildId, userId, amount, null);
 }
 
 module.exports = {
   CURRENCY,
+  DAILY_BASE,
+  DAILY_STREAK_BONUS,
   TRANSFER_TAX,
   format,
   balance,
@@ -165,6 +184,7 @@ module.exports = {
   daily,
   weekly,
   transfer,
+  coinflip,
   gamble,
   _setRng,
 };

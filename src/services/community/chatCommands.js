@@ -75,6 +75,14 @@ function stripPrefix(content, clientId) {
   return null;
 }
 
+/** OwO-style bang prefix: `!bal`, `!daily`, `!coinflip 50 heads`, … */
+function stripBangPrefix(content) {
+  const text = String(content ?? '').trim();
+  if (!text.startsWith('!')) return null;
+  const rest = text.slice(1).trim();
+  return rest || null;
+}
+
 /** Parse a whole number, or null when invalid. */
 function parseAmount(raw) {
   const n = Number(String(raw ?? '').replace(/[,_]/g, '').trim());
@@ -109,8 +117,13 @@ function parseCommand(line, mentionIds = []) {
 
   if (cmd === 'coinflip' || cmd === 'gamble' || cmd === 'cf' || cmd === 'flip') {
     const raw = rest.join(' ').trim();
-    const all = raw.toLowerCase() === 'all';
-    return { type: 'gamble', all, amount: all ? null : parseAmount(raw), raw };
+    // Optional heads/tails pick: `coinflip 50 heads`, `coinflip heads 50`,
+    // `coinflip tails all`, …
+    const pickTok = rest.find((t) => /^(heads|tails|h|t)$/i.test(t));
+    const pick = pickTok ? (pickTok.toLowerCase() === 'h' ? 'heads' : pickTok.toLowerCase() === 't' ? 'tails' : pickTok.toLowerCase()) : null;
+    const amountText = rest.filter((t) => !/^(heads|tails|h|t)$/i.test(t)).join(' ');
+    const all = amountText.toLowerCase() === 'all';
+    return { type: 'coinflip', all, pick, amount: all ? null : parseAmount(amountText), raw };
   }
 
   if (cmd === 'top') {
@@ -142,11 +155,12 @@ function helpEmbed() {
     title: '💰 FGx — chat commands',
     description:
       'Type **`fgx <command>`** in chat (mentioning the bot works too: `@FGx daily`).\n\n' +
-      '**Economy**\n' +
-      '• `fgx daily` / `fgx weekly` — claim rewards\n' +
-      '• `fgx wallet [@user]` — check a balance\n' +
+      '**Economy** (works with `fgx` or `!` prefixes)\n' +
+      '• `fgx daily` / `!daily` — 500 ₣Ԡ🇽 daily (streak bonus!)\n' +
+      '• `fgx weekly` / `!weekly` — weekly reward\n' +
+      '• `fgx wallet [@user]` / `!bal` — check a balance\n' +
       '• `fgx transfer @user <amount>` — send ₣Ԡ🇽 (5% tax)\n' +
-      '• `fgx coinflip <amount|all>` — 50/50 gamble\n' +
+      '• `fgx coinflip <amount|all> [heads|tails]` / `!coinflip 50 heads` — 50/50 gamble\n' +
       '• `fgx top` — richest members\n\n' +
       '**Server**\n' +
       '• `fgx profile [@user]` — player profile\n' +
@@ -164,7 +178,14 @@ function helpEmbed() {
  * Returns true when the message was handled as a command.
  */
 async function handle(client, message) {
-  const line = stripPrefix(message.content, client.user.id);
+  // `!`-prefixed messages are only claimed when the command name matches —
+  // unknown ones pass through untouched so other bots aren't hijacked.
+  let bang = false;
+  let line = stripPrefix(message.content, client.user.id);
+  if (!line) {
+    line = stripBangPrefix(message.content);
+    bang = line !== null;
+  }
   if (!line) return false;
 
   if (!CHAT_RATE_LIMIT.allow(message.author.id)) {
@@ -250,15 +271,20 @@ async function handle(client, message) {
         return true;
       }
 
-      case 'gamble': {
+      case 'coinflip': {
         const row = economy.balance(guildId, userId);
         const amount = parsed.all ? (row.balance ?? 0) : parsed.amount;
         if (!amount) {
-          await message.reply({ embeds: [views.warnEmbed('Invalid amount', 'Use `fgx coinflip <amount>` or `fgx coinflip all`')] });
+          await message.reply({
+            embeds: [views.warnEmbed('Invalid amount', 'Use `coinflip <amount|all> [heads|tails]` — e.g. `!coinflip 50 heads`')],
+          });
           return true;
         }
-        const result = await economy.gamble(guildId, userId, amount);
-        await message.reply({ embeds: [views.gambleEmbed(result)] });
+        // Fun animation: the coin spins, then the result lands.
+        const spinner = await message.reply({ content: '🪙 The coin spins…' });
+        const result = await economy.coinflip(guildId, userId, amount, parsed.pick ?? null);
+        await new Promise((resolve) => setTimeout(resolve, 1400));
+        await spinner.edit({ content: null, embeds: [views.coinflipEmbed(result)] }).catch(() => {});
         return true;
       }
 
@@ -278,6 +304,9 @@ async function handle(client, message) {
       }
 
       default:
+        // Unknown `!`-commands are left alone (other bots may use them);
+        // unknown `fgx`-commands get guidance.
+        if (bang) return false;
         await message.reply({
           embeds: [views.warnEmbed('Unknown command', `\`fgx ${parsed.raw}\` isn't a thing. Try \`fgx help\` — or use \`/help\`.`)],
         });
@@ -294,4 +323,4 @@ async function handle(client, message) {
   }
 }
 
-module.exports = { handle, stripPrefix, parseCommand, parseAmount, CHAT_RATE_LIMIT, helpEmbed, SECTION_ALIASES };
+module.exports = { handle, stripPrefix, stripBangPrefix, parseCommand, parseAmount, CHAT_RATE_LIMIT, helpEmbed, SECTION_ALIASES };

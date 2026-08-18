@@ -7,7 +7,7 @@ process.env.DISCORD_TOKEN = 'test-token';
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { stripPrefix, parseCommand, parseAmount } = require('../src/services/community/chatCommands');
+const { stripPrefix, stripBangPrefix, parseCommand, parseAmount } = require('../src/services/community/chatCommands');
 
 test('stripPrefix accepts "fgx ..." (case-insensitive) and bot mentions', () => {
   assert.equal(stripPrefix('fgx daily', '123'), 'daily');
@@ -17,6 +17,15 @@ test('stripPrefix accepts "fgx ..." (case-insensitive) and bot mentions', () => 
   assert.equal(stripPrefix('<@!123> transfer @u 5', '123'), 'transfer @u 5');
   assert.equal(stripPrefix('hello there', '123'), null);
   assert.equal(stripPrefix('', '123'), null);
+});
+
+test('stripBangPrefix accepts OwO-style "!" commands', () => {
+  assert.equal(stripBangPrefix('!bal'), 'bal');
+  assert.equal(stripBangPrefix('!daily'), 'daily');
+  assert.equal(stripBangPrefix('!coinflip 50 heads'), 'coinflip 50 heads');
+  assert.equal(stripBangPrefix('!  daily'), 'daily');
+  assert.equal(stripBangPrefix('hello'), null);
+  assert.equal(stripBangPrefix('!'), null);
 });
 
 test('parseCommand covers daily, weekly and wallet', () => {
@@ -29,12 +38,16 @@ test('parseCommand covers daily, weekly and wallet', () => {
   assert.deepEqual(parseCommand(''), { type: 'help' });
 });
 
-test('parseCommand parses coinflip amounts and "all"', () => {
-  assert.deepEqual(parseCommand('coinflip 50'), { type: 'gamble', all: false, amount: 50, raw: '50' });
-  assert.deepEqual(parseCommand('cf 1,000'), { type: 'gamble', all: false, amount: 1000, raw: '1,000' });
-  assert.deepEqual(parseCommand('gamble all'), { type: 'gamble', all: true, amount: null, raw: 'all' });
-  assert.deepEqual(parseCommand('flip'), { type: 'gamble', all: false, amount: null, raw: '' });
-  assert.deepEqual(parseCommand('coinflip abc'), { type: 'gamble', all: false, amount: null, raw: 'abc' });
+test('parseCommand parses coinflip amounts, "all" and heads/tails picks', () => {
+  assert.deepEqual(parseCommand('coinflip 50'), { type: 'coinflip', all: false, pick: null, amount: 50, raw: '50' });
+  assert.deepEqual(parseCommand('cf 1,000'), { type: 'coinflip', all: false, pick: null, amount: 1000, raw: '1,000' });
+  assert.deepEqual(parseCommand('gamble all'), { type: 'coinflip', all: true, pick: null, amount: null, raw: 'all' });
+  assert.deepEqual(parseCommand('flip'), { type: 'coinflip', all: false, pick: null, amount: null, raw: '' });
+  assert.deepEqual(parseCommand('coinflip abc'), { type: 'coinflip', all: false, pick: null, amount: null, raw: 'abc' });
+  assert.deepEqual(parseCommand('coinflip 50 heads'), { type: 'coinflip', all: false, pick: 'heads', amount: 50, raw: '50 heads' });
+  assert.deepEqual(parseCommand('coinflip tails all'), { type: 'coinflip', all: true, pick: 'tails', amount: null, raw: 'tails all' });
+  assert.deepEqual(parseCommand('cf 100 t'), { type: 'coinflip', all: false, pick: 'tails', amount: 100, raw: '100 t' });
+  assert.deepEqual(parseCommand('coinflip heads'), { type: 'coinflip', all: false, pick: 'heads', amount: null, raw: 'heads' });
 });
 
 test('parseCommand parses transfers with mentions and amounts', () => {

@@ -22,12 +22,12 @@ test('wallet starts at zero and formats nicely', () => {
   assert.equal(economy.format(1234), '1,234 ₣Ԡ🇽');
 });
 
-test('daily claim pays base and logs a transaction', async () => {
+test('daily claim pays the 500 base and logs a transaction', async () => {
   const result = await economy.daily('g1', 'u1');
-  assert.equal(result.amount, 100);
+  assert.equal(result.amount, 500);
   assert.equal(result.streak, 1);
-  assert.equal(result.balance, 100);
-  assert.equal(economyRepo.get('g1', 'u1').lifetime, 100);
+  assert.equal(result.balance, 500);
+  assert.equal(economyRepo.get('g1', 'u1').lifetime, 500);
   assert.equal(economyRepo.recentTx('g1', 'u1', 5)[0].kind, 'daily');
 });
 
@@ -38,17 +38,17 @@ test('daily cannot be claimed twice in the same day', async () => {
 test('weekly claim pays once', async () => {
   const result = await economy.weekly('g1', 'u1');
   assert.equal(result.amount, 500);
-  assert.equal(result.balance, 600);
+  assert.equal(result.balance, 1000);
   await assert.rejects(() => economy.weekly('g1', 'u1'), (err) => err.code === 'ALREADY_CLAIMED');
 });
 
 test('transfer applies the 5% tax and updates both wallets', async () => {
   const from = await economy.daily('g1', 'u2');
-  assert.equal(from.balance, 100);
+  assert.equal(from.balance, 500);
   const result = await economy.transfer('g1', 'u2', 'u3', 100);
   assert.equal(result.received, 95); // 5% tax
   assert.equal(result.tax, 5);
-  assert.equal(result.balance, 0);
+  assert.equal(result.balance, 400);
   assert.equal(economyRepo.get('g1', 'u3').balance, 95);
 });
 
@@ -63,11 +63,30 @@ test('gamble doubles on a win and halves on a loss (injected RNG)', async () => 
     economy._setRng(() => 0.1); // win
     const win = await economy.gamble('g1', 'u1', 50);
     assert.equal(win.won, true);
-    assert.equal(win.balance, 650);
+    assert.equal(win.balance, 1050);
     economy._setRng(() => 0.9); // loss
     const loss = await economy.gamble('g1', 'u1', 100);
     assert.equal(loss.won, false);
-    assert.equal(loss.balance, 550);
+    assert.equal(loss.balance, 950);
+  } finally {
+    economy._setRng(realRng);
+  }
+});
+
+test('coinflip with a heads pick doubles on heads and loses on tails', async () => {
+  const realRng = Math.random;
+  try {
+    economy._setRng(() => 0.1); // rng < 0.5 → heads
+    const win = await economy.coinflip('g1', 'u1', 200, 'heads');
+    assert.equal(win.won, true);
+    assert.equal(win.side, 'heads');
+    assert.equal(win.pick, 'heads');
+    assert.equal(win.balance, 1150);
+    economy._setRng(() => 0.9); // tails
+    const loss = await economy.coinflip('g1', 'u1', 150, 'heads');
+    assert.equal(loss.won, false);
+    assert.equal(loss.side, 'tails');
+    assert.equal(loss.balance, 1000);
   } finally {
     economy._setRng(realRng);
   }

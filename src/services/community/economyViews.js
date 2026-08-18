@@ -34,7 +34,9 @@ function claimEmbed(kind, result) {
     description:
       `You received **${economy.format(result.amount)}**.\n\n` +
       `**New balance:** ${economy.format(result.balance)}` +
-      (kind === 'daily' && result.streak > 1 ? `\n**Streak:** ${result.streak} days (+${(result.streak - 1) * 25} bonus)` : ''),
+      (kind === 'daily' && result.streak > 1
+        ? `\n**Streak:** ${result.streak} days (+${(result.streak - 1) * economy.DAILY_STREAK_BONUS} bonus)`
+        : ''),
     footer: { text: BRAND.footer },
   };
 }
@@ -61,6 +63,22 @@ function gambleEmbed(result) {
   };
 }
 
+function coinflipEmbed(result) {
+  const pickLine = result.pick
+    ? `You picked **${result.pick.toUpperCase()}** — the coin landed **${result.side.toUpperCase()}**.\n\n`
+    : `The coin landed **${result.side.toUpperCase()}**.\n\n`;
+  return {
+    color: result.won ? BRAND.colors.success : BRAND.colors.danger,
+    title: result.won ? `🪙 ${result.side.toUpperCase()}! You won!` : `🪙 ${result.side.toUpperCase()}! You lost.`,
+    description:
+      `${pickLine}` +
+      (result.won
+        ? `**+${economy.format(result.amount)}** — new balance **${economy.format(result.balance)}**.`
+        : `**-${economy.format(result.amount)}** — new balance **${economy.format(result.balance)}**.`),
+    footer: { text: `${BRAND.footer} • 50/50 odds` },
+  };
+}
+
 function warnEmbed(title, description) {
   return { color: BRAND.colors.warn, title, description, footer: { text: BRAND.footer } };
 }
@@ -70,5 +88,6 @@ module.exports = {
   claimEmbed,
   transferEmbed,
   gambleEmbed,
+  coinflipEmbed,
   warnEmbed,
 };
