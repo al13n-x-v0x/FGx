@@ -26,7 +26,7 @@ services:
       # 'basic' runs without privileged intents. Flip to 'full' after enabling
       # Server Members + Message Content intents in the Discord Developer Portal.
       - key: DISCORD_INTENTS
-        value: basic
+        value: full
       # AI: Gemini primary, Groq (2 keys x 2 models) as automatic fallback.
       - key: AI_PROVIDER
         value: gemini
