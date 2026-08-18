@@ -105,6 +105,15 @@ async function main() {
   const robloxService = require('./services/community/robloxService');
   setInterval(() => robloxService.sweepExpiredCodes(), 2 * 60 * 1000);
 
+  // Self-pinger: keep the Render free-tier service awake by hitting our own
+  // /health endpoint every 4 minutes (free tier spins down after 15 min).
+  const PING_INTERVAL_MS = 4 * 60 * 1000;
+  setInterval(() => {
+    const port = Number(process.env.PORT || env.WEBHOOK_PORT);
+    const url = `http://127.0.0.1:${port}/health`;
+    fetch(url).catch(() => {});
+  }, PING_INTERVAL_MS);
+
   logger.info('FGx startup complete');
 }
 
