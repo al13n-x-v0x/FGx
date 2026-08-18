@@ -207,7 +207,13 @@ async function handleHub(interaction) {
   }
   if (section) {
     const panel = hubService.renderSection(interaction.guild, interaction.user.id, section);
-    return interaction.update({ embeds: panel.embeds, components: panel.components });
+    // A stale/expired hub message makes update() fail — reply with a fresh
+    // panel instead so the click always does something visible.
+    try {
+      return await interaction.update({ embeds: panel.embeds, components: panel.components });
+    } catch {
+      return interaction.reply({ embeds: panel.embeds, components: panel.components });
+    }
   }
   // Back button
   return interaction.update({

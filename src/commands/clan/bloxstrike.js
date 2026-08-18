@@ -13,7 +13,7 @@ module.exports = {
   async execute(interaction) {
     await interaction.reply({
       embeds: [hubService.mainEmbed()],
-      components: [hubService.navRow(false)],
+      components: hubService.hubComponents(false),
     });
   },
 };
