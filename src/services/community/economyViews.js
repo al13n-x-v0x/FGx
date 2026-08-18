@@ -103,6 +103,46 @@ function battleEmbed(result) {
   };
 }
 
+/** Transaction kind → short label + emoji for history listings. */
+const TX_LABELS = {
+  daily: '📆 Daily',
+  weekly: '🗓️ Weekly',
+  transfer_in: '📥 Received',
+  transfer_out: '📤 Sent',
+  gamble_win: '🟢 Coinflip win',
+  gamble_loss: '🔴 Coinflip loss',
+  hunt: '🏹 Hunt',
+  battle_win: '⚔️ Battle win',
+  battle_loss: '💀 Battle loss',
+  match_win: '🏆 Match win',
+  match_draw: '🤝 Match draw',
+};
+
+function txLabel(kind) {
+  return TX_LABELS[kind] ?? `• ${kind.replace(/_/g, ' ')}`;
+}
+
+/** Build a history embed (one field per transaction). */
+function historyEmbed(targetName, rows) {
+  const embed = {
+    color: BRAND.colors.primary,
+    title: `🧾 ₣Ԡ🇽 History — ${targetName}`,
+    description: rows.length > 0 ? `Last **${rows.length}** transactions (newest first).` : 'No transactions yet — claim `fgx daily`!',
+    footer: { text: `${BRAND.footer} • /fgxcoin history for more` },
+  };
+  if (rows.length > 0) {
+    embed.fields = rows.map((r) => {
+      const sign = r.amount >= 0 ? '+' : '';
+      return {
+        name: `${txLabel(r.kind)} — ${sign}${economy.format(r.amount)}`,
+        value: `${r.note ?? ''} ${r.created_at ?? ''}`.trim(),
+        inline: false,
+      };
+    });
+  }
+  return embed;
+}
+
 function warnEmbed(title, description) {
   return { color: BRAND.colors.warn, title, description, footer: { text: BRAND.footer } };
 }
@@ -115,5 +155,8 @@ module.exports = {
   coinflipEmbed,
   huntEmbed,
   battleEmbed,
+  historyEmbed,
+  txLabel,
+  TX_LABELS,
   warnEmbed,
 };

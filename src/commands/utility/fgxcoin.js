@@ -9,6 +9,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const economy = require('../../services/community/economyService');
 const views = require('../../services/community/economyViews');
 const { economyRepo } = require('../../database/repos/economy');
+const { paginate } = require('../../utils/pagination');
 
 /**
  * /fgxcoin — FGx economy (OwO-style).
@@ -41,11 +42,22 @@ module.exports = {
         .setName('gamble')
         .setDescription('50/50 coinflip — double it or lose it')
         .addIntegerOption((o) => o.setName('amount').setDescription('Amount to gamble').setMinValue(1).setRequired(true)),
+    )
+    .addSubcommand((s) =>
+      s
+        .setName('history')
+        .setDescription('Show your (or a member\'s) transaction history')
+        .addUserOption((o) => o.setName('user').setDescription('Member (default: you)').setRequired(false))
+        .addIntegerOption((o) => o.setName('limit').setDescription('How many transactions (max 1000, default 10)').setMinValue(1).setMaxValue(1000).setRequired(false)),
     ),
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
     const userId = interaction.user.id;
     const guildId = interaction.guild.id;
+
+    if (sub === 'history') {
+      return module.exports.handleHistory(interaction);
+    }
 
     if (sub === 'wallet') {
       const target = interaction.options.getUser('user') ?? interaction.user;
@@ -101,4 +113,20 @@ module.exports = {
       throw err;
     }
   },
+};
+
+// history subcommand handler lives on module.exports for reuse.
+module.exports.handleHistory = async function handleHistory(interaction) {
+  const target = interaction.options.getUser('user') ?? interaction.user;
+  const limit = Math.min(1000, Math.max(1, interaction.options.getInteger('limit') ?? 10));
+  const rows = economyRepo.recentTx(interaction.guild.id, target.id, limit);
+
+  const perPage = 10;
+  const pages = [];
+  for (let i = 0; i < rows.length; i += perPage) {
+    pages.push(views.historyEmbed(target.username, rows.slice(i, i + perPage)));
+  }
+  if (pages.length === 0) pages.push(views.historyEmbed(target.username, []));
+
+  await paginate(interaction, pages, { customIdPrefix: 'hx' });
 };

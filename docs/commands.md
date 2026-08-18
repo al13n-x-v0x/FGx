@@ -59,6 +59,9 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `/fgxcoin weekly` | Claim the weekly ₣Ԡ🇽 reward | Anyone |
 | `/fgxcoin transfer <user> <amount>` | Send ₣Ԡ🇽 to a member (5% tax) | Anyone |
 | `/fgxcoin gamble <amount>` | 50/50 coinflip — double or lose it | Anyone |
+| `/fgxcoin history [user] [limit]` | Transaction history — last 1000 entries, paginated | Anyone |
+| `fgx history [@user] [count]` (chat) | Last transactions straight from chat | Anyone |
+| Match/clan-war wins | Every lineup player earns 250 ₣Ԡ🇽 on a win (50 on a draw) | Auto |
 | `/level [user]` / `/rank [user]` | Community XP and level |
 | `/leaderboard <category>` | Rating / kills / K-D / streak / wins / matches (paginated) |
 | `/achievements [user]` | Achievement catalog with unlock state |

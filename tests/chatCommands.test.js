@@ -92,6 +92,14 @@ test('parseCommand handles profile mentions, ping and status', () => {
   assert.deepEqual(parseCommand('status'), { type: 'status' });
 });
 
+test('parseCommand parses history with mentions and counts', () => {
+  assert.deepEqual(parseCommand('history'), { type: 'history', targetId: null, count: 10 });
+  assert.deepEqual(parseCommand('history 25'), { type: 'history', targetId: null, count: 25 });
+  assert.deepEqual(parseCommand('history 500'), { type: 'history', targetId: null, count: 25 }); // clamped
+  assert.deepEqual(parseCommand('logs @u 15', ['u8']), { type: 'history', targetId: 'u8', count: 15 });
+  assert.deepEqual(parseCommand('tx'), { type: 'history', targetId: null, count: 10 });
+});
+
 test('parseAmount accepts whole numbers only', () => {
   assert.equal(parseAmount('42'), 42);
   assert.equal(parseAmount('4,200'), 4200);

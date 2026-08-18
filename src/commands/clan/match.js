@@ -11,6 +11,7 @@ const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { matchesRepo } = require('../../database/repos/competitive');
 const rosterService = require('../../services/clan/rosterService');
 const matchService = require('../../services/clan/matchService');
+const economy = require('../../services/community/economyService');
 const { ValidationError } = require('../../utils/errors');
 const { formatDate } = require('../../utils/format');
 
@@ -84,7 +85,7 @@ module.exports = {
     const lineup = parseLineup(interaction.options.getString('lineup'));
     const notes = interaction.options.getString('notes');
 
-    const { match, updates } = await matchService.recordMatch(interaction.client, interaction.guild, {
+    const { match, updates, coins } = await matchService.recordMatch(interaction.client, interaction.guild, {
       opponent,
       ourScore,
       oppScore,
@@ -94,6 +95,10 @@ module.exports = {
     });
 
     const unlocked = updates.flatMap((u) => u.unlocked.map((a) => `<@${u.userId}> — ${a.icon} ${a.name}`));
+    const coinLine =
+      coins.rewarded > 0
+        ? `\n**Coin reward:** 💰 ${economy.format(coins.totalPaid)} paid out (${economy.format(coins.amount)} × ${coins.rewarded} players)`
+        : '';
 
     const embed = new EmbedBuilder()
       .setColor(BRAND.colors.success)
@@ -102,6 +107,7 @@ module.exports = {
         `**Score:** ${ourScore}–${oppScore} (**${match.winner === 'fgx' ? 'WIN' : match.winner === 'opponent' ? 'LOSS' : 'DRAW'}**)\n` +
           `**Players recorded:** ${updates.length}\n` +
           `**Match ID:** ${match.id}` +
+          `${coinLine}` +
           (unlocked.length > 0 ? `\n\n**Achievements unlocked:**\n${unlocked.join('\n')}` : ''),
       )
       .setFooter({ text: `${BRAND.footer} • Staff-recorded official stats` });

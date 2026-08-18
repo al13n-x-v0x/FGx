@@ -24,6 +24,8 @@ const DAILY_STREAK_BONUS = 50;
 const DAILY_MAX = 1000;
 const WEEKLY_AMOUNT = 500;
 const TRANSFER_TAX = 0.05;
+const MATCH_WIN_REWARD = 250;
+const MATCH_DRAW_REWARD = 50;
 const WEEK_MS = 7 * 24 * 3_600_000;
 
 /** Injectable RNG for tests (defaults to Math.random). */
@@ -187,6 +189,28 @@ async function gamble(guildId, userId, amount) {
 }
 
 /**
+ * Reward the FGx players from a recorded match (or clan war).
+ * Winner 'fgx' pays each lineup player MATCH_WIN_REWARD; a draw pays a
+ * small MATCH_DRAW_REWARD; losses pay nothing. Returns the payout summary.
+ */
+function rewardMatch(guildId, userIds, winner) {
+  const amount = winner === 'fgx' ? MATCH_WIN_REWARD : winner === 'draw' ? MATCH_DRAW_REWARD : 0;
+  if (amount <= 0) return { rewarded: 0, amount: 0, totalPaid: 0 };
+
+  let rewarded = 0;
+  const seen = new Set();
+  for (const id of userIds) {
+    const userId = String(id ?? '');
+    if (!userId || seen.has(userId)) continue;
+    seen.add(userId);
+    economyRepo.updateBalance(guildId, userId, amount);
+    economyRepo.logTx(guildId, userId, winner === 'fgx' ? 'match_win' : 'match_draw', amount, 'Competitive match reward');
+    rewarded += 1;
+  }
+  return { rewarded, amount, totalPaid: rewarded * amount };
+}
+
+/**
  * Hunt — find an animal, get paid. 60s cooldown per user.
  * Guaranteed small-ish payout; rare finds pay big.
  */
@@ -247,6 +271,9 @@ module.exports = {
   gamble,
   hunt,
   battle,
+  rewardMatch,
+  MATCH_WIN_REWARD,
+  MATCH_DRAW_REWARD,
   huntCooldownLeft,
   battleCooldownLeft,
   _setRng,

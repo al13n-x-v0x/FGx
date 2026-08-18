@@ -134,6 +134,12 @@ function parseCommand(line, mentionIds = []) {
   if (cmd === 'hunt') return { type: 'hunt' };
   if (cmd === 'battle' || cmd === 'fight') return { type: 'battle' };
 
+  if (cmd === 'history' || cmd === 'logs' || cmd === 'tx') {
+    const countText = rest.filter((t) => !/^<@!?\d+>$/.test(t) && !/^@.+/.test(t))[0] ?? '';
+    const count = Math.min(25, Math.max(1, parseAmount(countText) ?? 10));
+    return { type: 'history', targetId: mentionIds[0] ?? null, count };
+  }
+
   if (cmd === 'profile') {
     return { type: 'profile', targetId: mentionIds[0] ?? null };
   }
@@ -166,6 +172,7 @@ function helpEmbed() {
       '• `fgx coinflip <amount|all> [heads|tails]` / `!coinflip 50 heads` — 50/50 gamble\n' +
       '• `fgx hunt` / `!hunt` — find animals for coins (60s cooldown)\n' +
       '• `fgx battle` / `!battle` — fight enemies, win big or lose 10% (120s)\n' +
+      '• `fgx history [@user] [count]` / `!history` — last transactions\n' +
       '• `fgx top` — richest members\n\n' +
       '**Server**\n' +
       '• `fgx profile [@user]` — player profile\n' +
@@ -290,6 +297,13 @@ async function handle(client, message) {
         const result = await economy.coinflip(guildId, userId, amount, parsed.pick ?? null);
         await new Promise((resolve) => setTimeout(resolve, 1400));
         await spinner.edit({ content: null, embeds: [views.coinflipEmbed(result)] }).catch(() => {});
+        return true;
+      }
+
+      case 'history': {
+        const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) ?? message.author : message.author;
+        const rows = economyRepo.recentTx(guildId, target.id, parsed.count);
+        await message.reply({ embeds: [views.historyEmbed(target.username, rows)] });
         return true;
       }
 

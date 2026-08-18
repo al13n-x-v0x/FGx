@@ -96,6 +96,26 @@ test('gamble rejects amounts above the balance', async () => {
   await assert.rejects(() => economy.gamble('g1', 'u1', 999999), (err) => err.code === 'INVALID_AMOUNT');
 });
 
+test('match rewards pay the winning lineup and skip losses/draws correctly', async () => {
+  const win = economy.rewardMatch('g1', ['u1', 'u2', 'u1', 'u3'], 'fgx');
+  assert.equal(win.rewarded, 3); // u1 deduped
+  assert.equal(win.amount, 250);
+  assert.equal(win.totalPaid, 750);
+  assert.equal(economyRepo.get('g1', 'u1').balance, economyRepo.get('g1', 'u1').balance);
+
+  const draw = economy.rewardMatch('g1', ['u1'], 'draw');
+  assert.equal(draw.rewarded, 1);
+  assert.equal(draw.amount, 50);
+
+  const loss = economy.rewardMatch('g1', ['u1'], 'opponent');
+  assert.equal(loss.rewarded, 0);
+  assert.equal(loss.totalPaid, 0);
+
+  const kinds = economyRepo.recentTx('g1', 'u1', 20).map((r) => r.kind);
+  assert.ok(kinds.includes('match_win'));
+  assert.ok(kinds.includes('match_draw'));
+});
+
 test('economy leaderboard orders by balance', async () => {
   const rows = economy.leaderboard('g1', 10);
   assert.ok(rows.length >= 2);

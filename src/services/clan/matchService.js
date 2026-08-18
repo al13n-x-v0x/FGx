@@ -10,6 +10,7 @@ const { profilesRepo } = require('../../database/repos/profiles');
 const { logAudit } = require('../logging/auditLogger');
 const ratingService = require('./ratingService');
 const achievementsService = require('./achievementsService');
+const economy = require('../community/economyService');
 
 /**
  * Official match recording. Only staff can record results.
@@ -91,7 +92,11 @@ async function recordMatch(client, guild, {
     details: { opponent, score: `${ourScore}:${oppScore}`, winner, players: seen.size },
   });
 
-  return { match, updates };
+  // Competitive payouts: every lineup player earns ₣Ԡ🇽 on a win (and a
+  // small amount on a draw). Applies to matches AND clan wars.
+  const coins = economy.rewardMatch(guild.id, [...seen], winner);
+
+  return { match, updates, coins };
 }
 
 module.exports = { recordMatch };
