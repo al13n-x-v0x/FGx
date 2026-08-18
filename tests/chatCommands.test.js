@@ -69,7 +69,7 @@ test('parseCommand parses transfers with mentions and amounts', () => {
 test('parseCommand clamps the top-count and rejects unknown commands', () => {
   assert.deepEqual(parseCommand('top'), { type: 'top', count: 10 });
   assert.deepEqual(parseCommand('top 100'), { type: 'top', count: 15 });
-  assert.equal(parseCommand('hunt').type, 'unknown');
+  assert.equal(parseCommand('fishing').type, 'unknown');
 });
 
 test('parseCommand maps server commands to hub sections', () => {

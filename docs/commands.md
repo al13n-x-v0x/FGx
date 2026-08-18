@@ -51,6 +51,7 @@ relevant Discord permission or a clan staff rank (Captain+, configured via
 | `fgx daily` / `fgx weekly` (chat) | OwO-style chat commands — mention works too (`@FGx daily`) | Anyone |
 | `!bal` / `!daily` (chat) | OwO-style bang commands — check balance, claim the 500 ₣Ԡ🇽 daily | Anyone |
 | `!coinflip <amount|all> [heads|tails]` (chat) | OwO coinflip with a spinning-coin animation — pick a side to double your bet | Anyone |
+| `!hunt` / `!battle` (chat) | OwO-style minigames — hunt animals for coins (60s cooldown), battle enemies to win big or lose 10% (120s cooldown) | Anyone |
 | `fgx coinflip <amount/all> [heads|tails]` / `fgx transfer @user <amount>` (chat) | Coinflip and transfers straight from chat | Anyone |
 | `fgx wallet [user]` / `fgx top` (chat) | Balances and richest members from chat | Anyone |
 | `/fgxcoin wallet [user]` | Your (or a member's) ₣Ԡ🇽 balance, lifetime earned, daily streak | Anyone |

@@ -7,6 +7,8 @@
 
 const { economyRepo } = require('../../database/repos/economy');
 const { RateLimiter } = require('../../utils/ratelimit');
+const { Cooldown } = require('../../utils/cooldown');
+const minigames = require('../../data/minigames');
 
 /**
  * FGx economy — an OwO-style server currency.
@@ -37,6 +39,17 @@ function format(amount) {
 
 /** Per-user gamble limiter (anti-farm). */
 const gambleLimiter = new RateLimiter({ max: 5, windowMs: 60_000 });
+
+/** Per-user minigame cooldowns (hunt 60s, battle 120s). */
+const minigameCooldown = new Cooldown();
+
+function huntCooldownLeft(guildId, userId) {
+  return minigameCooldown.remaining(`hunt:${guildId}:${userId}`);
+}
+
+function battleCooldownLeft(guildId, userId) {
+  return minigameCooldown.remaining(`battle:${guildId}:${userId}`);
+}
 
 function balance(guildId, userId) {
   return economyRepo.ensure(guildId, userId);
@@ -173,6 +186,52 @@ async function gamble(guildId, userId, amount) {
   return coinflip(guildId, userId, amount, null);
 }
 
+/**
+ * Hunt — find an animal, get paid. 60s cooldown per user.
+ * Guaranteed small-ish payout; rare finds pay big.
+ */
+async function hunt(guildId, userId) {
+  const key = `hunt:${guildId}:${userId}`;
+  const left = minigameCooldown.remaining(key);
+  if (left > 0) {
+    const err = new Error(`You're tired from hunting. Try again in **${Math.ceil(left / 1000)}s**.`);
+    err.code = 'HUNT_COOLDOWN';
+    throw err;
+  }
+  minigameCooldown.set(key, minigames.HUNT_COOLDOWN_MS);
+
+  const animal = minigames.weightedPick(minigames.ANIMALS, rng);
+  const amount = minigames.range(animal.min, animal.max, rng);
+  economyRepo.updateBalance(guildId, userId, amount);
+  economyRepo.logTx(guildId, userId, 'hunt', amount, `Hunted a ${animal.name}`);
+  const updated = economyRepo.get(guildId, userId);
+  return { animal, amount, balance: updated.balance, row: updated };
+}
+
+/**
+ * Battle — fight a random enemy. Win: coins by enemy tier. Lose: 10% of
+ * balance (capped at 200). 120s cooldown per user.
+ */
+async function battle(guildId, userId) {
+  const key = `battle:${guildId}:${userId}`;
+  const left = minigameCooldown.remaining(key);
+  if (left > 0) {
+    const err = new Error(`You're still recovering. Try again in **${Math.ceil(left / 1000)}s**.`);
+    err.code = 'BATTLE_COOLDOWN';
+    throw err;
+  }
+  minigameCooldown.set(key, minigames.BATTLE_COOLDOWN_MS);
+
+  const enemy = minigames.weightedPick(minigames.ENEMIES, rng);
+  const won = rng() < enemy.winChance;
+  const row = economyRepo.ensure(guildId, userId);
+  const amount = won ? minigames.range(enemy.min, enemy.max, rng) : -Math.min(minigames.BATTLE_LOSS_CAP, Math.floor((row.balance ?? 0) * minigames.BATTLE_LOSS_FRACTION));
+  economyRepo.updateBalance(guildId, userId, amount);
+  economyRepo.logTx(guildId, userId, won ? 'battle_win' : 'battle_loss', amount, `Battle vs ${enemy.name}`);
+  const updated = economyRepo.get(guildId, userId);
+  return { enemy, won, amount, balance: updated.balance, row: updated };
+}
+
 module.exports = {
   CURRENCY,
   DAILY_BASE,
@@ -186,5 +245,9 @@ module.exports = {
   transfer,
   coinflip,
   gamble,
+  hunt,
+  battle,
+  huntCooldownLeft,
+  battleCooldownLeft,
   _setRng,
 };

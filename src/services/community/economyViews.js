@@ -79,6 +79,30 @@ function coinflipEmbed(result) {
   };
 }
 
+function huntEmbed(result) {
+  return {
+    color: BRAND.colors.success,
+    title: `🏹 Hunt successful!`,
+    description:
+      `You found a **${result.animal.emoji} ${result.animal.name}**!\n\n` +
+      `**+${economy.format(result.amount)}** — new balance **${economy.format(result.balance)}**.`,
+    footer: { text: `${BRAND.footer} • Hunt again in 60s` },
+  };
+}
+
+function battleEmbed(result) {
+  return {
+    color: result.won ? BRAND.colors.success : BRAND.colors.danger,
+    title: result.won
+      ? `⚔️ You defeated the ${result.enemy.emoji} ${result.enemy.name}!`
+      : `💀 The ${result.enemy.emoji} ${result.enemy.name} defeated you…`,
+    description: result.won
+      ? `**+${economy.format(result.amount)}** — new balance **${economy.format(result.balance)}**.`
+      : `You lost **${economy.format(-result.amount)}** — new balance **${economy.format(result.balance)}**.`,
+    footer: { text: `${BRAND.footer} • Battle again in 120s` },
+  };
+}
+
 function warnEmbed(title, description) {
   return { color: BRAND.colors.warn, title, description, footer: { text: BRAND.footer } };
 }
@@ -89,5 +113,7 @@ module.exports = {
   transferEmbed,
   gambleEmbed,
   coinflipEmbed,
+  huntEmbed,
+  battleEmbed,
   warnEmbed,
 };

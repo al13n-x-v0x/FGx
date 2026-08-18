@@ -131,6 +131,9 @@ function parseCommand(line, mentionIds = []) {
     return { type: 'top', count: Math.min(Math.max(n, 1), 15) };
   }
 
+  if (cmd === 'hunt') return { type: 'hunt' };
+  if (cmd === 'battle' || cmd === 'fight') return { type: 'battle' };
+
   if (cmd === 'profile') {
     return { type: 'profile', targetId: mentionIds[0] ?? null };
   }
@@ -161,6 +164,8 @@ function helpEmbed() {
       '• `fgx wallet [@user]` / `!bal` — check a balance\n' +
       '• `fgx transfer @user <amount>` — send ₣Ԡ🇽 (5% tax)\n' +
       '• `fgx coinflip <amount|all> [heads|tails]` / `!coinflip 50 heads` — 50/50 gamble\n' +
+      '• `fgx hunt` / `!hunt` — find animals for coins (60s cooldown)\n' +
+      '• `fgx battle` / `!battle` — fight enemies, win big or lose 10% (120s)\n' +
       '• `fgx top` — richest members\n\n' +
       '**Server**\n' +
       '• `fgx profile [@user]` — player profile\n' +
@@ -288,6 +293,21 @@ async function handle(client, message) {
         return true;
       }
 
+      case 'hunt': {
+        const result = await economy.hunt(guildId, userId);
+        await message.reply({ embeds: [views.huntEmbed(result)] });
+        return true;
+      }
+
+      case 'battle': {
+        // Quick animation: strike first, then the result lands.
+        const spinner = await message.reply({ content: '⚔️ You ready your weapon and charge…' });
+        const result = await economy.battle(guildId, userId);
+        await new Promise((resolve) => setTimeout(resolve, 1400));
+        await spinner.edit({ content: null, embeds: [views.battleEmbed(result)] }).catch(() => {});
+        return true;
+      }
+
       case 'top': {
         const rows = economy.leaderboard(guildId, parsed.count);
         const embed = {
@@ -313,7 +333,7 @@ async function handle(client, message) {
         return true;
     }
   } catch (err) {
-    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED'];
+    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN'];
     if (codes.includes(err.code)) {
       await message.reply({ embeds: [views.warnEmbed('FGx coins', err.message)] }).catch(() => {});
       return true;
