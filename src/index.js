@@ -71,35 +71,51 @@ async function main() {
   dashboard.start(client);
   logger.info('Web dashboard server started');
 
-  // ✅ Connect to Discord FIRST — don't let registerCommands block this.
-  try {
-    await client.login(env.DISCORD_TOKEN);
-    logger.info('Discord client logged in successfully');
+  // Connect to Discord with auto-retry (never blocks the health endpoint).
+  async function connectDiscord(attempt = 1) {
+    try {
+      logger.info(`Discord: connecting (attempt ${attempt})...`);
+      await client.login(env.DISCORD_TOKEN);
+      logger.info('Discord: logged in successfully');
 
-    // ✅ Register slash commands AFTER login, non-blocking.
-    registerCommands(client)
-      .then(() => logger.info('Slash commands registered'))
-      .catch((err) => logger.error('Failed to register slash commands', { error: err.message }));
+      // Register slash commands AFTER login, non-blocking.
+      registerCommands(client)
+        .then(() => logger.info('Slash commands registered'))
+        .catch((err) => logger.error('Failed to register slash commands', { error: err.message }));
 
-    // Clean up expired private servers.
-    privateServerService.sweep(client).catch((err) =>
-      logger.warn('private server sweep failed', { error: err.message }),
-    );
-  } catch (err) {
-    if (/disallowed intents/i.test(err.message)) {
-      logger.error('gateway refused: privileged intents not enabled', {
-        hint: 'Enable Server Members + Message Content intents in the Discord Developer Portal, or set DISCORD_INTENTS=basic',
-      });
-    } else {
-      logger.error('Discord login error', { error: err.message, stack: err.stack });
+      // Clean up expired private servers.
+      privateServerService.sweep(client).catch((err) =>
+        logger.warn('private server sweep failed', { error: err.message }),
+      );
+    } catch (err) {
+      if (/disallowed intents/i.test(err.message)) {
+        logger.error('gateway refused: privileged intents not enabled', {
+          hint: 'Enable Server Members + Message Content intents in the Discord Developer Portal, or set DISCORD_INTENTS=basic',
+        });
+      } else {
+        logger.error('Discord login error', { error: err.message });
+      }
+      logger.info('Discord: retrying in 30s...');
+      setTimeout(() => connectDiscord(attempt + 1), 30_000);
     }
   }
+  await connectDiscord();
+
+  // Auto-reconnect on gateway disconnect.
+  client.on('disconnect', () => {
+    logger.warn('Discord disconnected — reconnecting in 30s');
+    setTimeout(() => connectDiscord(), 30_000);
+  });
+
+  client.on('ready', () => {
+    logger.info(`Discord bot ready — serving ${client.guilds.cache.size} guild(s)`);
+  });
 
   // Auto-sweep expired Roblox verification codes every 2 minutes.
   const robloxService = require('./services/community/robloxService');
   setInterval(() => robloxService.sweepExpiredCodes(), 2 * 60 * 1000);
 
-  // Self-pinger: keep Render free-tier awake.
+  // Self-pinger: keep Render free-tier awake (pings /health every 1 min).
   const PING_INTERVAL_MS = 1 * 60 * 1000;
   setInterval(() => {
     const port = Number(process.env.PORT || env.WEBHOOK_PORT);
