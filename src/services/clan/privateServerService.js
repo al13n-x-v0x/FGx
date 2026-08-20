@@ -24,12 +24,24 @@ const { logger } = require('../../utils/logger');
 const ICON_PATH = path.join(__dirname, '..', '..', 'assets', 'fgx-icon.png');
 
 const MODES = {
+  // Symmetric modes
   '1v1': { label: '1v1', teams: 2 },
   '2v2': { label: '2v2', teams: 2 },
   '3v3': { label: '3v3', teams: 2 },
   '4v4': { label: '4v4', teams: 2 },
   '5v5': { label: '5v5', teams: 2 },
   '6v6': { label: '6v6', teams: 2 },
+  // Asymmetric modes
+  '2v1': { label: '2v1', teams: 2 },
+  '3v1': { label: '3v1', teams: 2 },
+  '3v2': { label: '3v2', teams: 2 },
+  '4v2': { label: '4v2', teams: 2 },
+  '4v3': { label: '4v3', teams: 2 },
+  '5v3': { label: '5v3', teams: 2 },
+  '5v4': { label: '5v4', teams: 2 },
+  '6v4': { label: '6v4', teams: 2 },
+  '6v5': { label: '6v5', teams: 2 },
+  // Special
   practice: { label: 'Practice', teams: 1 },
 };
 

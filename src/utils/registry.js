@@ -30,11 +30,14 @@ function loadCommands() {
   for (const file of walk('src/commands')) {
     try {
       const mod = require(file);
-      if (!mod.data || typeof mod.execute !== 'function') {
-        logger.warn('registry: skipped command without data/execute', { file });
-        continue;
+      // Support array exports (multiple commands from one file).
+      const mods = Array.isArray(mod) ? mod : [mod];
+      for (const cmd of mods) {
+        if (!cmd.data || typeof cmd.execute !== 'function') {
+          continue;
+        }
+        commands.set(cmd.data.name, cmd);
       }
-      commands.set(mod.data.name, mod);
     } catch (err) {
       logger.error('registry: failed to load command', { file, error: err.message });
     }

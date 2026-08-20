@@ -2,7 +2,12 @@
 
 /* Copyright © 2026 FGx. All rights reserved. */
 
-const { createCanvas, GlobalFonts } = require('@napi-rs/canvas');
+let createCanvas, loadImage;
+try {
+  ({ createCanvas, loadImage } = require('canvas'));
+} catch {
+  // canvas not available — generateWelcomeImage will throw at call time.
+}
 const { AttachmentBuilder } = require('discord.js');
 const path = require('node:path');
 const { logger } = require('./logger');
@@ -138,12 +143,10 @@ async function generateWelcomeImage(member, { message } = {}) {
     ? null
     : null; // will use Image directly
 
+  if (!createCanvas || !loadImage) {
+    throw new Error('canvas library not available');
+  }
   // Load the avatar buffer into a canvas image
-  const avatarCanvas = createCanvas(1, 1);
-  const avatarCtx = avatarCanvas.getContext('2d');
-
-  // Use loadImage from @napi-rs/canvas
-  const { loadImage } = require('@napi-rs/canvas');
   const avatarImage = await loadImage(avatarBuf);
 
   // Glow ring
