@@ -6,7 +6,7 @@
  */
 
 const { BRAND } = require('../../config/constants');
-const { verificationService } = require('./verificationService');
+const verificationService = require('./verificationService');
 const economy = require('./economyService');
 
 /** Shared VIP status panel — slash, chat and hub all render this. */

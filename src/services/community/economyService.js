@@ -10,7 +10,7 @@ const { RateLimiter } = require('../../utils/ratelimit');
 const { Cooldown } = require('../../utils/cooldown');
 const minigames = require('../../data/minigames');
 const zoo = require('./zooService');
-const { verificationService } = require('./verificationService');
+const verificationService = require('./verificationService');
 
 /**
  * FGx economy — an OwO-style server currency.

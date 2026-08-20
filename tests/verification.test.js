@@ -12,7 +12,7 @@ const assert = require('node:assert/strict');
 const db = require('../src/database');
 db.init();
 
-const { verificationService } = require('../src/services/community/verificationService');
+const verificationService = require('../src/services/community/verificationService');
 const economy = require('../src/services/community/economyService');
 const { linksRepo } = require('../src/database/repos/profiles');
 const { robloxLinksRepo } = require('../src/database/repos/roblox');

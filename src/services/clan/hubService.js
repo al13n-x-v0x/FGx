@@ -23,7 +23,7 @@ const privateServerService = require('./privateServerService');
 const economy = require('../community/economyService');
 const { aiSummary } = require('../../config/env');
 const rosterService = require('./rosterService');
-const { verificationService } = require('../community/verificationService');
+const verificationService = require('../community/verificationService');
 const { winRate } = require('../../utils/format');
 
 /**
