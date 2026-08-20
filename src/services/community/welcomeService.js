@@ -100,7 +100,6 @@ function buildWelcomeView({ member, message, memberCount, guildName, includeVeri
       },
     )
     .setThumbnail(member.user?.displayAvatarURL({ size: 256 }) ?? undefined)
-    .setImage('attachment://welcome-card.png')
     .setFooter({ text: `${BRAND.footer} • We're glad you're here 💜` })
     .setTimestamp(new Date());
 
@@ -147,6 +146,21 @@ async function onJoin(client, member) {
     }
     if (!channel?.isTextBased?.()) return;
 
+    // Generate the canvas welcome card image.
+    let files = [];
+    let cardAvailable = false;
+    try {
+      const card = await generateWelcomeImage(member, {
+        message: renderMessage(welcome.message, member),
+      });
+      if (card) {
+        files.push(card);
+        cardAvailable = true;
+      }
+    } catch (err) {
+      logger.warn('welcome image generation failed', { error: err.message });
+    }
+
     const { embed, rows } = buildWelcomeView({
       member,
       message: renderMessage(welcome.message, member),
@@ -155,15 +169,9 @@ async function onJoin(client, member) {
       includeVerify: true,
     });
 
-    // Generate the canvas welcome card image.
-    let files = [];
-    try {
-      const card = await generateWelcomeImage(member, {
-        message: renderMessage(welcome.message, member),
-      });
-      files.push(card);
-    } catch (err) {
-      logger.warn('welcome image generation failed', { error: err.message });
+    // Only set the embed image if we actually have the card file.
+    if (cardAvailable) {
+      embed.setImage('attachment://welcome-card.png');
     }
 
     // Also attach the welcome animation video.
