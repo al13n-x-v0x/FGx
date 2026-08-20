@@ -135,7 +135,16 @@ async function onJoin(client, member) {
     }
 
     if (!welcome.channel) return;
-    const channel = member.guild.channels.cache.get(welcome.channel);
+    let channel = member.guild.channels.cache.get(welcome.channel);
+    // On cold start the channel may not be cached — fetch it.
+    if (!channel) {
+      try {
+        channel = await member.guild.channels.fetch(welcome.channel);
+      } catch {
+        logger.warn('welcome channel fetch failed', { channelId: welcome.channel });
+        return;
+      }
+    }
     if (!channel?.isTextBased?.()) return;
 
     const { embed, rows } = buildWelcomeView({

@@ -55,6 +55,11 @@ async function registerCommands(client) {
     if (env.GUILD_ID) {
       await rest.put(Routes.applicationGuildCommands(env.CLIENT_ID, env.GUILD_ID), { body: bodies });
       logger.info(`registry: registered ${bodies.length} commands for guild ${env.GUILD_ID}`);
+      // Clear stale global commands to prevent duplicate command entries.
+      try {
+        await rest.put(Routes.applicationCommands(env.CLIENT_ID), { body: [] });
+        logger.info('registry: cleared stale global commands');
+      } catch { /* best-effort */ }
     } else {
       await rest.put(Routes.applicationCommands(env.CLIENT_ID), { body: bodies });
       logger.info(`registry: registered ${bodies.length} global commands`);

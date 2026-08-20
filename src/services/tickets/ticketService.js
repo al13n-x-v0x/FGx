@@ -46,14 +46,23 @@ async function createPanel(guild) {
     throw new Error('Tickets are not configured. Run `/setup` (admin) or set a category with `/config tickets` first.');
   }
 
-  const channel = tickets.panelChannelId
+  let channel = tickets.panelChannelId
     ? (guild.channels.cache.get(tickets.panelChannelId) ?? null)
     : null;
-  if (!channel) {
+  // On cold start the channel may not be cached — fetch it.
+  if (!channel && tickets.panelChannelId) {
+    try {
+      channel = await guild.channels.fetch(tickets.panelChannelId);
+    } catch {
+      channel = null;
+    }
+  }
+  if (!channel?.isTextBased?.()) {
     const firstText = guild.channels.cache.find((c) => c.isTextBased?.() && c.type === ChannelType.GuildText);
     if (!firstText) throw new Error('No text channel available for the ticket panel.');
+    channel = firstText;
   }
-  const target = channel ?? guild.channels.cache.find((c) => c.isTextBased?.() && c.type === ChannelType.GuildText);
+  const target = channel;
 
   const embed = new EmbedBuilder()
     .setColor(BRAND.colors.primary)

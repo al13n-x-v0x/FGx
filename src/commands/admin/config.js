@@ -111,6 +111,7 @@ const KEY_DEFS = {
   tickets: [
     ['tickets.enabled', 'boolean'],
     ['tickets.categoryId', 'snowflake'],
+    ['tickets.panelChannelId', 'snowflake'],
     ['tickets.staffRoleIds', 'list'],
   ],
   clan: [
@@ -254,9 +255,10 @@ function applyLines(guildId, category, text) {
     if (eq === -1) throw new ValidationError(`Line \`${line}\` is missing "=".`);
     const key = line.slice(0, eq).trim();
     const value = line.slice(eq + 1).trim();
+    if (!key) continue; // skip empty keys (blank lines like "=value")
     const def = KEY_DEFS[category].find(([k]) => k === key);
     if (!def) {
-      throw new ValidationError(`Unknown key \`${key}\` in ${category}.`);
+      throw new ValidationError(`Unknown key \`${key}\` in ${category}. Valid keys: ${KEY_DEFS[category].map(([k]) => k).join(', ')}`);
     }
     if (seen.has(key)) continue;
     seen.add(key);
