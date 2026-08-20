@@ -41,15 +41,32 @@ function transcriptDir() {
 /** Create the ticket panel (select menu of ticket types). */
 async function createPanel(guild) {
   const config = guildConfigRepo.get(guild.id);
-  const tickets = config.tickets;
-  if (!tickets.enabled || !tickets.categoryId) {
-    throw new Error('Tickets are not configured. Run `/setup` (admin) or set a category with `/config tickets` first.');
+  let tickets = config.tickets;
+
+  // Auto-create the category if missing.
+  if (!tickets.categoryId) {
+    let category = guild.channels.cache.find(
+      (c) => c.name === 'FGx Tickets' && c.type === ChannelType.GuildCategory,
+    );
+    if (!category) {
+      try {
+        category = await guild.channels.create({
+          name: 'FGx Tickets',
+          type: ChannelType.GuildCategory,
+          reason: 'FGx /ticket setup',
+        });
+      } catch (err) {
+        throw new Error(`Could not create ticket category: ${err.message}`);
+      }
+    }
+    guildConfigRepo.update(guild.id, { tickets: { categoryId: category.id } });
+    tickets = guildConfigRepo.get(guild.id).tickets;
   }
 
+  // Auto-create the panel channel if missing.
   let channel = tickets.panelChannelId
     ? (guild.channels.cache.get(tickets.panelChannelId) ?? null)
     : null;
-  // On cold start the channel may not be cached — fetch it.
   if (!channel && tickets.panelChannelId) {
     try {
       channel = await guild.channels.fetch(tickets.panelChannelId);
@@ -58,9 +75,25 @@ async function createPanel(guild) {
     }
   }
   if (!channel?.isTextBased?.()) {
-    const firstText = guild.channels.cache.find((c) => c.isTextBased?.() && c.type === ChannelType.GuildText);
-    if (!firstText) throw new Error('No text channel available for the ticket panel.');
-    channel = firstText;
+    // Try to find an existing #tickets channel.
+    channel = guild.channels.cache.find(
+      (c) => c.name === 'tickets' && c.isTextBased?.() && c.type === ChannelType.GuildText,
+    );
+    // Create one if it doesn't exist.
+    if (!channel) {
+      try {
+        const catId = tickets.categoryId;
+        const cat = catId ? (guild.channels.cache.get(catId) ?? null) : null;
+        channel = await guild.channels.create({
+          name: 'tickets',
+          type: ChannelType.GuildText,
+          parent: cat?.id,
+          reason: 'FGx /ticket setup',
+        });
+      } catch (err) {
+        throw new Error(`Could not create ticket channel: ${err.message}`);
+      }
+    }
   }
   const target = channel;
 
@@ -114,9 +147,17 @@ async function handleCreate(interaction) {
   if (!type || !Object.values(TICKET_TYPES).includes(type)) {
     return interaction.reply({ content: 'Invalid ticket type.', ephemeral: true });
   }
-  const category = interaction.guild.channels.cache.get(tickets.categoryId);
+  // Fetch the category — may not be cached on cold start.
+  let category = interaction.guild.channels.cache.get(tickets.categoryId);
+  if (!category && tickets.categoryId) {
+    try {
+      category = await interaction.guild.channels.fetch(tickets.categoryId);
+    } catch {
+      category = null;
+    }
+  }
   if (!category || category.type !== ChannelType.GuildCategory) {
-    return interaction.reply({ content: 'The ticket category is misconfigured. Contact staff.', ephemeral: true });
+    return interaction.reply({ content: 'The ticket category is misconfigured. Contact staff to run `/ticket setup`.', ephemeral: true });
   }
 
   // Prevent duplicate open tickets for the same user + type.
