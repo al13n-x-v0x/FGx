@@ -10,6 +10,7 @@ const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { matchesRepo, scrimsRepo, eventsRepo, clanWarsRepo } = require('../../database/repos/competitive');
 const { systemPromptSection } = require('../../data/bloxstrike');
 const { RateLimiter } = require('../../utils/ratelimit');
+const { lookupPlayer, detectPlayerQuery } = require('./playerLookup');
 
 /**
  * FGx community assistant (/ask, /ai, /bloxai).
@@ -28,8 +29,20 @@ const GUARDRAILS =
 const limiter = new RateLimiter({ max: 5, windowMs: 60_000 });
 
 /** Build verified context from FGx's own database (never fabricated). */
-function buildContext(client, guild) {
+function buildContext(client, guild, question) {
   const lines = [`Server: ${guild.name}`, `Members: ${guild.memberCount}`];
+
+  // If the question is about a specific player, look them up.
+  const playerQuery = detectPlayerQuery(guild, question);
+  if (playerQuery) {
+    try {
+      const playerData = lookupPlayer(guild, playerQuery.member.id);
+      lines.push(`\n--- Player lookup: ${playerQuery.member.user.username} ---`);
+      lines.push(playerData);
+    } catch {
+      lines.push(`\nPlayer lookup failed for: ${playerQuery.query}`);
+    }
+  }
 
   try {
     const record = matchesRepo.record(guild.id);
@@ -79,10 +92,11 @@ async function ask(client, guild, userId, question, { extraSystem } = {}) {
   const system = [
     config.ai.systemPrompt || 'You are FGx, a helpful community assistant.',
     'Answer in clean, readable Discord markdown. Be concise: aim for under 250 words.',
+    'When asked about a player (who is X, show stats for X, etc.), use the Player lookup data below to answer. Report their roles, rank, stats, verification status, XP, balance, and warnings. If the player is not found, say so.',
     GUARDRAILS,
     ...(extraSystem ? [extraSystem] : []),
     `FGx BloxStrike knowledge base (verified FGx context):\n${systemPromptSection()}`,
-    `Verified FGx server data (from FGx records only):\n${buildContext(client, guild)}`,
+    `Verified FGx server data (from FGx records only):\n${buildContext(client, guild, question)}`,
   ].join('\n\n');
 
   // Generous budget: thinking-capable models spend tokens on internal
