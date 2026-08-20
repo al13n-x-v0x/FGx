@@ -2,42 +2,38 @@
 
 /* Copyright © 2026 FGx. All rights reserved. */
 
-const { SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { BRAND } = require('../../config/constants');
 const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const privateServerService = require('../../services/clan/privateServerService');
 
 /**
- * Shortcut commands for creating private servers directly.
- * Each command is a separate module exported as an array.
+ * Instant duel commands: /1v1, /2v2, /5v5, /2v1, etc.
  *
- * Usage: /1v1, /2v2, /5v5, /2v1, /3v2, etc.
- * Creates a private server instantly without the menu flow.
+ * Type the command → bot creates the server → drops the invite in chat.
+ * No menus, no confirmations, no ephemeral. Just instant.
  */
 
 const SHORTCUT_MODES = [
   // Symmetric
-  { mode: '1v1', name: '1v1', desc: 'Create a 1v1 private server instantly' },
-  { mode: '2v2', name: '2v2', desc: 'Create a 2v2 private server instantly' },
-  { mode: '3v3', name: '3v3', desc: 'Create a 3v3 private server instantly' },
-  { mode: '4v4', name: '4v4', desc: 'Create a 4v4 private server instantly' },
-  { mode: '5v5', name: '5v5', desc: 'Create a 5v5 private server instantly' },
-  { mode: '6v6', name: '6v6', desc: 'Create a 6v6 private server instantly' },
+  { mode: '1v1', name: '1v1', desc: '⚡ Create a 1v1 server — drops invite in chat' },
+  { mode: '2v2', name: '2v2', desc: '⚡ Create a 2v2 server — drops invite in chat' },
+  { mode: '3v3', name: '3v3', desc: '⚡ Create a 3v3 server — drops invite in chat' },
+  { mode: '4v4', name: '4v4', desc: '⚡ Create a 4v4 server — drops invite in chat' },
+  { mode: '5v5', name: '5v5', desc: '⚡ Create a 5v5 server — drops invite in chat' },
+  { mode: '6v6', name: '6v6', desc: '⚡ Create a 6v6 server — drops invite in chat' },
   // Asymmetric
-  { mode: '2v1', name: '2v1', desc: 'Create a 2v1 private server instantly' },
-  { mode: '3v1', name: '3v1', desc: 'Create a 3v1 private server instantly' },
-  { mode: '3v2', name: '3v2', desc: 'Create a 3v2 private server instantly' },
-  { mode: '4v2', name: '4v2', desc: 'Create a 4v2 private server instantly' },
-  { mode: '4v3', name: '4v3', desc: 'Create a 4v3 private server instantly' },
-  { mode: '5v3', name: '5v3', desc: 'Create a 5v3 private server instantly' },
-  { mode: '5v4', name: '5v4', desc: 'Create a 5v4 private server instantly' },
-  { mode: '6v4', name: '6v4', desc: 'Create a 6v4 private server instantly' },
-  { mode: '6v5', name: '6v5', desc: 'Create a 6v5 private server instantly' },
+  { mode: '2v1', name: '2v1', desc: '⚡ Create a 2v1 server — drops invite in chat' },
+  { mode: '3v1', name: '3v1', desc: '⚡ Create a 3v1 server — drops invite in chat' },
+  { mode: '3v2', name: '3v2', desc: '⚡ Create a 3v2 server — drops invite in chat' },
+  { mode: '4v2', name: '4v2', desc: '⚡ Create a 4v2 server — drops invite in chat' },
+  { mode: '4v3', name: '4v3', desc: '⚡ Create a 4v3 server — drops invite in chat' },
+  { mode: '5v3', name: '5v3', desc: '⚡ Create a 5v3 server — drops invite in chat' },
+  { mode: '5v4', name: '5v4', desc: '⚡ Create a 5v4 server — drops invite in chat' },
+  { mode: '6v4', name: '6v4', desc: '⚡ Create a 6v4 server — drops invite in chat' },
+  { mode: '6v5', name: '6v5', desc: '⚡ Create a 6v5 server — drops invite in chat' },
 ];
 
-/**
- * Build a shortcut command module for a given mode.
- */
 function buildShortcut({ mode, name, desc }) {
   return {
     data: new SlashCommandBuilder()
@@ -54,7 +50,9 @@ function buildShortcut({ mode, name, desc }) {
       const config = guildConfigRepo.get(interaction.guild.id);
       const hours = interaction.options.getInteger('hours') ?? privateServerService.DEFAULT_HOURS;
 
-      await interaction.deferReply({ ephemeral: true });
+      // Defer PUBLICLY so everyone sees the "Creating..." status.
+      await interaction.deferReply();
+
       try {
         const { server, invite, info } = await privateServerService.create(
           interaction.client,
@@ -65,31 +63,40 @@ function buildShortcut({ mode, name, desc }) {
           { member: interaction.member, config },
         );
 
-        const totalPlayers = info.teams === 2 ? ` (${mode})` : '';
-        const embed = {
-          color: BRAND.colors.success,
-          title: `🎮 FGx ${info.label} server ready${totalPlayers}`,
-          description:
-            `**${server.name}** is live for **${hours}h**.\n\n` +
-            `**Invite:** https://discord.gg/${invite.code}\n` +
-            `**Channels:** match-chat, results, Main, Team 1${info.teams > 1 ? ', Team 2' : ''}\n\n` +
-            'Share the invite with your opponents. The server **auto-deletes** when the timer expires.',
-          footer: { text: `${BRAND.footer} • Roblox-verified members only` },
-        };
+        const embed = new EmbedBuilder()
+          .setColor(BRAND.colors.success)
+          .setTitle(`⚔️ ${mode.toUpperCase()} SERVER READY`)
+          .setDescription(
+            `<@${interaction.user.id}> created a **${mode}** server!\n\n` +
+            `🔗 **Click to join:** https://discord.gg/${invite.code}\n\n` +
+            `📍 **Channels:** match-chat, results, Main, Team 1${info.teams > 1 ? ', Team 2' : ''}\n` +
+            `⏰ **Expires in:** ${hours}h (auto-deletes)\n\n` +
+            `*Share the link with your opponent — game on!*`,
+          )
+          .setFooter({ text: `${BRAND.footer} • Roblox-verified players only` })
+          .setTimestamp();
+
         return interaction.editReply({ embeds: [embed] });
       } catch (err) {
-        if (['INVALID_MODE', 'GUILD_LIMIT', 'OWNER_LIMIT', 'ROBLOX_REQUIRED'].includes(err.code)) {
-          return interaction.editReply({
-            embeds: [{ color: BRAND.colors.warn, title: 'Server not created', description: err.message, footer: { text: BRAND.footer } }],
-          });
+        const errorEmbed = new EmbedBuilder()
+          .setColor(BRAND.colors.danger)
+          .setTitle('❌ Server not created');
+
+        if (err.code === 'GUILD_LIMIT') {
+          errorEmbed.setDescription('Too many active servers. End one first with `/private end`.');
+        } else if (err.code === 'OWNER_LIMIT') {
+          errorEmbed.setDescription('You already have an active server. End it first with `/private end`.');
+        } else if (err.code === 'ROBLOX_REQUIRED') {
+          errorEmbed.setDescription('You need to verify your Roblox account first.\nRun `/roblox verify` — it takes under a minute.');
+        } else {
+          errorEmbed.setDescription(`Error: ${err.message}`);
         }
-        return interaction.editReply({
-          embeds: [{ color: BRAND.colors.danger, title: 'Creation failed', description: `Discord API error: ${err.message}`, footer: { text: BRAND.footer } }],
-        });
+
+        errorEmbed.setFooter({ text: BRAND.footer });
+        return interaction.editReply({ embeds: [errorEmbed] });
       }
     },
   };
 }
 
-/** Export all shortcut commands as an array. */
 module.exports = SHORTCUT_MODES.map(buildShortcut);
