@@ -397,6 +397,7 @@ const handlers = [
     fn: (i) => i.update({ embeds: [configCommand.menuEmbed()], components: [configCommand.menuRow()] }),
   },
   { match: 'tryout:apply:modal', fn: (i) => handleTryoutModal(i), modal: true },
+  { match: 'help:', fn: (i) => require('../commands/utility/help').handleButton(i) },
 ];
 
 /** Route a component/modal interaction by customId prefix. */
