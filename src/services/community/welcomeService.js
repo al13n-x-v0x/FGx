@@ -12,6 +12,7 @@ const { guildConfigRepo } = require('../../database/repos/guildConfig');
 const { robloxLinksRepo } = require('../../database/repos/roblox');
 const { logAudit } = require('../logging/auditLogger');
 const { logger } = require('../../utils/logger');
+const { generateWelcomeImage } = require('../../utils/welcomeImage');
 
 /**
  * Welcome system.
@@ -99,6 +100,7 @@ function buildWelcomeView({ member, message, memberCount, guildName, includeVeri
       },
     )
     .setThumbnail(member.user?.displayAvatarURL({ size: 256 }) ?? undefined)
+    .setImage('attachment://welcome-card.png')
     .setFooter({ text: `${BRAND.footer} • We're glad you're here 💜` })
     .setTimestamp(new Date());
 
@@ -144,8 +146,23 @@ async function onJoin(client, member) {
       includeVerify: true,
     });
 
-    // The bundled welcome animation, attached so it plays inline in Discord.
-    const files = [{ attachment: welcomeVideoPath(config), name: 'welcome.mp4' }];
+    // Generate the canvas welcome card image.
+    let files = [];
+    try {
+      const card = await generateWelcomeImage(member, {
+        message: renderMessage(welcome.message, member),
+      });
+      files.push(card);
+    } catch (err) {
+      logger.warn('welcome image generation failed', { error: err.message });
+    }
+
+    // Also attach the welcome animation video.
+    try {
+      files.push({ attachment: welcomeVideoPath(config), name: 'welcome.mp4' });
+    } catch {
+      // Video file missing — send without it
+    }
 
     await channel.send({
       content: `<@${member.id}>`,
