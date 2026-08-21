@@ -423,7 +423,11 @@ const roastCmd = {
     const outro = randomFrom(ROAST_OUTROS);
     const fullRoast = self ? roastText : `${intro}${roastText}${outro}`;
 
-    const gif = await getGif('roast');
+    // Pick the right GIF category based on heat
+    const gifCategory = heat === 'nuclear' ? 'roast_nuclear' : heat === 'medium' ? 'roast_medium' : 'roast_light';
+    const gif = await getGif(gifCategory);
+    const burnGif = await getGif('burn');
+
     const embed = new EmbedBuilder()
       .setColor(heatInfo.color)
       .setTitle(`${heatInfo.label} — ${self ? 'Self-Roast' : `Roasting ${target.username}`}`)
@@ -431,12 +435,13 @@ const roastCmd = {
       .addFields(
         { name: '🌡️ Heat Level', value: flameBar(heat), inline: true },
         { name: '🎯 Victim', value: self ? 'Themselves (brave!)' : `${target}`, inline: true },
+        { name: '💀 Method', value: method === 'vision' ? 'AI Vision 👁️' : method === 'ai' ? 'AI Text 🤖' : 'Curated 🔥', inline: true },
       )
       .setFooter({
         text: method === 'vision'
-          ? `👁️ AI analyzed ${target.username}'s avatar`
+          ? `👁️ AI analyzed ${target.username}'s avatar + roasted them`
           : method === 'ai'
-            ? `🤖 AI-generated roast`
+            ? `🤖 AI-generated roast • 3 attempts, best selected`
             : `${BRAND.footer} • Roasted by ${interaction.user.tag}`,
       })
       .setTimestamp(new Date());
@@ -444,9 +449,11 @@ const roastCmd = {
     // Show the avatar prominently
     if (target.displayAvatarURL) embed.setThumbnail(target.displayAvatarURL({ size: 256 }));
 
-    // Show the avatar as the main image if we used vision
+    // Show the avatar as the main image if we used vision, otherwise use GIF
     if (method === 'vision') {
       embed.setImage(target.displayAvatarURL({ size: 512, dynamic: true }));
+    } else if (burnGif) {
+      embed.setImage(burnGif);
     } else if (gif) {
       embed.setImage(gif);
     }
