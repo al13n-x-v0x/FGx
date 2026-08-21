@@ -407,7 +407,54 @@ const handlers = [
   { match: 'poll:', fn: (i) => handlePollButton(i) },
   { match: 'emoji:pick', fn: (i) => handleEmojiPick(i) },
   { match: 'meme:refresh', fn: (i) => require('../commands/fun/meme').handleButton(i) },
+  { match: 'embed:edit', fn: (i) => require('../commands/utility/embedBuilder').handleButton(i) },
+  { match: 'embed:send', fn: (i) => require('../commands/utility/embedBuilder').handleButton(i) },
+  { match: 'embed:cancel', fn: (i) => require('../commands/utility/embedBuilder').handleButton(i) },
+  { match: 'embed:modal', fn: (i) => require('../commands/utility/embedBuilder').handleModal(i), modal: true },
+  { match: 'nitro:', fn: (i) => handleNitroButton(i) },
 ];
+
+/** Handle nitro-style buttons. */
+async function handleNitroButton(interaction) {
+  if (interaction.customId === 'nitro:boost') {
+    const embed = new EmbedBuilder()
+      .setColor(0xF47FFF)
+      .setTitle('🚀 Server Boosted!')
+      .setDescription(
+        `**${interaction.user.username}** just boosted **${interaction.guild.name}**!\n\n` +
+        `🎉 Everyone gets:\n` +
+        `• 🔥 Custom emojis in all channels\n` +
+        `• 🎬 Animated server banner\n` +
+        `• 📊 Enhanced embed quality\n` +
+        `• ⚡ Priority bot responses\n` +
+        `• 🎨 Custom profile cards\n\n` +
+        `*Thank you for making this server even better!* 💜`
+      )
+      .setThumbnail(interaction.user.displayAvatarURL({ size: 256 }))
+      .setFooter({ text: `${BRAND.footer} • Nitro Boost` })
+      .setTimestamp(new Date());
+    return interaction.reply({ content: '@everyone', embeds: [embed] });
+  }
+
+  if (interaction.customId === 'nitro:status') {
+    const embed = new EmbedBuilder()
+      .setColor(0xF47FFF)
+      .setTitle('✨ Nitro Status')
+      .setDescription(
+        `**${interaction.user.username}** has Nitro!\n\n` +
+        `• 🎬 Animated Avatar\n` +
+        `• 🖼️ Custom Banner\n` +
+        `• 🏷️ Custom Tags\n` +
+        `• 📺 4K Streaming\n` +
+        `• 🎵 HD Audio\n` +
+        `• 📎 500MB Uploads\n\n` +
+        `*Join FGx to get Nitro perks for free!*`
+      )
+      .setFooter({ text: BRAND.footer })
+      .setTimestamp(new Date());
+    return interaction.reply({ embeds: [embed], ephemeral: true });
+  }
+}
 
 /** Handle poll results button. */
 async function handlePollButton(interaction) {

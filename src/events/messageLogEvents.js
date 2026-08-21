@@ -1,13 +1,15 @@
 'use strict';
 
-/*
- * Copyright © 2026 FGx.
- * All rights reserved.
- */
+/* Copyright © 2026 FGx. All rights reserved. */
 
 const { Events } = require('discord.js');
 const { logAudit } = require('../services/logging/auditLogger');
 const { logger } = require('../utils/logger');
+
+/** Cache of last deleted messages per channel (for /snipe). */
+const snipeCache = new Map();
+const MAX_SNIPE_CACHE = 50; // per channel, keep last 5
+const SNIPE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /** Only log content when we actually have it (partials may lack it). */
 function snippet(content, max = 500) {
@@ -19,6 +21,23 @@ function register(client) {
   client.on(Events.MessageDelete, async (message) => {
     try {
       if (!message.guild || message.author?.bot) return;
+
+      // Cache for snipe command
+      if (message.content || message.embeds.length > 0) {
+        const channelId = message.channel.id;
+        if (!snipeCache.has(channelId)) snipeCache.set(channelId, []);
+        const cached = snipeCache.get(channelId);
+        cached.unshift({
+          author: { id: message.author.id, tag: message.author.tag, avatar: message.author.displayAvatarURL?.({ size: 128 }) },
+          content: message.content || null,
+          embeds: message.embeds.map(e => e.toJSON?.() ?? null).filter(Boolean),
+          attachments: [...(message.attachments?.values() ?? [])].map(a => a.url),
+          channel: message.channel.name ?? message.channel.id,
+          timestamp: Date.now(),
+        });
+        if (cached.length > MAX_SNIPE_CACHE) cached.pop();
+      }
+
       await logAudit(client, message.guild, {
         action: 'message_delete',
         target: message.author,
@@ -53,4 +72,14 @@ function register(client) {
   });
 }
 
-module.exports = { register };
+/** Get the snipe cache for a channel. */
+function getSnipeCache(channelId) {
+  const cached = snipeCache.get(channelId) || [];
+  const now = Date.now();
+  // Filter out expired entries
+  const valid = cached.filter(e => now - e.timestamp < SNIPE_TTL);
+  snipeCache.set(channelId, valid);
+  return valid;
+}
+
+module.exports = { register, getSnipeCache };
