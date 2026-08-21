@@ -401,7 +401,16 @@ const handlers = [
   { match: 'help:', fn: (i) => require('../commands/utility/help').handleButton(i) },
   { match: 'giveaway:enter', fn: (i) => giveawayService.handleEnter(i) },
   { match: 'giveaway:reroll', fn: (i) => handleGiveawayReroll(i) },
+  { match: 'rr:', fn: (i) => require('../commands/admin/reactionrole').handleSelect(i) },
+  { match: 'announce:', fn: (i) => require('../commands/admin/announce').handleButton(i) },
+  { match: 'announce:modal:', fn: (i) => require('../commands/admin/announce').handleModal(i), modal: true },
+  { match: 'poll:', fn: (i) => handlePollButton(i) },
 ];
+
+/** Handle poll results button. */
+async function handlePollButton(interaction) {
+  return interaction.reply({ content: 'React above to vote! Results show when the poll ends.', ephemeral: true });
+}
 
 /** Handle giveaway reroll button. */
 async function handleGiveawayReroll(interaction) {
