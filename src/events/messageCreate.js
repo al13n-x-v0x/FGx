@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
 const { guildConfigRepo } = require('../database/repos/guildConfig');
 const { antispam, lockdown } = require('../services/security');
 const { awardForMessage } = require('../services/community/xpService');
@@ -13,6 +13,7 @@ const chatCommands = require('../services/community/chatCommands');
 const { analyzeMessage } = require('../services/ai/securityEngine');
 const { logger } = require('../utils/logger');
 const { logAudit } = require('../services/logging/auditLogger');
+const afkCmd = require('../commands/utility/afk');
 
 function register(client) {
   client.on(Events.MessageCreate, async (message) => {
@@ -20,6 +21,34 @@ function register(client) {
 
     try {
       const config = guildConfigRepo.get(message.guild.id);
+
+      // ── AFK system ──────────────────────────────────────
+      // Check if this user is returning from AFK
+      const afkReturn = await afkCmd.checkReturn(message.author.id, message.guild.id);
+      if (afkReturn) {
+        const returnEmbed = new EmbedBuilder()
+          .setColor(0x57F287)
+          .setDescription(afkReturn.message)
+          .setTimestamp(new Date());
+        if (afkReturn.gif) returnEmbed.setImage(afkReturn.gif);
+        await message.reply({ embeds: [returnEmbed] }).catch(() => {});
+      }
+
+      // Check if any mentioned users are AFK
+      for (const [userId] of message.mentions.users) {
+        const afkInfo = afkCmd.getAfkInfo(userId);
+        if (afkInfo && userId !== message.author.id) {
+          const mentionData = await afkCmd.formatMention(userId);
+          if (mentionData) {
+            const afkEmbed = new EmbedBuilder()
+              .setColor(0xFEE75C)
+              .setDescription(mentionData.message)
+              .setTimestamp(new Date());
+            if (mentionData.gif) afkEmbed.setImage(mentionData.gif);
+            await message.reply({ embeds: [afkEmbed] }).catch(() => {});
+          }
+        }
+      }
 
       // Lockdown: silence non-staff during protection mode.
       if (config.security.lockdown && !lockdown.maySpeakDuringLockdown(message.member)) {
