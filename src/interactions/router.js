@@ -405,6 +405,7 @@ const handlers = [
   { match: 'announce:', fn: (i) => require('../commands/admin/announce').handleButton(i) },
   { match: 'announce:modal:', fn: (i) => require('../commands/admin/announce').handleModal(i), modal: true },
   { match: 'poll:', fn: (i) => handlePollButton(i) },
+  { match: 'emoji:pick', fn: (i) => handleEmojiPick(i) },
 ];
 
 /** Handle poll results button. */
@@ -424,6 +425,16 @@ async function handleGiveawayReroll(interaction) {
   }
   await interaction.reply({
     content: `🔀 New winner: <@${result.winnerId}>! You won **${result.prize}**!`,
+  });
+}
+
+/** Handle emoji pick from select menu — reply with the emoji code. */
+async function handleEmojiPick(interaction) {
+  const value = interaction.values[0];
+  if (!value) return;
+  await interaction.reply({
+    content: `Copy this code to use the emoji:\n${value}`,
+    ephemeral: true,
   });
 }
 

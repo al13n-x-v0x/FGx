@@ -7,24 +7,52 @@ const { BRAND } = require('../../config/constants');
 const { getGif } = require('../../utils/gifLibrary');
 const assistant = require('../../services/ai/assistant');
 
-/** Pre-written roasts (used if AI is unavailable) */
-const ROASTS = [
-  "You're the reason God created the middle finger.",
-  "If you were any more inbred, you'd be a sandwich.",
-  "You're like a cloud. When you disappear, it's a beautiful day.",
-  "I'd agree with you, but then we'd both be wrong.",
-  "You're proof that evolution can go in reverse.",
-  "You bring everyone a lot of joy… when you leave.",
-  "I'm jealous of people who don't know you.",
-  "You're the living proof that man can fly without wings.",
-  "You're like a software update — whenever I see you, I think 'not now'.",
-  "I'd roast you, but my mom taught me not to burn trash.",
-  "You're the human version of a sneeze that doesn't come out.",
-  "You're so dense, light bends around you.",
-  "Your birth certificate should be an apology letter.",
-  "You have the charisma of a wet sock.",
-  "You're the type of person to Google 'how to Google'.",
-];
+// ─── Roast intensity levels ──────────────────────────────
+const HEAT = {
+  light: { label: '🔥 Light Roast', color: 0xFEE75C, flames: 1 },
+  medium: { label: '🔥🔥 Medium Roast', color: 0xE67E22, flames: 2 },
+  nuclear: { label: '☢️ NUCLEAR ROAST', color: 0xED4245, flames: 3 },
+};
+
+// ─── Fallback roasts by intensity (used if AI fails) ──────
+const FALLBACK_ROASTS = {
+  light: [
+    "You're like a cloud. When you disappear, it's a beautiful day.",
+    "I'd agree with you, but then we'd both be wrong.",
+    "You bring everyone a lot of joy… when you leave.",
+    "You're the human version of a sneeze that doesn't come out.",
+    "You're like a software update — whenever I see you, I think 'not now'.",
+    "If you were any more inbred, you'd be a sandwich.",
+    "You're proof that evolution can go in reverse.",
+    "Your birth certificate should be an apology letter.",
+    "You're the type of person to Google 'how to Google'.",
+    "I'm jealous of people who don't know you.",
+  ],
+  medium: [
+    "You're so dense, light bends around you.",
+    "You have the charisma of a wet sock.",
+    "I'd roast you, but my mom taught me not to burn trash.",
+    "You're the living proof that man can fly without wings.",
+    "You're the reason God created the middle finger.",
+    "If you were a spice, you'd be flour.",
+    "Your face makes onions cry.",
+    "You're like a Monday morning — nobody wants you here.",
+    "You're the type to WiFi disconnect and nobody notices.",
+    "Your personality is like expired milk — it went bad a long time ago.",
+  ],
+  nuclear: [
+    "Your family tree must be a circle.",
+    "You're the reason shampoo has instructions.",
+    "If stupid were a sport, you'd have a gold medal, a silver medal, AND a bronze medal.",
+    "You're the disappointment in your parents' life.",
+    "Somewhere out there, a tree is producing oxygen for you. I'm sorry, tree.",
+    "You're not stupid — you just have bad luck when thinking.",
+    "The only thing you've ever successfully launched is a conversation topic nobody cares about.",
+    "You're like a human version of a 404 error — present but completely useless.",
+    "You're the reason aliens won't visit us.",
+    "If you were any more irrelevant, you'd be a Wikipedia page nobody reads.",
+  ],
+};
 
 const COMPLIMENTS = [
   "You're literally the best person in this server. 💜",
@@ -65,7 +93,7 @@ const EIGHT_BALL = [
   "🎱 **The answer is within you.** — Look deeper.",
   "🎱 **My sources say yes.** — Trust me bro.",
   "🎱 **Very doubtful.** — Don't hold your breath.",
-  "使用網路 **Cannot predict now.** — My WiFi is down.",
+  "🎱 **Cannot predict now.** — My WiFi is down.",
   "🎱 **Outlook not so good.** — Yikes.",
 ];
 
@@ -85,38 +113,62 @@ function getRateReply(score) {
   return range ? range.msg.replace('{score}', score) : `${score}/10`;
 }
 
+/** Build the flame bar for roast intensity */
+function flameBar(level) {
+  const info = HEAT[level];
+  return '🔥'.repeat(info.flames) + ' gray_fire'.repeat(3 - info.flames).replace(/gray_fire/g, '⚫');
+}
+
 // ─── /roast ────────────────────────────────────────────────
 const roastCmd = {
   data: new SlashCommandBuilder()
     .setName('roast')
-    .setDescription('Roast someone with AI-generated burns 🔥')
+    .setDescription('Roast someone with savage AI-generated burns 🔥')
     .addUserOption(opt =>
-      opt.setName('target').setDescription('Who to roast').setRequired(false)),
+      opt.setName('target').setDescription('Who to roast').setRequired(false))
+    .addStringOption(opt =>
+      opt.setName('heat').setDescription('Roast intensity')
+        .addChoices(
+          { name: '🔥 Light', value: 'light' },
+          { name: '🔥🔥 Medium', value: 'medium' },
+          { name: '☢️ Nuclear', value: 'nuclear' },
+        )),
 
   async execute(interaction) {
     const target = interaction.options.getUser('target') ?? interaction.user;
     const self = target.id === interaction.user.id;
+    const heat = interaction.options.getString('heat') ?? randomFrom(['light', 'medium', 'nuclear']);
+    const heatInfo = HEAT[heat];
+
+    await interaction.deferReply();
 
     let roast;
     try {
       const prompt = self
-        ? `Give me a funny, creative, savage roast about someone roasting themselves. Keep it under 200 chars.`
-        : `Give me a funny, creative, savage roast of a Discord user named "${target.username}". Keep it under 200 chars. Be hilarious but not genuinely hurtful.`;
+        ? `You are a legendary comedy roast master at a stand-up show. The person on stage is roasting THEMSELVES. Write ONE savage, hilarious, creative self-roast. Be brutally funny — think Kevin Hart or Andrew Schulz level. Under 250 chars. No asterisks, no formatting, just the raw roast text.`
+        : `You are a legendary comedy roast master. Roast a Discord user named "${target.username}" who is sitting in the front row. Write ONE absolutely savage, hilarious, creative roast. Be brutally funny — think Kevin Hart or Andrew Schulz level. Under 250 chars. No asterisks, no formatting, just the raw roast text. Make it PERSONAL to their name if possible.`;
       roast = await assistant.chat(prompt);
+      // Clean up any quotes or extra formatting
+      roast = roast.replace(/^["']|["']$/g, '').replace(/\*\*/g, '').trim();
     } catch {
-      roast = randomFrom(ROASTS);
+      roast = randomFrom(FALLBACK_ROASTS[heat]);
     }
 
     const gif = await getGif('roast');
     const embed = new EmbedBuilder()
-      .setColor(0xED4245)
-      .setTitle(`🔥 ${self ? 'Self-Roast' : `Roasting ${target.username}`} 🔥`)
-      .setDescription(roast)
+      .setColor(heatInfo.color)
+      .setTitle(`${heatInfo.label} — ${self ? 'Self-Roast' : `Roasting ${target.username}`}`)
+      .setDescription(`> ${roast}`)
+      .addFields(
+        { name: '🌡️ Heat Level', value: flameBar(heat), inline: true },
+        { name: '🎯 Victim', value: self ? 'Themselves (brave!)' : `${target}`, inline: true },
+      )
       .setFooter({ text: `${BRAND.footer} • Roasted by ${interaction.user.tag}` })
       .setTimestamp(new Date());
     if (target.displayAvatarURL) embed.setThumbnail(target.displayAvatarURL({ size: 256 }));
     if (gif) embed.setImage(gif);
-    await interaction.reply({ embeds: [embed] });
+
+    await interaction.editReply({ embeds: [embed] });
   },
 };
 
@@ -130,11 +182,13 @@ const complimentCmd = {
 
   async execute(interaction) {
     const target = interaction.options.getUser('target') ?? interaction.user;
+    await interaction.deferReply();
     let compliment;
     try {
       compliment = await assistant.chat(
-        `Give a wholesome, creative compliment for a Discord user named "${target.username}". Keep it under 200 chars.`
+        `You are the world's best hype person. Give a wholesome, creative, heartfelt compliment for a Discord user named "${target.username}". Make it genuine and make them feel special. Under 200 chars. No asterisks, no formatting, just the text.`
       );
+      compliment = compliment.replace(/^["']|["']$/g, '').replace(/\*\*/g, '').trim();
     } catch {
       compliment = randomFrom(COMPLIMENTS);
     }
@@ -142,11 +196,12 @@ const complimentCmd = {
     const embed = new EmbedBuilder()
       .setColor(0xEB459E)
       .setTitle(`💜 Compliment for ${target.username}`)
-      .setDescription(compliment)
+      .setDescription(`> ${compliment}`)
+      .setThumbnail(target.displayAvatarURL({ size: 256 }))
       .setFooter({ text: `${BRAND.footer} • From ${interaction.user.tag}` })
       .setTimestamp(new Date());
     if (gif) embed.setImage(gif);
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
   },
 };
 
@@ -160,11 +215,13 @@ const insultCmd = {
 
   async execute(interaction) {
     const target = interaction.options.getUser('target') ?? interaction.user;
+    await interaction.deferReply();
     let insult;
     try {
       insult = await assistant.chat(
-        `Give a funny, creative insult for a Discord user named "${target.username}". Keep it under 200 chars. Witty, not mean.`
+        `You are a witty comedian. Give a funny, creative, savage insult for a Discord user named "${target.username}". Be clever and hilarious, not genuinely mean. Under 200 chars. No asterisks, no formatting, just the text.`
       );
+      insult = insult.replace(/^["']|["']$/g, '').replace(/\*\*/g, '').trim();
     } catch {
       insult = randomFrom(INSULTS);
     }
@@ -172,11 +229,12 @@ const insultCmd = {
     const embed = new EmbedBuilder()
       .setColor(0xE67E22)
       .setTitle(`💢 ${target.username} just got insulted`)
-      .setDescription(insult)
+      .setDescription(`> ${insult}`)
+      .setThumbnail(target.displayAvatarURL({ size: 256 }))
       .setFooter({ text: `${BRAND.footer} • Insulted by ${interaction.user.tag}` })
       .setTimestamp(new Date());
     if (gif) embed.setImage(gif);
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
   },
 };
 
@@ -275,9 +333,9 @@ const shipCmd = {
 
     let emoji, verdict;
     if (percent >= 90) { emoji = '💘'; verdict = 'SOULMATES! The universe brought you together.'; }
-    else if (percent >= 70) { emoji = '💕'; verdict = 'High compatibility! There\'s something real here.'; }
+    else if (percent >= 70) { emoji = '💕'; verdict = "High compatibility! There's something real here."; }
     else if (percent >= 50) { emoji = '💛'; verdict = 'Decent match! Could work with some effort.'; }
-    else if (percent >= 30) { emoji = '💔'; verdict = 'Not great... but opposites attract?'; }
+    else if (percent >= 30) { emoji = '💔'; verdict = "Not great... but opposites attract?"; }
     else { emoji = '☠️'; verdict = 'Absolutely not. Run. Save yourselves.'; }
 
     const bar = '❤️'.repeat(Math.round(percent / 10)) + '🖤'.repeat(10 - Math.round(percent / 10));

@@ -1,9 +1,6 @@
 'use strict';
 
-/*
- * Copyright © 2026 FGx.
- * All rights reserved.
- */
+/* Copyright © 2026 FGx. All rights reserved. */
 
 const { SlashCommandBuilder } = require('discord.js');
 const { socialService } = require('../../services/community/socialService');
@@ -47,18 +44,19 @@ module.exports = {
   data: builder,
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
+    const guild = interaction.guild;
 
     if (sub === 'stats') {
       const target = interaction.options.getUser('user') ?? interaction.user;
       const s = socialService.stats(interaction.guildId, target.id);
-      await interaction.reply({ embeds: [socialViews.statsEmbed(target.username, s)] });
+      await interaction.reply({ embeds: [socialViews.statsEmbed(target.username, s, guild)] });
       return;
     }
 
     if (sub === 'top') {
       const kind = interaction.options.getString('kind') ?? 'slap';
       const rows = socialService.top(interaction.guildId, kind, 5);
-      await interaction.reply({ embeds: [socialViews.topEmbed(kind, rows)] });
+      await interaction.reply({ embeds: [socialViews.topEmbed(kind, rows, guild)] });
       return;
     }
 
@@ -71,6 +69,6 @@ module.exports = {
       target.username,
       interaction.user.username,
     );
-    await interaction.reply({ embeds: [socialViews.interactionEmbed(result, target.username)] });
+    await interaction.reply({ embeds: [socialViews.interactionEmbed(result, target.username, guild)] });
   },
 };
