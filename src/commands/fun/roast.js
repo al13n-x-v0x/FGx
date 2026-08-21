@@ -6,6 +6,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { BRAND } = require('../../config/constants');
 const { getGif } = require('../../utils/gifLibrary');
 const assistant = require('../../services/ai/assistant');
+const { analyzeImage } = require('../../services/ai/vision');
 
 // ─── Roast intensity levels ──────────────────────────────
 const HEAT = {
@@ -116,14 +117,43 @@ function getRateReply(score) {
 /** Build the flame bar for roast intensity */
 function flameBar(level) {
   const info = HEAT[level];
-  return '🔥'.repeat(info.flames) + ' gray_fire'.repeat(3 - info.flames).replace(/gray_fire/g, '⚫');
+  return '🔥'.repeat(info.flames) + '⚫'.repeat(3 - info.flames);
+}
+
+/**
+ * Analyze user's avatar with AI vision and generate a roast about it.
+ * Falls back to text-only roast if vision fails.
+ */
+async function avatarRoast(target, heat) {
+  const avatarUrl = target.displayAvatarURL({ size: 512, dynamic: true });
+
+  const visionPrompt = `You are a legendary comedy roast master. Look at this Discord user's profile picture/avatar.
+
+Write ONE savage, hilarious roast about their avatar. Be brutally funny — think Kevin Hart or Andrew Schulz level.
+- If it's an anime picture, roast them for being a weeb
+- If it's a selfie, roast their appearance
+- If it's a pet, roast them for using their pet as a crutch
+- If it's a meme, roast them for being unfunny
+- If it's a default avatar, roast them for being too lazy to change it
+- If it's a logo/gaming picture, roast them for trying too hard
+
+Heat level: ${heat} (light = gentle roasting, medium = savage, nuclear = absolutely devastating)
+Under 200 chars. No asterisks, no formatting, just the raw roast text.`;
+
+  try {
+    const roast = await analyzeImage(avatarUrl, visionPrompt);
+    return roast.replace(/^["']|["']$/g, '').replace(/\*\*/g, '').trim();
+  } catch (err) {
+    console.log('[roast] Vision failed, falling back to text roast:', err.message);
+    return null;
+  }
 }
 
 // ─── /roast ────────────────────────────────────────────────
 const roastCmd = {
   data: new SlashCommandBuilder()
     .setName('roast')
-    .setDescription('Roast someone with savage AI-generated burns 🔥')
+    .setDescription('Roast someone — AI sees their avatar and roasts them 🔥')
     .addUserOption(opt =>
       opt.setName('target').setDescription('Who to roast').setRequired(false))
     .addStringOption(opt =>
@@ -142,16 +172,26 @@ const roastCmd = {
 
     await interaction.deferReply();
 
-    let roast;
-    try {
-      const prompt = self
-        ? `You are a legendary comedy roast master at a stand-up show. The person on stage is roasting THEMSELVES. Write ONE savage, hilarious, creative self-roast. Be brutally funny — think Kevin Hart or Andrew Schulz level. Under 250 chars. No asterisks, no formatting, just the raw roast text.`
-        : `You are a legendary comedy roast master. Roast a Discord user named "${target.username}" who is sitting in the front row. Write ONE absolutely savage, hilarious, creative roast. Be brutally funny — think Kevin Hart or Andrew Schulz level. Under 250 chars. No asterisks, no formatting, just the raw roast text. Make it PERSONAL to their name if possible.`;
-      roast = await assistant.chat(prompt);
-      // Clean up any quotes or extra formatting
-      roast = roast.replace(/^["']|["']$/g, '').replace(/\*\*/g, '').trim();
-    } catch {
-      roast = randomFrom(FALLBACK_ROASTS[heat]);
+    let roast = null;
+    let usedVision = false;
+
+    // Step 1: Try to analyze the avatar with AI vision
+    if (!self) {
+      roast = await avatarRoast(target, heat);
+      if (roast) usedVision = true;
+    }
+
+    // Step 2: If vision failed or self-roast, use text-based AI roast
+    if (!roast) {
+      try {
+        const prompt = self
+          ? `You are a legendary comedy roast master at a stand-up show. The person on stage is roasting THEMSELVES. Write ONE savage, hilarious, creative self-roast. Be brutally funny — think Kevin Hart or Andrew Schulz level. Under 250 chars. No asterisks, no formatting, just the raw roast text.`
+          : `You are a legendary comedy roast master. Roast a Discord user named "${target.username}" who is sitting in the front row. Write ONE absolutely savage, hilarious, creative roast. Be brutally funny — think Kevin Hart or Andrew Schulz level. Under 250 chars. No asterisks, no formatting, just the raw roast text. Make it PERSONAL to their name if possible.`;
+        roast = await assistant.chat(prompt);
+        roast = roast.replace(/^["']|["']$/g, '').replace(/\*\*/g, '').trim();
+      } catch {
+        roast = randomFrom(FALLBACK_ROASTS[heat]);
+      }
     }
 
     const gif = await getGif('roast');
@@ -163,10 +203,22 @@ const roastCmd = {
         { name: '🌡️ Heat Level', value: flameBar(heat), inline: true },
         { name: '🎯 Victim', value: self ? 'Themselves (brave!)' : `${target}`, inline: true },
       )
-      .setFooter({ text: `${BRAND.footer} • Roasted by ${interaction.user.tag}` })
+      .setFooter({
+        text: usedVision
+          ? `${BRAND.footer} • AI analyzed ${target.username}'s avatar 👁️`
+          : `${BRAND.footer} • Roasted by ${interaction.user.tag}`,
+      })
       .setTimestamp(new Date());
+
+    // Show the avatar prominently
     if (target.displayAvatarURL) embed.setThumbnail(target.displayAvatarURL({ size: 256 }));
-    if (gif) embed.setImage(gif);
+
+    // Show the avatar as the main image if we used vision
+    if (usedVision) {
+      embed.setImage(target.displayAvatarURL({ size: 512, dynamic: true }));
+    } else if (gif) {
+      embed.setImage(gif);
+    }
 
     await interaction.editReply({ embeds: [embed] });
   },

@@ -28,6 +28,7 @@ const OPTIONAL_DEFAULTS = {
   GEMINI_API_KEY: '',
   GEMINI_KEYS: '',
   GEMINI_MODEL: 'gemini-3.6-flash',
+  GEMINI_VISION_MODEL: 'gemini-2.0-flash',
   GEMINI_MODELS: '',
   GROQ_API_KEY: '',
   GROQ_KEYS: '',
