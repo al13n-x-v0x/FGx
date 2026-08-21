@@ -406,6 +406,7 @@ const handlers = [
   { match: 'announce:modal:', fn: (i) => require('../commands/admin/announce').handleModal(i), modal: true },
   { match: 'poll:', fn: (i) => handlePollButton(i) },
   { match: 'emoji:pick', fn: (i) => handleEmojiPick(i) },
+  { match: 'meme:refresh', fn: (i) => require('../commands/fun/meme').handleButton(i) },
 ];
 
 /** Handle poll results button. */
