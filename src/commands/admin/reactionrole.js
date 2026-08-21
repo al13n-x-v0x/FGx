@@ -3,42 +3,15 @@
 /* Copyright © 2026 FGx. All rights reserved. */
 
 const {
-  SlashCommandBuilder, EmbedBuilder, ActionRowBuilder,
-  StringSelectMenuBuilder, PermissionFlagsBits, ChannelType,
+  SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType,
 } = require('discord.js');
 const { BRAND } = require('../../config/constants');
-
-/** Active reaction-role messages (in-memory, resets on restart). */
-const activePanels = new Map();
-
-/**
- * Build the select menu row for a panel's current role list.
- */
-function buildMenuRow(panel) {
-  const options = panel.roles.map(r => ({
-    label: r.label,
-    value: r.roleId,
-    emoji: r.emoji,
-    description: r.description || undefined,
-  }));
-
-  const menu = new StringSelectMenuBuilder()
-    .setCustomId(`rr:${panel.guildId}:${panel.channelId}`)
-    .setPlaceholder('Pick your roles...')
-    .setMinValues(0)
-    .setMaxValues(Math.min(panel.roles.length, 25));
-
-  for (const opt of options) {
-    menu.addOptions(opt);
-  }
-
-  return new ActionRowBuilder().addComponents(menu);
-}
+const { reactionRolesRepo } = require('../../database/repos/reactionRoles');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('reactionrole')
-    .setDescription('Set up reaction roles — users pick roles from a menu')
+    .setDescription('Set up reaction roles — users click emoji to get roles')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .addSubcommand(sub =>
       sub.setName('create')
@@ -53,17 +26,15 @@ module.exports = {
     )
     .addSubcommand(sub =>
       sub.setName('add')
-        .setDescription('Add a role to a panel (use message link or ID)')
+        .setDescription('Add a role with emoji to a panel')
         .addStringOption(opt =>
           opt.setName('message_id').setDescription('Panel message ID or link').setRequired(true))
         .addRoleOption(opt =>
-          opt.setName('role').setDescription('Role to add').setRequired(true))
+          opt.setName('role').setDescription('Role to assign').setRequired(true))
         .addStringOption(opt =>
-          opt.setName('emoji').setDescription('Emoji for this role (e.g. 🔴)').setRequired(true))
+          opt.setName('emoji').setDescription('Emoji for this role (e.g. 🔴 or :custom_emoji:)').setRequired(true))
         .addStringOption(opt =>
           opt.setName('label').setDescription('Display label (default: role name)'))
-        .addStringOption(opt =>
-          opt.setName('description').setDescription('Option description'))
     )
     .addSubcommand(sub =>
       sub.setName('remove')
@@ -96,86 +67,79 @@ module.exports = {
         .setColor(BRAND.colors.primary)
         .setTitle(title)
         .setDescription(description + '\n\n*Roles will appear here once added by staff.*')
-        .setFooter({ text: `${BRAND.footer} • Reaction Roles • Use /reactionrole add to add roles` })
+        .setFooter({ text: `${BRAND.footer} • Reaction Roles` })
         .setTimestamp(new Date());
 
-      // Send the embed first — no select menu yet (need at least 1 role first)
       const msg = await channel.send({ embeds: [embed] });
 
-      // Store the panel reference
-      const panelKey = `${interaction.guildId}:${msg.id}`;
-      activePanels.set(panelKey, {
-        messageId: msg.id,
-        channelId: channel.id,
-        guildId: interaction.guildId,
-        title,
-        roles: [],
-      });
-
       await interaction.reply({
-        content: `✅ Panel created in ${channel}! Now use:\n\`/reactionrole add message_id:${msg.id} role:@Role emoji:🔴\`\n\nto add roles to the panel.`,
+        content: `✅ Panel created! Now add roles:\n\`/reactionrole add message_id:${msg.id} role:@Role emoji:🔴\`\n\nReact to the message with the emoji you want to use, then run the command.`,
         ephemeral: true,
       });
 
     } else if (sub === 'add') {
       const messageId = resolveMessageId(interaction.options.getString('message_id'));
       const role = interaction.options.getRole('role');
-      const emoji = interaction.options.getString('emoji');
+      const emojiStr = interaction.options.getString('emoji');
       const label = interaction.options.getString('label') ?? role.name;
-      const description = interaction.options.getString('description') ?? '';
 
-      // Find the panel by message ID
-      const panel = findPanel(interaction.guildId, messageId);
-      if (!panel) {
-        return interaction.reply({
-          content: '❌ Panel not found. Make sure you paste the message ID or link of the reaction role panel.',
-          ephemeral: true,
-        });
+      if (!messageId) {
+        return interaction.reply({ content: '❌ Invalid message ID or link.', ephemeral: true });
       }
 
       // Check role hierarchy
       if (role.position >= interaction.guild.members.me.roles.highest.position) {
         return interaction.reply({
-          content: '❌ I can\'t assign that role — it\'s higher than my highest role.',
+          content: "❌ I can't assign that role — it's higher than my highest role.",
           ephemeral: true,
         });
       }
 
-      // Check if role already added
-      if (panel.roles.some(r => r.roleId === role.id)) {
-        return interaction.reply({
-          content: `❌ ${role} is already in this panel.`,
-          ephemeral: true,
-        });
+      // Check if role already mapped to this message
+      const existing = reactionRolesRepo.getByMessage(interaction.guildId, messageId);
+      if (existing.some(r => r.role_id === role.id)) {
+        return interaction.reply({ content: `❌ ${role} is already in this panel.`, ephemeral: true });
       }
 
-      // Add the role
-      panel.roles.push({ roleId: role.id, emoji, label, description });
+      // Normalize emoji — extract the Unicode emoji or keep custom format
+      const emoji = normalizeEmoji(emojiStr);
 
-      // Fetch the panel message and update it
-      const channel = interaction.guild.channels.cache.get(panel.channelId);
-      if (!channel) {
-        return interaction.reply({ content: '❌ Panel channel not found.', ephemeral: true });
-      }
-
-      const msg = await channel.messages.fetch(panel.messageId).catch(() => null);
+      // Fetch the panel message
+      const channel = interaction.channel;
+      const msg = await channel.messages.fetch(messageId).catch(() => null);
       if (!msg) {
-        return interaction.reply({ content: '❌ Panel message not found. Create a new panel.', ephemeral: true });
+        return interaction.reply({ content: '❌ Panel message not found. Make sure the message is in this channel.', ephemeral: true });
       }
 
-      // Rebuild the embed with role list
-      const roleList = panel.roles.map(r => `${r.emoji} **${r.label}**`).join('\n');
-      const embed = EmbedBuilder.from(msg.embeds[0])
+      // Add reaction to the message
+      try {
+        await msg.react(emoji);
+      } catch (err) {
+        return interaction.reply({
+          content: `❌ Failed to add reaction \`${emoji}\`. Make sure it's a valid emoji.\nError: ${err.message}`,
+          ephemeral: true,
+        });
+      }
+
+      // Save to database
+      reactionRolesRepo.add(
+        interaction.guildId, channel.id, messageId, role.id, emoji, label,
+      );
+
+      // Update the embed with the role list
+      const allRoles = reactionRolesRepo.getByMessage(interaction.guildId, messageId);
+      const roleList = allRoles.map(r => `${r.emoji} **${r.label || r.role_id}**`).join('\n');
+
+      const embed = EmbedBuilder.from(msg.embeds[0] ?? new EmbedBuilder())
+        .setColor(BRAND.colors.primary)
         .setDescription(
-          panel.title ? `**${panel.title}**\n\n` : '' +
-          `${roleList}\n\n*Select your roles from the menu below!*`
+          `${roleList}\n\n*Click an emoji above to get/remove a role!*`
         );
 
-      const row = buildMenuRow(panel);
-      await msg.edit({ embeds: [embed], components: [row] });
+      await msg.edit({ embeds: [embed] }).catch(() => {});
 
       await interaction.reply({
-        content: `✅ Added ${role} (${emoji}) to the panel. **${panel.roles.length}** role(s) total.`,
+        content: `✅ Added ${role} (${emoji}) to the panel. **${allRoles.length}** role(s) total.`,
         ephemeral: true,
       });
 
@@ -183,135 +147,115 @@ module.exports = {
       const messageId = resolveMessageId(interaction.options.getString('message_id'));
       const role = interaction.options.getRole('role');
 
-      const panel = findPanel(interaction.guildId, messageId);
-      if (!panel) {
-        return interaction.reply({ content: '❌ Panel not found.', ephemeral: true });
+      if (!messageId) {
+        return interaction.reply({ content: '❌ Invalid message ID or link.', ephemeral: true });
       }
 
-      const idx = panel.roles.findIndex(r => r.roleId === role.id);
-      if (idx === -1) {
+      const allRoles = reactionRolesRepo.getByMessage(interaction.guildId, messageId);
+      const match = allRoles.find(r => r.role_id === role.id);
+      if (!match) {
         return interaction.reply({ content: `❌ ${role} is not in this panel.`, ephemeral: true });
       }
 
-      panel.roles.splice(idx, 1);
+      // Remove from database
+      reactionRolesRepo.remove(interaction.guildId, messageId, role.id);
 
-      // Update the panel message
-      const channel = interaction.guild.channels.cache.get(panel.channelId);
+      // Try to remove the reaction from the message
+      const channel = interaction.guild.channels.cache.get(match.channel_id);
       if (channel) {
-        const msg = await channel.messages.fetch(panel.messageId).catch(() => null);
+        const msg = await channel.messages.fetch(messageId).catch(() => null);
         if (msg) {
-          if (panel.roles.length === 0) {
-            // No more roles — remove the select menu, keep embed
-            const embed = EmbedBuilder.from(msg.embeds[0])
-              .setDescription(
-                (panel.title ? `**${panel.title}**\n\n` : '') +
-                '*Roles will appear here once added by staff.*'
-              );
-            await msg.edit({ embeds: [embed], components: [] });
+          // Remove the bot's reaction
+          const botReaction = msg.reactions.cache.find(r =>
+            normalizeEmoji(r.emoji.name) === match.emoji ||
+            (r.emoji.id && `<:${r.emoji.name}:${r.emoji.id}>` === match.emoji)
+          );
+          if (botReaction) await botReaction.remove().catch(() => {});
+
+          // Update the embed
+          const remaining = reactionRolesRepo.getByMessage(interaction.guildId, messageId);
+          if (remaining.length > 0) {
+            const roleList = remaining.map(r => `${r.emoji} **${r.label || r.role_id}**`).join('\n');
+            const embed = EmbedBuilder.from(msg.embeds[0] ?? new EmbedBuilder())
+              .setColor(BRAND.colors.primary)
+              .setDescription(`${roleList}\n\n*Click an emoji above to get/remove a role!*`);
+            await msg.edit({ embeds: [embed] }).catch(() => {});
           } else {
-            const roleList = panel.roles.map(r => `${r.emoji} **${r.label}**`).join('\n');
-            const embed = EmbedBuilder.from(msg.embeds[0])
-              .setDescription(
-                (panel.title ? `**${panel.title}**\n\n` : '') +
-                `${roleList}\n\n*Select your roles from the menu below!*`
-              );
-            const row = buildMenuRow(panel);
-            await msg.edit({ embeds: [embed], components: [row] });
+            const embed = EmbedBuilder.from(msg.embeds[0] ?? new EmbedBuilder())
+              .setColor(BRAND.colors.primary)
+              .setDescription('*No roles configured yet. Staff: use /reactionrole add to add roles.*');
+            await msg.edit({ embeds: [embed], components: [] }).catch(() => {});
           }
         }
       }
 
       await interaction.reply({
-        content: `✅ Removed ${role} from the panel. **${panel.roles.length}** role(s) remaining.`,
+        content: `✅ Removed ${role} from the panel. **${allRoles.length - 1}** role(s) remaining.`,
         ephemeral: true,
       });
 
     } else if (sub === 'delete') {
       const messageId = resolveMessageId(interaction.options.getString('message_id'));
-      const panel = findPanel(interaction.guildId, messageId);
-      if (!panel) {
-        return interaction.reply({ content: '❌ Panel not found.', ephemeral: true });
+      if (!messageId) {
+        return interaction.reply({ content: '❌ Invalid message ID.', ephemeral: true });
       }
 
-      const channel = interaction.guild.channels.cache.get(panel.channelId);
+      const allRoles = reactionRolesRepo.getByMessage(interaction.guildId, messageId);
+      if (allRoles.length === 0) {
+        return interaction.reply({ content: '❌ No reaction role panel found with that message ID.', ephemeral: true });
+      }
+
+      // Delete the message
+      const channel = interaction.guild.channels.cache.get(allRoles[0].channel_id);
       if (channel) {
-        const msg = await channel.messages.fetch(panel.messageId).catch(() => null);
+        const msg = await channel.messages.fetch(messageId).catch(() => null);
         if (msg) await msg.delete().catch(() => {});
       }
 
-      const panelKey = `${interaction.guildId}:${panel.messageId}`;
-      activePanels.delete(panelKey);
+      // Delete from database
+      reactionRolesRepo.deleteMessage(interaction.guildId, messageId);
+
       await interaction.reply({ content: '✅ Reaction role panel deleted.', ephemeral: true });
 
     } else if (sub === 'list') {
-      const guildPanels = [];
-      for (const [key, data] of activePanels) {
-        if (data.guildId === interaction.guildId) {
-          guildPanels.push(data);
+      const allRoles = reactionRolesRepo.getAll(interaction.guildId);
+      if (allRoles.length === 0) {
+        return interaction.reply({ content: 'No reaction role panels found.', ephemeral: true });
+      }
+
+      // Group by message
+      const panels = {};
+      for (const r of allRoles) {
+        if (!panels[r.message_id]) {
+          panels[r.message_id] = { channelId: r.channel_id, roles: [] };
         }
+        panels[r.message_id].roles.push(r);
       }
 
-      if (guildPanels.length === 0) {
-        return interaction.reply({ content: 'No active reaction role panels.', ephemeral: true });
-      }
-
-      const list = guildPanels.map(p =>
-        `• **${p.title || 'Untitled'}** — ${p.roles.length} role(s) — <#${p.channelId}> (msg: \`${p.messageId}\`)`
-      ).join('\n');
+      const list = Object.entries(panels).map(([msgId, data]) => {
+        const roleNames = data.roles.map(r => `${r.emoji} ${r.label || r.role_id}`).join(', ');
+        return `• <#${data.channelId}> (msg: \`${msgId}\`) — ${roleNames}`;
+      }).join('\n');
 
       await interaction.reply({ content: list, ephemeral: true });
     }
-  },
-
-  /**
-   * Handle the string select menu interaction for reaction roles.
-   */
-  async handleSelect(interaction) {
-    const [, guildId, messageId] = interaction.customId.split(':');
-    const panelKey = `${guildId}:${messageId}`;
-    const panel = activePanels.get(panelKey);
-
-    if (!panel) {
-      return interaction.reply({ content: 'This reaction role panel is no longer active.', ephemeral: true });
-    }
-
-    const selected = interaction.values;
-    const member = interaction.member;
-    const added = [];
-    const removed = [];
-
-    for (const roleData of panel.roles) {
-      const hasRole = member.roles.cache.has(roleData.roleId);
-      if (selected.includes(roleData.roleId) && !hasRole) {
-        await member.roles.add(roleData.roleId).catch(() => {});
-        added.push(roleData.label);
-      } else if (!selected.includes(roleData.roleId) && hasRole) {
-        await member.roles.remove(roleData.roleId).catch(() => {});
-        removed.push(roleData.label);
-      }
-    }
-
-    const parts = [];
-    if (added.length > 0) parts.push(`✅ Added: ${added.join(', ')}`);
-    if (removed.length > 0) parts.push(`❌ Removed: ${removed.join(', ')}`);
-    if (parts.length === 0) parts.push('No changes.');
-
-    await interaction.reply({ content: parts.join('\n'), ephemeral: true });
   },
 };
 
 /** Extract message ID from a message link or raw ID. */
 function resolveMessageId(input) {
   if (!input) return null;
-  // Handle message link: https://discord.com/channels/GUILD/CHANNEL/MESSAGE
   const linkMatch = input.match(/channels\/\d+\/\d+\/(\d+)/);
   if (linkMatch) return linkMatch[1];
   return input.trim();
 }
 
-/** Find a panel by guild ID and message ID. */
-function findPanel(guildId, messageId) {
-  if (!messageId) return null;
-  const key = `${guildId}:${messageId}`;
-  return activePanels.get(key) || null;
+/** Normalize an emoji string for storage and reaction lookup. */
+function normalizeEmoji(str) {
+  if (!str) return str;
+  // Custom emoji format: <:name:id> or <a:name:id>
+  const customMatch = str.match(/^<a?:([^:]+):(\d+)>$/);
+  if (customMatch) return `<:${customMatch[1]}:${customMatch[2]}>`;
+  // Unicode emoji — return as-is
+  return str.trim();
 }

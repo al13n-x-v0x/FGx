@@ -314,6 +314,25 @@ const MIGRATIONS = [
 
   CREATE INDEX IF NOT EXISTS idx_social_target ON social_interactions (guild_id, target_id, kind);
   `,
+
+  // Migration 7 — reaction roles (real Discord reactions, not select menus).
+  // Maps a message+emoji to a role. When a user reacts, they get the role;
+  // when they unreact, the role is removed.
+  `
+  CREATE TABLE IF NOT EXISTS reaction_roles (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id    TEXT NOT NULL,
+    channel_id  TEXT NOT NULL,
+    message_id  TEXT NOT NULL,
+    role_id     TEXT NOT NULL,
+    emoji       TEXT NOT NULL,
+    label       TEXT,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (guild_id, message_id, emoji)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_rr_message ON reaction_roles (guild_id, message_id);
+  `,
 ];
 
 module.exports = { MIGRATIONS };
