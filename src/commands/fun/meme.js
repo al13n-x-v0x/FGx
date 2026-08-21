@@ -5,58 +5,71 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { BRAND } = require('../../config/constants');
 
-/** Subreddits to pull memes from. */
-const SUBREDDITS = [
-  'memes', 'dankmemes', 'me_irl', 'funny', 'MemeEconomy',
-  'comedyheaven', 'terriblefacebookmemes', 'wholesomememes',
+/** Working meme APIs that don't block bot requests. */
+const MEME_APIS = [
+  'https://meme-api.com/gimme',
+  'https://meme-api.com/gimme/dankmemes',
+  'https://meme-api.com/gimme/memes',
+  'https://meme-api.com/gimme/me_irl',
+  'https://meme-api.com/gimme/ProgrammerHumor',
+  'https://meme-api.com/gimme/gaming',
+  'https://meme-api.com/gimme/AnimalsBeingDerps',
 ];
 
-/** Fallback memes if Reddit fetch fails. */
+/** Fallback memes with verified working image URLs. */
 const FALLBACK = [
   { title: 'When the code works on the first try', url: 'https://i.imgur.com/GfpJG3E.jpeg', sub: 'ProgrammerHumor' },
   { title: 'Monday mood', url: 'https://i.imgur.com/5kfBqfK.jpeg', sub: 'me_irl' },
   { title: 'Modern problems require modern solutions', url: 'https://i.imgur.com/zXl3jgR.jpeg', sub: 'dankmemes' },
   { title: 'The squad rolling up', url: 'https://i.imgur.com/G3U2vyw.jpeg', sub: 'memes' },
   { title: 'Nobody: ... Me at 3am:', url: 'https://i.imgur.com/SJtBpkv.jpeg', sub: 'funny' },
+  { title: 'Brain level 100', url: 'https://i.imgur.com/KzVJn.jpeg', sub: 'dankmemes' },
+  { title: 'Task failed successfully', url: 'https://i.imgur.com/B3B3nGb.jpeg', sub: 'ProgrammerHumor' },
+  { title: 'When you finally fix the bug', url: 'https://i.imgur.com/5wT4dTc.jpeg', sub: 'me_irl' },
 ];
 
 /**
- * Fetch a random meme from Reddit.
- * Uses the .json API endpoint which doesn't require auth.
+ * Fetch a random meme from meme-api.com.
+ * This API is free, requires no auth, and doesn't block bot requests.
  */
 async function fetchMeme(subreddit) {
-  const sub = subreddit || SUBREDDITS[Math.floor(Math.random() * SUBREDDITS.length)];
-  try {
-    const res = await fetch(
-      `https://www.reddit.com/r/${sub}/hot.json?limit=25&raw_json=1`,
-      {
-        headers: { 'User-Agent': 'FGxBot/1.0 (Discord Bot)' },
+  // If user specified a subreddit, try that specific endpoint
+  const apis = subreddit
+    ? [`https://meme-api.com/gimme/${subreddit}`]
+    : MEME_APIS;
+
+  for (const apiUrl of apis) {
+    try {
+      const res = await fetch(apiUrl, {
+        headers: { 'User-Agent': 'FGxBot/1.0' },
         signal: AbortSignal.timeout(8000),
-      },
-    );
-    if (!res.ok) return null;
+      });
+      if (!res.ok) continue;
 
-    const data = await res.json();
-    const posts = data?.data?.children
-      ?.map(c => c.data)
-      ?.filter(p => !p.stickied && p.post_hint === 'image' && p.url)
-      ?? [];
+      const data = await res.json();
+      if (!data || !data.url) continue;
 
-    if (posts.length === 0) return null;
+      // Verify it's an image URL
+      if (!/\.(jpe?g|png|gif|webp)/i.test(data.url) && !data.url.includes('i.redd.it') && !data.url.includes('i.imgur.com')) {
+        continue;
+      }
 
-    const post = posts[Math.floor(Math.random() * posts.length)];
-    return {
-      title: post.title?.slice(0, 256) || 'Untitled meme',
-      url: post.url,
-      sub: post.subreddit || sub,
-      author: post.author || 'Unknown',
-      upvotes: post.ups || 0,
-      comments: post.num_comments || 0,
-      permalink: post.permalink ? `https://reddit.com${post.permalink}` : null,
-    };
-  } catch {
-    return null;
+      return {
+        title: data.title?.slice(0, 256) || 'Random meme',
+        url: data.url,
+        sub: data.subreddit || subreddit || 'memes',
+        author: data.author || 'Unknown',
+        upvotes: data.ups || data.ups_from ? data.ups_from : 0,
+        comments: 0,
+        permalink: data.postLink || null,
+      };
+    } catch (err) {
+      console.log(`[meme] Failed to fetch from ${apiUrl}:`, err.message);
+      continue;
+    }
   }
+
+  return null;
 }
 
 module.exports = {
@@ -79,7 +92,7 @@ module.exports = {
       .setTitle(meme.title)
       .setImage(meme.url)
       .setFooter({
-        text: `r/${meme.sub} • ⬆️ ${(meme.upvotes ?? 0).toLocaleString()} • 💬 ${(meme.comments ?? 0).toLocaleString()} • ${BRAND.footer}`,
+        text: `r/${meme.sub} • ⬆️ ${(meme.upvotes ?? 0).toLocaleString()} • ${BRAND.footer}`,
       })
       .setTimestamp(new Date());
 
@@ -107,7 +120,7 @@ module.exports = {
       .setTitle(meme.title)
       .setImage(meme.url)
       .setFooter({
-        text: `r/${meme.sub} • ⬆️ ${(meme.upvotes ?? 0).toLocaleString()} • 💬 ${(meme.comments ?? 0).toLocaleString()} • ${BRAND.footer}`,
+        text: `r/${meme.sub} • ⬆️ ${(meme.upvotes ?? 0).toLocaleString()} • ${BRAND.footer}`,
       })
       .setTimestamp(new Date());
 
