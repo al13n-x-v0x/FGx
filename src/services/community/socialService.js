@@ -49,6 +49,92 @@ const EMOJI = {
   dance: '💃',
 };
 
+/** Curated GIF URLs for each interaction (hosted on Tenor, free to use). */
+const GIFS = {
+  slap: [
+    'https://media.tenor.com/images/54a15c7757e08c68d5f7b89b3e3e5e5e/tenor.gif',
+    'https://media1.tenor.com/m/WiRBXorDxMoAAAAC/anime-slap.gif',
+    'https://media1.tenor.com/m/7ZNQqW8x9ZoAAAAC/anime-slap.gif',
+  ],
+  hug: [
+    'https://media1.tenor.com/m/P0fK92xTiG4AAAAC/hug-anime.gif',
+    'https://media1.tenor.com/m/Mp4-8z3rTuEAAAAC/hug-cuddle.gif',
+    'https://media1.tenor.com/m/LXOR2cJY9WcAAAAC/anime-hug.gif',
+  ],
+  kiss: [
+    'https://media1.tenor.com/m/TK1dAS3u1fcAAAAC/kiss-anime.gif',
+    'https://media1.tenor.com/m/BsdnWrPaUKYAAAAC/kiss-love.gif',
+    'https://media1.tenor.com/m/fF1aVoPqz2sAAAAC/kiss-cute.gif',
+  ],
+  punch: [
+    'https://media1.tenor.com/m/4E5iEz6_qQEAAAAC/punch-anime.gif',
+    'https://media1.tenor.com/m/EGKa5FKHO8oAAAAC/punch-fight.gif',
+    'https://media1.tenor.com/m/k7bMb2d-XiEAAAAC/punch-anime-fight.gif',
+  ],
+  tickle: [
+    'https://media1.tenor.com/m/jR9zA2-5vFsAAAAC/tickle-anime.gif',
+    'https://media1.tenor.com/m/4GWL4z_yCx8AAAAC/tickle-laugh.gif',
+    'https://media1.tenor.com/m/7q9k2aX-aMYAAAAC/tickle-cute.gif',
+  ],
+  poke: [
+    'https://media1.tenor.com/m/sSvwVm-Sfm8AAAAC/poke-anime.gif',
+    'https://media1.tenor.com/m/hA3tvZDzS_QAAAAC/poke-boop.gif',
+    'https://media1.tenor.com/m/T5RQMQ8x-hEAAAAC/poke-hello.gif',
+  ],
+  cuddle: [
+    'https://media1.tenor.com/m/9hxIgzICbqoAAAAC/cuddle-anime.gif',
+    'https://media1.tenor.com/m/P0fK92xTiG4AAAAC/cuddle-hug.gif',
+    'https://media1.tenor.com/m/0_6nKg-0dfgAAAAC/cuddle-cute.gif',
+  ],
+  dance: [
+    'https://media1.tenor.com/m/9UjYI6AQ_bEAAAAC/dance-anime.gif',
+    'https://media1.tenor.com/m/fFnfwbX-aQEAAAAC/dance-party.gif',
+    'https://media1.tenor.com/m/kfIjKVZSkjYAAAAC/dance-happy.gif',
+  ],
+  highfive: [
+    'https://media1.tenor.com/m/3CkJGf_kmgEAAAAC/highfive-anime.gif',
+    'https://media1.tenor.com/m/bpvHmFQKyyYAAAAC/highfive-five.gif',
+    'https://media1.tenor.com/m/kIq2F2kPrhEAAAAC/highfive-celebrate.gif',
+  ],
+  pat: [
+    'https://media1.tenor.com/m/9gxg_SfR_voAAAAC/pat-anime.gif',
+    'https://media1.tenor.com/m/5yF9zSG_q-QAAAAC/pat-head.gif',
+    'https://media1.tenor.com/m/EpFJeCOBnOQAAAAC/pat-cute.gif',
+  ],
+  clap: [
+    'https://media1.tenor.com/m/WJEZhjCnbdAAAAAC/clap-anime.gif',
+    'https://media1.tenor.com/m/CZjEfcUuIBQAAAAC/clap-bravo.gif',
+    'https://media1.tenor.com/m/iDaLp1vF8j0AAAAC/clap-applause.gif',
+  ],
+  stare: [
+    'https://media1.tenor.com/m/9BZB3A7Q-GgAAAAC/stare-anime.gif',
+    'https://media1.tenor.com/m/sdE3JU1Xjj0AAAAC/stare-intense.gif',
+    'https://media1.tenor.com/m/pDb8W_uqVtIAAAAC/stare-looking.gif',
+  ],
+  boop: [
+    'https://media1.tenor.com/m/QG3qL1b6Va0AAAAC/boop-nose.gif',
+    'https://media1.tenor.com/m/LhvfHpHrFnIAAAAC/boop-cute.gif',
+    'https://media1.tenor.com/m/q-Mfw6uGQWcAAAAC/boop-anime.gif',
+  ],
+  feed: [
+    'https://media1.tenor.com/m/h1dPNR1jOiEAAAAC/feed-cookie.gif',
+    'https://media1.tenor.com/m/KShAuJU3rQkAAAAC/feed-snack.gif',
+    'https://media1.tenor.com/m/NmaIY74xJMYAAAAC/feed-cute.gif',
+  ],
+  bite: [
+    'https://media1.tenor.com/m/QU-5ZXhJxnEAAAAC/bite-anime.gif',
+    'https://media1.tenor.com/m/0IPxy7aEHXoAAAAC/bite-chomp.gif',
+    'https://media1.tenor.com/m/Vcbmxz6JCaUAAAAC/bite-cute.gif',
+  ],
+};
+
+/** Pick a random GIF for the given kind. */
+function gifFor(kind) {
+  const pool = GIFS[kind];
+  if (!pool || pool.length === 0) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 /** Randomized flavor lines; {actor}/{target} are replaced with names. */
 const LINES = {
   slap: [
@@ -147,7 +233,8 @@ function interact(guildId, actorId, targetId, kind, targetName = 'them', actorNa
     throw err;
   }
   const count = socialRepo.add(guildId, actorId, targetId, kind);
-  return { kind, actorId, targetId, count, emoji: EMOJI[kind], line: lineFor(kind, actorName, targetName, rng) };
+  const gif = gifFor(kind);
+  return { kind, actorId, targetId, count, emoji: EMOJI[kind], gif, line: lineFor(kind, actorName, targetName, rng) };
 }
 
 /** Rich stats for one member: dealt/received per kind + lifetime. */
@@ -173,4 +260,4 @@ function top(guildId, kind, n = 5) {
   return socialRepo.top(guildId, kind, n);
 }
 
-module.exports = { socialService: { interact, stats, lifetime, top, KINDS, EMOJI } };
+module.exports = { socialService: { interact, stats, lifetime, top, KINDS, EMOJI, GIFS, gifFor } };

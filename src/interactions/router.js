@@ -16,6 +16,7 @@ const robloxService = require('../services/community/robloxService');
 const privateServerService = require('../services/clan/privateServerService');
 const { guildConfigRepo } = require('../database/repos/guildConfig');
 const { eventsRepo, scrimsRepo, trainingRepo } = require('../database/repos/competitive');
+const giveawayService = require('../services/community/giveawayService');
 const participation = require('../services/clan/participation');
 const shuffleService = require('../services/clan/shuffleService');
 const { logAudit } = require('../services/logging/auditLogger');
@@ -398,7 +399,24 @@ const handlers = [
   },
   { match: 'tryout:apply:modal', fn: (i) => handleTryoutModal(i), modal: true },
   { match: 'help:', fn: (i) => require('../commands/utility/help').handleButton(i) },
+  { match: 'giveaway:enter', fn: (i) => giveawayService.handleEnter(i) },
+  { match: 'giveaway:reroll', fn: (i) => handleGiveawayReroll(i) },
 ];
+
+/** Handle giveaway reroll button. */
+async function handleGiveawayReroll(interaction) {
+  const messageId = interaction.customId.split(':')[2];
+  if (!messageId) {
+    return interaction.reply({ content: 'This giveaway has no data.', ephemeral: true });
+  }
+  const result = await giveawayService.reroll(messageId, interaction.client);
+  if (!result) {
+    return interaction.reply({ content: '❌ No entries to reroll from.', ephemeral: true });
+  }
+  await interaction.reply({
+    content: `🔀 New winner: <@${result.winnerId}>! You won **${result.prize}**!`,
+  });
+}
 
 /** Route a component/modal interaction by customId prefix. */
 async function route(interaction) {

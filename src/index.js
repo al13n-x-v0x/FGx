@@ -115,6 +115,10 @@ async function main() {
   const robloxService = require('./services/community/robloxService');
   setInterval(() => robloxService.sweepExpiredCodes(), 2 * 60 * 1000);
 
+  // Auto-sweep expired giveaways every 30 seconds.
+  const giveawayService = require('./services/community/giveawayService');
+  setInterval(() => giveawayService.sweep(client), 30 * 1000);
+
   // Self-pinger: keep Render free-tier awake (pings /health every 1 min).
   const PING_INTERVAL_MS = 1 * 60 * 1000;
   setInterval(() => {

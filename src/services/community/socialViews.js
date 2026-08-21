@@ -39,6 +39,7 @@ function interactionEmbed(result, targetName) {
     description:
       `${result.line}\n\n` +
       `That's **#${pairCount}** ${verb} you've ${GIVEN_KINDS.has(verb) ? 'given' : 'shared with'} **${targetName}**.`,
+    image: result.gif ? { url: result.gif } : undefined,
     footer: { text: `${BRAND.footer} • FGx socials` },
   };
 }
