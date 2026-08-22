@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-const { env, aiConfigured, aiTimeoutMs, resolveProvider, fallbackProviders, keyList, modelList } = require('../../config/env');
+const { env, aiConfigured, aiTimeoutMs, resolveProvider, fallbackProviders, keyList, modelList, providerLabel } = require('../../config/env');
 const { logger } = require('../../utils/logger');
 
 /**
@@ -43,12 +43,14 @@ async function callOpenAiCompatible(baseUrl, apiKey, model, { system, messages, 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), aiTimeoutMs());
   try {
+    // Ollama doesn't need an Authorization header
+    const headers = { 'Content-Type': 'application/json' };
+    if (apiKey !== 'ollama') {
+      headers.Authorization = `Bearer ${apiKey}`;
+    }
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
         model,
         messages: [
@@ -168,10 +170,12 @@ async function chatCompletion({ system, messages, maxTokens = 800, temperature =
   if (!aiConfigured()) throw new AIUnavailableError();
 
   // Primary provider first (AI_PROVIDER or auto-detect), then every other
-  // configured provider as automatic fallback.
-  const providers = [resolveProvider(), ...fallbackProviders()];
+  // configured provider as automatic fallback.    const providers = [resolveProvider(), ...fallbackProviders()];
   const mode = env.AI_FAILOVER_MODE;
   let lastError = null;
+
+  // Ollama base URL resolver
+  const ollamaUrl = env.OLLAMA_BASE_URL || 'http://localhost:11434';
 
   for (const provider of providers) {
     const pool = buildPool(provider);
@@ -188,15 +192,20 @@ async function chatCompletion({ system, messages, maxTokens = 800, temperature =
           provider === 'gemini'
             ? await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature })
             : await callOpenAiCompatible(
-                provider === 'groq' ? 'https://api.groq.com/openai/v1' : env.AI_BASE_URL,
-                entry.key,
+                provider === 'groq'
+                  ? 'https://api.groq.com/openai/v1'
+                  : provider === 'ollama'
+                    ? `${ollamaUrl}/v1`
+                    : env.AI_BASE_URL,
+                provider === 'ollama' ? 'ollama' : entry.key,
                 entry.model,
                 { system, messages, maxTokens, temperature },
               );
+        const label = provider === 'ollama' ? 'Ollama (Local)' : providerLabel();
         if (provider !== providers[0]) {
-          logger.warn('ai provider fallback used', { provider, model: entry.model });
+          logger.warn('ai provider fallback used', { provider: label, model: entry.model });
         } else {
-          logger.debug('ai request ok', { provider, model: entry.model, keyIndex: index + 1 });
+          logger.debug('ai request ok', { provider: label, model: entry.model, keyIndex: index + 1 });
         }
         return result;
       } catch (err) {

@@ -16,7 +16,7 @@ const OPTIONAL_DEFAULTS = {
   CLIENT_ID: '',
   GUILD_ID: '',
   DATABASE_PATH: 'data/fgx.db',
-  // AI provider: '' (auto-detect) | 'openai' | 'gemini' | 'groq'
+  // AI provider: '' (auto-detect) | 'openai' | 'gemini' | 'groq' | 'ollama'
   AI_PROVIDER: '',
   // Single-key vars (kept for compatibility) plus comma-separated key/model
   // lists for key shuffling and model shuffling.
@@ -34,6 +34,10 @@ const OPTIONAL_DEFAULTS = {
   GROQ_KEYS: '',
   GROQ_MODEL: 'groq/compound',
   GROQ_MODELS: '',
+  // Ollama (local AI, no API key needed)
+  OLLAMA_BASE_URL: 'http://localhost:11434',
+  OLLAMA_MODEL: 'llama3.1',
+  OLLAMA_MODELS: '',
   // failover (default) | roundrobin | shuffle
   AI_FAILOVER_MODE: 'failover',
   AI_TIMEOUT_MS: '30000',
@@ -93,7 +97,7 @@ if (!Number.isInteger(webhookPort) || webhookPort < 1 || webhookPort > 65535) {
 }
 env.WEBHOOK_PORT = String(webhookPort);
 
-const AI_PROVIDERS = ['openai', 'gemini', 'groq'];
+const AI_PROVIDERS = ['openai', 'gemini', 'groq', 'ollama'];
 
 /** Discord gateway intents: 'full' requires privileged intents enabled in the Developer Portal. */
 const DISCORD_INTENTS_MODES = ['full', 'basic'];
@@ -103,9 +107,16 @@ if (!DISCORD_INTENTS_MODES.includes(env.DISCORD_INTENTS.toLowerCase())) {
 
 /**
  * Comma-separated list of API keys for a provider (plural var wins, falls
- * back to the single-key var). Returns a non-empty array or throws.
+ * back to the single-key var). Ollama needs no key — returns ['ollama']
+ * only if explicitly configured or OLLAMA_BASE_URL is set.
  */
 function keyList(provider) {
+  if (provider === 'ollama') {
+    // Only consider Ollama available if explicitly set as provider or OLLAMA_BASE_URL is non-default
+    const explicitlyConfigured = env.AI_PROVIDER.toLowerCase() === 'ollama';
+    const hasCustomUrl = env.OLLAMA_BASE_URL && env.OLLAMA_BASE_URL !== 'http://localhost:11434';
+    return (explicitlyConfigured || hasCustomUrl) ? ['ollama'] : [];
+  }
   const raw =
     provider === 'gemini'
       ? env.GEMINI_KEYS || env.GEMINI_API_KEY
@@ -123,7 +134,9 @@ function modelList(provider) {
       ? env.GEMINI_MODELS || env.GEMINI_MODEL
       : provider === 'groq'
         ? env.GROQ_MODELS || env.GROQ_MODEL
-        : env.AI_MODELS || env.AI_MODEL;
+        : provider === 'ollama'
+          ? env.OLLAMA_MODELS || env.OLLAMA_MODEL
+          : env.AI_MODELS || env.AI_MODEL;
   return (raw || '').split(',').map((s) => s.trim()).filter(Boolean);
 }
 
@@ -151,8 +164,8 @@ function aiConfigured() {
   return resolveProvider() !== null;
 }
 
-/** Auto-detect priority: first provider with a key wins. */
-const AUTO_DETECT_ORDER = ['openai', 'groq', 'gemini'];
+/** Auto-detect priority: first provider with a key wins. Ollama is last (local, no key). */
+const AUTO_DETECT_ORDER = ['openai', 'groq', 'gemini', 'ollama'];
 
 /** All providers that have at least one key, in auto-detect priority order. */
 function configuredProviders() {
@@ -173,7 +186,10 @@ function fallbackProviders() {
 function providerLabel() {
   const provider = resolveProvider();
   if (!provider) return 'not configured';
-  return provider === 'openai' ? 'OpenAI' : provider === 'gemini' ? 'Gemini' : 'Groq';
+  if (provider === 'openai') return 'OpenAI';
+  if (provider === 'gemini') return 'Gemini';
+  if (provider === 'ollama') return 'Ollama (Local)';
+  return 'Groq';
 }
 
 /** The model name for the resolved provider. */

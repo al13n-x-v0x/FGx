@@ -28,6 +28,18 @@ function requireAdmin(member) {
   requirePerms(member, [PermissionsBitField.Flags.ManageGuild], 'Only administrators can use that.');
 }
 
+/** Require the member to be the server owner, co-owner, or leader. */
+function requireOwnerOrLeader(member) {
+  if (!member || !member.guild) throw new PermissionError('Cannot verify ownership.');
+  if (member.id === member.guild.ownerId) return; // server owner always passes
+  // Check for Co-Owner or Leader role (case-insensitive)
+  const ownerRoles = ['co-owner', 'leader'];
+  const hasRole = member.roles.cache.some(r => ownerRoles.includes(r.name.toLowerCase()));
+  if (!hasRole) {
+    throw new PermissionError('Only the server owner, Co-Owner, or Leader can use this.');
+  }
+}
+
 /**
  * Validate that a moderator can act on a target:
  *  - moderator is not the target

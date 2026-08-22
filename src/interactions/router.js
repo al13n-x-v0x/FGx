@@ -412,6 +412,7 @@ const handlers = [
   { match: 'embed:cancel', fn: (i) => require('../commands/utility/embedBuilder').handleButton(i) },
   { match: 'embed:modal', fn: (i) => require('../commands/utility/embedBuilder').handleModal(i), modal: true },
   { match: 'nitro:', fn: (i) => handleNitroButton(i) },
+  { match: 'editbot:', fn: (i) => require('../commands/admin/editBot').handleButton(i) },
 ];
 
 /** Handle nitro-style buttons. */
