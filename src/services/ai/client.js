@@ -43,9 +43,9 @@ async function callOpenAiCompatible(baseUrl, apiKey, model, { system, messages, 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), aiTimeoutMs());
   try {
-    // Ollama doesn't need an Authorization header
+    // Ollama local doesn't need auth; cloud Ollama providers may need a key
     const headers = { 'Content-Type': 'application/json' };
-    if (apiKey !== 'ollama') {
+    if (apiKey && apiKey !== 'ollama') {
       headers.Authorization = `Bearer ${apiKey}`;
     }
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -172,9 +172,7 @@ async function chatCompletion({ system, messages, maxTokens = 800, temperature =
   // Primary provider first (AI_PROVIDER or auto-detect), then every other
   // configured provider as automatic fallback.    const providers = [resolveProvider(), ...fallbackProviders()];
   const mode = env.AI_FAILOVER_MODE;
-  let lastError = null;
-
-  // Ollama base URL resolver
+  let lastError = null;    // Ollama base URL resolver (works for local and cloud)
   const ollamaUrl = env.OLLAMA_BASE_URL || 'http://localhost:11434';
 
   for (const provider of providers) {
@@ -197,7 +195,8 @@ async function chatCompletion({ system, messages, maxTokens = 800, temperature =
                   : provider === 'ollama'
                     ? `${ollamaUrl}/v1`
                     : env.AI_BASE_URL,
-                provider === 'ollama' ? 'ollama' : entry.key,
+                // For Ollama: use OLLAMA_API_KEY if set (cloud), otherwise 'ollama' (local)
+                provider === 'ollama' ? (entry.key === 'ollama' ? '' : entry.key) : entry.key,
                 entry.model,
                 { system, messages, maxTokens, temperature },
               );

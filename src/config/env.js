@@ -34,10 +34,14 @@ const OPTIONAL_DEFAULTS = {
   GROQ_KEYS: '',
   GROQ_MODEL: 'groq/compound',
   GROQ_MODELS: '',
-  // Ollama (local AI, no API key needed)
+  // Ollama (local or cloud — OpenAI-compatible API)
+  // Set OLLAMA_BASE_URL to a cloud Ollama host (e.g. Novita.ai, self-hosted VPS)
+  // or keep localhost for local usage. No API key needed for local,
+  // but cloud providers may require one via OLLAMA_API_KEY.
   OLLAMA_BASE_URL: 'http://localhost:11434',
   OLLAMA_MODEL: 'llama3.1',
   OLLAMA_MODELS: '',
+  OLLAMA_API_KEY: '',
   // failover (default) | roundrobin | shuffle
   AI_FAILOVER_MODE: 'failover',
   AI_TIMEOUT_MS: '30000',
@@ -112,10 +116,12 @@ if (!DISCORD_INTENTS_MODES.includes(env.DISCORD_INTENTS.toLowerCase())) {
  */
 function keyList(provider) {
   if (provider === 'ollama') {
-    // Only consider Ollama available if explicitly set as provider or OLLAMA_BASE_URL is non-default
+    // Ollama is available if explicitly set as provider, or has a non-localhost URL (cloud),
+    // or has an API key set (cloud providers need auth).
     const explicitlyConfigured = env.AI_PROVIDER.toLowerCase() === 'ollama';
     const hasCustomUrl = env.OLLAMA_BASE_URL && env.OLLAMA_BASE_URL !== 'http://localhost:11434';
-    return (explicitlyConfigured || hasCustomUrl) ? ['ollama'] : [];
+    const hasApiKey = !!(env.OLLAMA_API_KEY && env.OLLAMA_API_KEY.trim());
+    return (explicitlyConfigured || hasCustomUrl || hasApiKey) ? [env.OLLAMA_API_KEY || 'ollama'] : [];
   }
   const raw =
     provider === 'gemini'
@@ -188,7 +194,10 @@ function providerLabel() {
   if (!provider) return 'not configured';
   if (provider === 'openai') return 'OpenAI';
   if (provider === 'gemini') return 'Gemini';
-  if (provider === 'ollama') return 'Ollama (Local)';
+  if (provider === 'ollama') {
+    const url = env.OLLAMA_BASE_URL || 'http://localhost:11434';
+    return url.includes('localhost') ? 'Ollama (Local)' : `Ollama (${new URL(url).hostname})`;
+  }
   return 'Groq';
 }
 
@@ -212,7 +221,7 @@ function aiSummary() {
   const keys = keyList(provider).length;
   const model = models.length > 1 ? `${models.length} models` : models[0];
   const fb = fallbackProviders()
-    .map((p) => (p === 'openai' ? 'OpenAI' : p === 'gemini' ? 'Gemini' : 'Groq'))
+    .map((p) => (p === 'openai' ? 'OpenAI' : p === 'gemini' ? 'Gemini' : p === 'ollama' ? 'Ollama' : 'Groq'))
     .join(', ');
   const fallback = fb ? ` • fallback: ${fb}` : '';
   return `${providerLabel()} • ${model} • ${keys} key${keys === 1 ? '' : 's'} • ${env.AI_FAILOVER_MODE}${fallback}`;
