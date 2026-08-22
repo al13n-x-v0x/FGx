@@ -16,7 +16,7 @@ const OPTIONAL_DEFAULTS = {
   CLIENT_ID: '',
   GUILD_ID: '',
   DATABASE_PATH: 'data/fgx.db',
-  // AI provider: '' (auto-detect) | 'openai' | 'gemini' | 'groq' | 'ollama'
+  // AI provider: '' (auto-detect) | 'openai' | 'gemini' | 'groq'
   AI_PROVIDER: '',
   // Single-key vars (kept for compatibility) plus comma-separated key/model
   // lists for key shuffling and model shuffling.
@@ -34,14 +34,6 @@ const OPTIONAL_DEFAULTS = {
   GROQ_KEYS: '',
   GROQ_MODEL: 'groq/compound',
   GROQ_MODELS: '',
-  // Ollama (local or cloud — OpenAI-compatible API)
-  // Set OLLAMA_BASE_URL to a cloud Ollama host (e.g. Novita.ai, self-hosted VPS)
-  // or keep localhost for local usage. No API key needed for local,
-  // but cloud providers may require one via OLLAMA_API_KEY.
-  OLLAMA_BASE_URL: 'http://localhost:11434',
-  OLLAMA_MODEL: 'llama3.1',
-  OLLAMA_MODELS: '',
-  OLLAMA_API_KEY: '',
   // failover (default) | roundrobin | shuffle
   AI_FAILOVER_MODE: 'failover',
   AI_TIMEOUT_MS: '30000',
@@ -101,7 +93,7 @@ if (!Number.isInteger(webhookPort) || webhookPort < 1 || webhookPort > 65535) {
 }
 env.WEBHOOK_PORT = String(webhookPort);
 
-const AI_PROVIDERS = ['openai', 'gemini', 'groq', 'ollama'];
+const AI_PROVIDERS = ['openai', 'gemini', 'groq'];
 
 /** Discord gateway intents: 'full' requires privileged intents enabled in the Developer Portal. */
 const DISCORD_INTENTS_MODES = ['full', 'basic'];
@@ -111,18 +103,9 @@ if (!DISCORD_INTENTS_MODES.includes(env.DISCORD_INTENTS.toLowerCase())) {
 
 /**
  * Comma-separated list of API keys for a provider (plural var wins, falls
- * back to the single-key var). Ollama needs no key — returns ['ollama']
- * only if explicitly configured or OLLAMA_BASE_URL is set.
+ * back to the single-key var). Returns a non-empty array or throws.
  */
 function keyList(provider) {
-  if (provider === 'ollama') {
-    // Ollama is available if explicitly set as provider, or has a non-localhost URL (cloud),
-    // or has an API key set (cloud providers need auth).
-    const explicitlyConfigured = env.AI_PROVIDER.toLowerCase() === 'ollama';
-    const hasCustomUrl = env.OLLAMA_BASE_URL && env.OLLAMA_BASE_URL !== 'http://localhost:11434';
-    const hasApiKey = !!(env.OLLAMA_API_KEY && env.OLLAMA_API_KEY.trim());
-    return (explicitlyConfigured || hasCustomUrl || hasApiKey) ? [env.OLLAMA_API_KEY || 'ollama'] : [];
-  }
   const raw =
     provider === 'gemini'
       ? env.GEMINI_KEYS || env.GEMINI_API_KEY
@@ -140,9 +123,7 @@ function modelList(provider) {
       ? env.GEMINI_MODELS || env.GEMINI_MODEL
       : provider === 'groq'
         ? env.GROQ_MODELS || env.GROQ_MODEL
-        : provider === 'ollama'
-          ? env.OLLAMA_MODELS || env.OLLAMA_MODEL
-          : env.AI_MODELS || env.AI_MODEL;
+        : env.AI_MODELS || env.AI_MODEL;
   return (raw || '').split(',').map((s) => s.trim()).filter(Boolean);
 }
 
@@ -170,8 +151,8 @@ function aiConfigured() {
   return resolveProvider() !== null;
 }
 
-/** Auto-detect priority: first provider with a key wins. Ollama is last (local, no key). */
-const AUTO_DETECT_ORDER = ['openai', 'groq', 'gemini', 'ollama'];
+/** Auto-detect priority: first provider with a key wins. */
+const AUTO_DETECT_ORDER = ['openai', 'groq', 'gemini'];
 
 /** All providers that have at least one key, in auto-detect priority order. */
 function configuredProviders() {
@@ -194,10 +175,6 @@ function providerLabel() {
   if (!provider) return 'not configured';
   if (provider === 'openai') return 'OpenAI';
   if (provider === 'gemini') return 'Gemini';
-  if (provider === 'ollama') {
-    const url = env.OLLAMA_BASE_URL || 'http://localhost:11434';
-    return url.includes('localhost') ? 'Ollama (Local)' : `Ollama (${new URL(url).hostname})`;
-  }
   return 'Groq';
 }
 
@@ -221,7 +198,7 @@ function aiSummary() {
   const keys = keyList(provider).length;
   const model = models.length > 1 ? `${models.length} models` : models[0];
   const fb = fallbackProviders()
-    .map((p) => (p === 'openai' ? 'OpenAI' : p === 'gemini' ? 'Gemini' : p === 'ollama' ? 'Ollama' : 'Groq'))
+    .map((p) => (p === 'openai' ? 'OpenAI' : p === 'gemini' ? 'Gemini' : 'Groq'))
     .join(', ');
   const fallback = fb ? ` • fallback: ${fb}` : '';
   return `${providerLabel()} • ${model} • ${keys} key${keys === 1 ? '' : 's'} • ${env.AI_FAILOVER_MODE}${fallback}`;
