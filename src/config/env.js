@@ -44,6 +44,14 @@ const OPTIONAL_DEFAULTS = {
   // Discord gateway intents: 'full' (privileged intents; needs Developer Portal
   // toggles) or 'basic' (runs without them, degrades welcome/raid/AI-on-content).
   DISCORD_INTENTS: 'full',
+  // Minecraft server config (standard MC query protocol)
+  MC_SERVER_HOST: 'aternos.org',
+  MC_SERVER_PORT: '25565',
+  // Aternos account for auto-start (optional — only needed for /minecraft start)
+  ATERNOS_USERNAME: '',
+  ATERNOS_PASSWORD: '',
+  // Server display name for embeds
+  MC_SERVER_NAME: 'FGx Minecraft Server',
 };
 
 /** @type {Record<string, string>} */
