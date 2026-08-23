@@ -5,7 +5,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { BRAND } = require('../../config/constants');
 const { getGif } = require('../../utils/gifLibrary');
-const { chatCompletion } = require('../../services/ai/client');
+const { quickAI } = require('../../services/ai/quick');
 const { analyzeImage } = require('../../services/ai/vision');
 
 // ─── Roast intensity levels ──────────────────────────────
@@ -318,7 +318,15 @@ const roastCmd = {
 
     await interaction.deferReply();
 
-    const { text: roastText, method } = await generateRoast(target, heat, self);
+    let roastText, method;
+    try {
+      ({ text: roastText, method } = await generateRoast(target, heat, self));
+    } catch (err) {
+      // AI completely failed — use a curated fallback
+      roastText = randomFrom(MEGA_ROASTS[heat]);
+      method = 'fallback';
+      console.log('[roast] AI completely failed, using fallback:', err.message);
+    }
 
     // Add intro and outro for extra flavor
     const intro = self ? '' : randomFrom(ROAST_INTROS);
@@ -442,8 +450,9 @@ async function generateAIRoast(username, heat, isSelf) {
     ? `Someone just asked you to roast THEMSELVES on stage. They're sitting right there, ready to take it.\n\nWrite ONE absolutely savage, hilarious self-roast. Be ${heatLevel}.\nThe audience is dying laughing.\n\nRULES:\n- Under 200 characters\n- NO asterisks, NO markdown, NO formatting\n- Just the raw roast text\n- Sound like a real comedian, not a chatbot\n- Swearing is encouraged\n- Be creative and unique\n\nWrite the roast now.`
     : `You're roasting someone named "${username}" at a sold-out show. They're sitting in the front row.\n\nWrite ONE absolutely savage, hilarious roast about them. Be ${heatLevel}.\n\nRULES:\n- Under 200 characters\n- NO asterisks, NO markdown, NO formatting\n- Just the raw roast text\n- Reference their username if it's funny\n- Swearing is encouraged\n- Be creative and unique, not generic\n- Sound like Andrew Schulz or Dave Chappelle at a roast battle\n\nWrite the roast now.`;
 
-  const result = await chatCompletion({ system, messages: [{ role: 'user', content: prompt }], maxTokens: 300, temperature: 0.9 });
-  return result.replace(/^["']|["']$/g, '').trim();
+  const result = await quickAI(system, prompt, { maxTokens: 300, temperature: 0.9 });
+  if (!result) throw new Error('AI unavailable');
+  return result;
 }
 
 // ─── /compliment ────────────────────────────────────────────
@@ -459,12 +468,11 @@ const complimentCmd = {
     await interaction.deferReply();
     let compliment;
     try {
-      compliment = await chatCompletion({
-        system: 'You are the world\'s best hype person. Give wholesome, creative, heartfelt compliments. Be genuine and make people feel special.',
-        messages: [{ role: 'user', content: `Give a wholesome, creative, heartfelt compliment for a Discord user named "${target.username}". Make it genuine and unique. Under 200 chars. No asterisks, no formatting, just the text.` }],
-        maxTokens: 300,
-        temperature: 0.8,
-      });
+      compliment = await quickAI(
+        'You are the world\'s best hype person. Give wholesome, creative, heartfelt compliments. Be genuine and make people feel special.',
+        `Give a wholesome, creative, heartfelt compliment for a Discord user named "${target.username}". Make it genuine and unique. Under 200 chars. No asterisks, no formatting, just the text.`,
+        { maxTokens: 300, temperature: 0.8 },
+      );
       compliment = compliment.replace(/^["']|["']$/g, '').replace(/\*\*/g, '').trim();
     } catch {
       compliment = randomFrom(COMPLIMENTS);
@@ -495,12 +503,11 @@ const insultCmd = {
     await interaction.deferReply();
     let insult;
     try {
-      insult = await chatCompletion({
-        system: 'You are a witty, savage comedian. Give funny, creative, devastating insults. Swearing is encouraged. Be hilarious, not genuinely mean.',
-        messages: [{ role: 'user', content: `Give a funny, creative, savage insult for a Discord user named "${target.username}". Be clever and hilarious. Swearing allowed. Under 200 chars. No asterisks, no formatting, just the text.` }],
-        maxTokens: 300,
-        temperature: 0.8,
-      });
+      insult = await quickAI(
+        'You are a witty, savage comedian. Give funny, creative, devastating insults. Swearing is encouraged. Be hilarious, not genuinely mean.',
+        `Give a funny, creative, savage insult for a Discord user named "${target.username}". Be clever and hilarious. Swearing allowed. Under 200 chars. No asterisks, no formatting, just the text.`,
+        { maxTokens: 300, temperature: 0.8 },
+      );
       insult = insult.replace(/^["']|["']$/g, '').replace(/\*\*/g, '').trim();
     } catch {
       insult = randomFrom(INSULTS);

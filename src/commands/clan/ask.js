@@ -30,19 +30,26 @@ module.exports = {
         .setFooter({ text: BRAND.footer });
       await interaction.editReply({ embeds: [embed] });
     } catch (err) {
-      if (err instanceof AIUnavailableError) {
+      if (err instanceof AIUnavailableError || err.message?.includes('timeout') || err.name === 'AbortError') {
         return interaction.editReply({
           embeds: [
             {
               color: BRAND.colors.danger,
               title: 'AI unavailable',
               description:
-                'The AI assistant is not configured or the provider is unreachable.\nSet `AI_API_KEY`, `GROQ_API_KEY`, or `GEMINI_API_KEY` in the environment to enable it.',
+                'The AI assistant is temporarily unavailable. It might be rate-limited or the model is too slow.\n\n**Try again in a few seconds.** If this keeps happening, check that `GEMINI_MODEL` is set to `gemini-3.5-flash-lite` in Render env vars.',
             },
           ],
         });
       }
-      throw err;
+      console.error('[ask] unexpected error:', err);
+      await interaction.editReply({
+        embeds: [{
+          color: BRAND.colors.danger,
+          title: 'Something went wrong',
+          description: 'The AI hit an unexpected error. Please try again.',
+        }],
+      });
     }
   },
 };
