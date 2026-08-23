@@ -41,7 +41,7 @@ async function analyzeImage(imageUrl, prompt) {
   const geminiKey = env.GEMINI_API_KEY || env.GOOGLE_API_KEY;
   if (!geminiKey) throw new Error('No Gemini API key configured for vision');
 
-  const model = env.GEMINI_VISION_MODEL || 'gemini-2.0-flash';
+  const model = env.GEMINI_VISION_MODEL || 'gemini-3.5-flash-lite';
   const { base64, mimeType } = await downloadImage(imageUrl);
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(geminiKey)}`;
@@ -61,7 +61,7 @@ async function analyzeImage(imageUrl, prompt) {
   };
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15_000);
+  const timer = setTimeout(() => controller.abort(), 30_000);
 
   try {
     const response = await fetch(url, {

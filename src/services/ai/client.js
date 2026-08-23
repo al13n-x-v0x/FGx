@@ -169,9 +169,11 @@ async function chatCompletion({ system, messages, maxTokens = 800, temperature =
   if (!aiConfigured()) throw new AIUnavailableError();
 
   // Primary provider first (AI_PROVIDER or auto-detect), then every other
-  // configured provider as automatic fallback.    const providers = [resolveProvider(), ...fallbackProviders()];
+  // configured provider as automatic fallback.
+  const providers = [resolveProvider(), ...fallbackProviders()];
   const mode = env.AI_FAILOVER_MODE;
-  let lastError = null;  for (const provider of providers) {
+  let lastError = null;
+  for (const provider of providers) {
     const pool = buildPool(provider);
     if (pool.length === 0) continue; // e.g. explicit AI_PROVIDER without a key
 
