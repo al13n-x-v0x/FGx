@@ -1,9 +1,6 @@
 'use strict';
 
-/*
- * Copyright © 2026 FGx.
- * All rights reserved.
- */
+/* Copyright © 2026 FGx. All rights reserved. */
 
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { env } = require('./config/env');
@@ -47,6 +44,42 @@ async function shutdown(signal) {
   }
 }
 
+// Connect to Discord with auto-retry (never blocks the health endpoint).
+async function connectDiscord(attempt = 1) {
+  try {
+    logger.info(`Discord: connecting (attempt ${attempt})...`);
+    // Timeout login after 15s — prevents hanging if gateway is unreachable.
+    const loginPromise = client.login(env.DISCORD_TOKEN);
+    const loginTimeout = new Promise((_, reject) => {
+      setTimeout(() => reject(Object.assign(new Error('Login timed out after 15s'), { code: 'LOGIN_TIMEOUT' })), 15_000);
+    });
+    await Promise.race([loginPromise, loginTimeout]);
+    logger.info('Discord: logged in successfully');
+
+    // Register slash commands AFTER login, non-blocking.
+    registerCommands(client)
+      .then(() => logger.info('Slash commands registered'))
+      .catch((err) => logger.error('Failed to register slash commands', { error: err.message }));
+
+    // Clean up expired private servers.
+    privateServerService.sweep(client).catch((err) =>
+      logger.warn('private server sweep failed', { error: err.message }),
+    );
+  } catch (err) {
+    if (/disallowed intents/i.test(err.message)) {
+      logger.error('gateway refused: privileged intents not enabled', {
+        hint: 'Enable Server Members + Message Content intents in the Discord Developer Portal, or set DISCORD_INTENTS=basic',
+      });
+    } else if (/token/i.test(err.message) || /unauthorized/i.test(err.message)) {
+      logger.error('Discord token is invalid — check DISCORD_TOKEN env var', { error: err.message });
+    } else {
+      logger.error('Discord login error', { error: err.message });
+    }
+    logger.info(`Discord: retrying in 30s... (attempt ${attempt})`);
+    setTimeout(() => connectDiscord(attempt + 1), 30_000);
+  }
+}
+
 async function main() {
   logger.info(`FGx v${require('../package.json').version} starting`, { node: process.version, env: env.NODE_ENV });
 
@@ -71,44 +104,26 @@ async function main() {
   dashboard.start(client);
   logger.info('Web dashboard server started');
 
-  // Connect to Discord with auto-retry (never blocks the health endpoint).
-  async function connectDiscord(attempt = 1) {
-    try {
-      logger.info(`Discord: connecting (attempt ${attempt})...`);
-      await client.login(env.DISCORD_TOKEN);
-      logger.info('Discord: logged in successfully');
-
-      // Register slash commands AFTER login, non-blocking.
-      registerCommands(client)
-        .then(() => logger.info('Slash commands registered'))
-        .catch((err) => logger.error('Failed to register slash commands', { error: err.message }));
-
-      // Clean up expired private servers.
-      privateServerService.sweep(client).catch((err) =>
-        logger.warn('private server sweep failed', { error: err.message }),
-      );
-    } catch (err) {
-      if (/disallowed intents/i.test(err.message)) {
-        logger.error('gateway refused: privileged intents not enabled', {
-          hint: 'Enable Server Members + Message Content intents in the Discord Developer Portal, or set DISCORD_INTENTS=basic',
-        });
-      } else {
-        logger.error('Discord login error', { error: err.message });
-      }
-      logger.info('Discord: retrying in 30s...');
-      setTimeout(() => connectDiscord(attempt + 1), 30_000);
-    }
-  }
-  await connectDiscord();
-
   // Auto-reconnect on gateway disconnect.
-  client.on('disconnect', () => {
-    logger.warn('Discord disconnected — reconnecting in 30s');
+  client.on('disconnect', (event) => {
+    logger.warn('Discord disconnected', { code: event.code, reason: event.reason });
     setTimeout(() => connectDiscord(), 30_000);
   });
 
   client.on('ready', () => {
-    logger.info(`Discord bot ready — serving ${client.guilds.cache.size} guild(s)`);
+    logger.info(`Discord bot ready — serving ${client.guilds.cache.size} guild(s)`, {
+      user: client.user?.tag,
+      id: client.user?.id,
+    });
+  });
+
+  // Catch gateway errors to prevent silent failures.
+  client.on('error', (err) => {
+    logger.error('Discord gateway error', { error: err.message });
+  });
+
+  client.on('warn', (msg) => {
+    logger.warn('Discord gateway warning', { message: msg });
   });
 
   // Auto-sweep expired Roblox verification codes every 2 minutes.
@@ -128,6 +143,13 @@ async function main() {
   }, PING_INTERVAL_MS);
 
   logger.info('FGx startup complete');
+
+  // Connect to Discord LAST — dashboard is already accepting health checks.
+  if (env.DISCORD_TOKEN && env.DISCORD_TOKEN.length >= 20) {
+    connectDiscord();
+  } else {
+    logger.error('DISCORD_TOKEN is missing or invalid — bot cannot connect to Discord');
+  }
 }
 
 main().catch((err) => {
