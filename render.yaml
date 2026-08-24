@@ -16,22 +16,17 @@ services:
         value: '10000'
       - key: NODE_ENV
         value: production
-      # Free-tier Render has NO persistent disks, so the SQLite DB lives on
-      # ephemeral storage: it survives spin-up/down (keep the service awake
-      # with UptimeRobot) but resets on every redeploy. For permanent data,
-      # upgrade to a paid instance, then add a disk mounted at /data and set
-      # DATABASE_PATH=/data/fgx.db.
       - key: DATABASE_PATH
         value: data/fgx.db
-      # 'basic' runs without privileged intents. Flip to 'full' after enabling
-      # Server Members + Message Content intents in the Discord Developer Portal.
       - key: DISCORD_INTENTS
         value: full
-      # AI: Gemini primary, Groq (2 keys x 2 models) as automatic fallback.
+      # AI: Gemini primary, Groq as fallback.
       - key: AI_PROVIDER
         value: gemini
       - key: GEMINI_MODEL
-        value: gemini-3.6-flash
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_VISION_MODEL
+        value: gemini-3.5-flash-lite
       - key: GROQ_MODELS
         value: groq/compound,groq/compound-mini
       - key: AI_FAILOVER_MODE
@@ -40,8 +35,14 @@ services:
         value: LOG
       - key: AI_TIMEOUT_MS
         value: '30000'
-      # Secrets — after the blueprint creates the service, open the Environment
-      # tab, fill these in, and Save (triggers an automatic redeploy).
+      # Minecraft server config
+      - key: MC_SERVER_HOST
+        value: aternos.org
+      - key: MC_SERVER_PORT
+        value: '25565'
+      - key: MC_SERVER_NAME
+        value: FGx Minecraft Server
+      # Secrets — set these in Render dashboard Environment tab.
       - key: DISCORD_TOKEN
         sync: false
       - key: CLIENT_ID
@@ -49,4 +50,8 @@ services:
       - key: GEMINI_KEYS
         sync: false
       - key: GROQ_KEYS
+        sync: false
+      - key: ATERNOS_USERNAME
+        sync: false
+      - key: ATERNOS_PASSWORD
         sync: false
