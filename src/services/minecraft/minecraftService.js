@@ -20,11 +20,31 @@ async function queryServer(host, port) {
   const serverHost = host || env.MC_SERVER_HOST;
   const serverPort = Number(port || env.MC_SERVER_PORT);
 
+  // Quick DNS check — fail fast on bad hostnames.
+  const dns = require('dns').promises;
   try {
-    const result = await status(serverHost, serverPort, {
-      timeout: 8000,
-      enableSRV: true,
-    });
+    await dns.lookup(serverHost, { family: 4, timeout: 2000 });
+  } catch {
+    return {
+      online: false,
+      host: serverHost,
+      port: serverPort,
+      error: 'ENOTFOUND',
+      message: `Server address "${serverHost}" not found. Set MC_SERVER_HOST to your actual server IP (e.g. yourserver.aternos.me).`,
+    };
+  }
+
+  // Hard timeout wrapper — kill the query after 5 seconds no matter what.
+  const queryPromise = status(serverHost, serverPort, {
+    timeout: 4000,
+    enableSRV: true,
+  });
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(Object.assign(new Error('Query timed out'), { code: 'TIMEOUT' })), 5000);
+  });
+
+  try {
+    const result = await Promise.race([queryPromise, timeoutPromise]);
 
     return {
       online: true,
