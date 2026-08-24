@@ -2,10 +2,15 @@
 
 /* Copyright © 2026 FGx. All rights reserved. */
 
-const net = require('net');
-const { status } = require('minecraft-server-util');
 const { env } = require('../../config/env');
 const { logger } = require('../../utils/logger');
+
+// Lazy-load minecraft-server-util — it has native deps that can hang on require.
+let _mcUtil = null;
+function getMcUtil() {
+  if (!_mcUtil) _mcUtil = require('minecraft-server-util');
+  return _mcUtil;
+}
 
 // Active monitors: Map<channelId, intervalId>
 const monitors = new Map();
@@ -35,7 +40,7 @@ async function queryServer(host, port) {
   }
 
   // Hard timeout wrapper — kill the query after 5 seconds no matter what.
-  const queryPromise = status(serverHost, serverPort, {
+  const queryPromise = getMcUtil().status(serverHost, serverPort, {
     timeout: 4000,
     enableSRV: true,
   });

@@ -2,10 +2,16 @@
 
 /* Copyright © 2026 FGx. All rights reserved. */
 
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { BRAND } = require('../../config/constants');
 const { env } = require('../../config/env');
-const mc = require('../../services/minecraft/minecraftService');
+
+// Lazy-load the MC service — it has heavy deps that can hang on require.
+let _mc = null;
+function mc() {
+  if (!_mc) _mc = require('../../services/minecraft/minecraftService');
+  return _mc;
+}
 
 /** Generate star rating based on latency (lower = better). */
 function latencyStars(ms) {
@@ -107,7 +113,12 @@ module.exports = {
       const host = interaction.options.getString('host') || env.MC_SERVER_HOST;
       const port = interaction.options.getInteger('port') || Number(env.MC_SERVER_PORT);
 
-      const result = await mc.queryServer(host, port);
+      let result;
+      try {
+        result = await mc().queryServer(host, port);
+      } catch (err) {
+        result = { online: false, host, port, error: 'CRASH', message: `Query crashed: ${err.message}` };
+      }
 
       if (result.online) {
         const stars = latencyStars(result.latency);
@@ -197,7 +208,7 @@ module.exports = {
     if (sub === 'start') {
       await interaction.deferReply();
 
-      const result = await mc.startAternos();
+      const result = await mc().startAternos();
 
       const embed = new EmbedBuilder()
         .setColor(result.success ? BRAND.colors.success : BRAND.colors.danger)
@@ -224,7 +235,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed], components: [row] });
 
         // Start monitoring in background
-        mc.startMonitor(interaction.channel, host, port, 30000, 60);
+        mc().startMonitor(interaction.channel, host, port, 30000, 60);
         await interaction.followUp({
           content: '📡 **Auto-monitor started** — I\'ll ping the server every 30s and notify here when it\'s online!',
         });
@@ -245,7 +256,7 @@ module.exports = {
       const host = interaction.options.getString('host') || env.MC_SERVER_HOST;
       const port = interaction.options.getInteger('port') || Number(env.MC_SERVER_PORT);
 
-      if (mc.isMonitoring(interaction.channel.id)) {
+      if (mc().isMonitoring(interaction.channel.id)) {
         return interaction.reply({
           content: '📡 This channel is already being monitored! I\'ll notify when the server comes online.',
           ephemeral: true,
@@ -253,7 +264,7 @@ module.exports = {
       }
 
       // Quick check — if already online, no need to monitor
-      const quickCheck = await mc.queryServer(host, port);
+      const quickCheck = await mc().queryServer(host, port);
       if (quickCheck.online) {
         return interaction.reply({
           content: `🟢 **Server is already online!** \`${host}:${port}\` — ${quickCheck.players.online}/${quickCheck.players.max} players.`,
@@ -261,7 +272,7 @@ module.exports = {
         });
       }
 
-      mc.startMonitor(interaction.channel, host, port, 30000, 60);
+      mc().startMonitor(interaction.channel, host, port, 30000, 60);
 
       const embed = new EmbedBuilder()
         .setColor(BRAND.colors.warn)
@@ -288,7 +299,7 @@ module.exports = {
 
     // ─── STOP ──────────────────────────────────────────────────────────────
     if (sub === 'stop') {
-      const stopped = mc.stopMonitor(interaction.channel.id);
+      const stopped = mc().stopMonitor(interaction.channel.id);
 
       return interaction.reply({
         content: stopped

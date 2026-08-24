@@ -493,7 +493,7 @@ async function handleEmojiPick(interaction) {
 async function handleMinecraftButton(interaction) {
   const mc = require('../services/minecraft/minecraftService');
   const { BRAND } = require('../config/constants');
-  const { env } = require('../config/env');
+  const env = require('../config/env').env;
   const parts = interaction.customId.split(':');
 
   // mc:start — start Aternos server
