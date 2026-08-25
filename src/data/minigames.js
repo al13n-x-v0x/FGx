@@ -63,7 +63,7 @@ const ENEMIES = Object.freeze([
   { id: 'dragonboss', name: 'Dragon Boss', emoji: '🐲', weight: 5, winChance: 0.35, min: 600, max: 1500 },
 ]);
 
-const HUNT_COOLDOWN_MS = 60_000;
+const HUNT_COOLDOWN_MS = 15 * 60_000; // 15 minutes
 const BATTLE_COOLDOWN_MS = 120_000;
 const PRAY_COOLDOWN_MS = 2 * 3_600_000;
 const BATTLE_LOSS_FRACTION = 0.1;
