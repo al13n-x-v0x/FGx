@@ -74,7 +74,14 @@ module.exports = {
         .setDescription('Rob another member (3min cooldown)')
         .addUserOption((o) => o.setName('user').setDescription('Who to rob').setRequired(true)),
     )
-    .addSubcommand((s) => s.setName('fish').setDescription('Go fishing for coins (30s cooldown)')),
+    .addSubcommand((s) => s.setName('fish').setDescription('Go fishing for coins (30s cooldown)'))
+    .addSubcommand((s) => s.setName('shop').setDescription('Buy items with ₣Ԡ🇽 coins'))
+    .addSubcommand((s) =>
+      s
+        .setName('inventory')
+        .setDescription('View your purchased items')
+        .addUserOption((o) => o.setName('user').setDescription('Member (default: you)').setRequired(false)),
+    ),
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
     const userId = interaction.user.id;
@@ -131,6 +138,38 @@ module.exports = {
         }
         throw err;
       }
+    }
+
+    if (sub === 'shop') {
+      const SHOP_ITEMS = [
+        { id: 'crown', name: '👑 Golden Crown', price: 5000, desc: 'Flex on everyone' },
+        { id: 'sword', name: '⚔️ Diamond Sword', price: 3000, desc: 'Looks cool in your inventory' },
+        { id: 'shield', name: '🛡️ Shield of Glory', price: 2500, desc: 'Protection vibes' },
+        { id: 'cape', name: '🦸 Hero Cape', price: 2000, desc: 'Superhero energy' },
+        { id: 'ring', name: '💍 Ring of Fortune', price: 4000, desc: 'Boosts your luck' },
+        { id: 'pet', name: '🐉 Dragon Pet', price: 8000, desc: 'A tiny dragon follows you' },
+        { id: 'title', name: '📛 Custom Title', price: 1500, desc: 'Set a custom title on your profile' },
+        { id: 'frame', name: '🖼️ Profile Frame', price: 1000, desc: 'Fancy border for your profile' },
+        { id: 'gem', name: '💎 Rare Gem', price: 6000, desc: 'Shiny and valuable' },
+        { id: 'booster', name: '🚀 XP Booster (1h)', price: 750, desc: 'Double XP for 1 hour' },
+      ];
+      const lines = SHOP_ITEMS.map((item, i) => `**${i + 1}.** ${item.name} — **${economy.format(item.price)}** ₣Ԡ🇽\n${item.desc}`);
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle('🛒 FGx Shop')
+        .setDescription(lines.join('\n\n'))
+        .setFooter({ text: `${BRAND.footer} • Buy with /fgxcoin shop (coming soon)` });
+      return interaction.reply({ embeds: [embed] });
+    }
+
+    if (sub === 'inventory') {
+      const target = interaction.options.getUser('user') ?? interaction.user;
+      const embed = new EmbedBuilder()
+        .setColor(BRAND.colors.primary)
+        .setTitle(`🎒 ${target.username}'s Inventory`)
+        .setDescription('*Shop items will appear here once purchased!*')
+        .setFooter({ text: BRAND.footer });
+      return interaction.reply({ embeds: [embed] });
     }
 
     if (sub === 'zoo') {

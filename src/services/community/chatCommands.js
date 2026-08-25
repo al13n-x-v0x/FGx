@@ -165,6 +165,30 @@ function parseCommand(line, mentionIds = []) {
   if (cmd === 'rate') {
     return { type: 'rate', thing: rest.join(' ').trim() };
   }
+  if (cmd === 'joke') return { type: 'joke' };
+  if (cmd === 'quote') return { type: 'quote' };
+  if (cmd === 'urban' || cmd === 'ud') {
+    return { type: 'urban', term: rest.join(' ').trim() };
+  }
+  if (cmd === 'wyr' || cmd === 'wouldyourather') return { type: 'wyr' };
+  if (cmd === 'nhie' || cmd === 'neverhaveiever') return { type: 'nhie' };
+  if (cmd === 'truth' || cmd === 'dare') {
+    return { type: 'truthdare', kind: cmd };
+  }
+  if (cmd === 'rps') {
+    const choice = (rest[0] ?? '').toLowerCase();
+    return { type: 'rps', choice: ['rock', 'paper', 'scissors'].includes(choice) ? choice : null };
+  }
+  if (cmd === 'trivia') return { type: 'trivia_chat' };
+  if (cmd === 'baltop') {
+    return { type: 'top', count: 10 };
+  }
+  if (cmd === 'timer' || cmd === 'countdown') {
+    return { type: 'timer', raw: rest.join(' ').trim() };
+  }
+  if (cmd === 'remind' || cmd === 'reminder') {
+    return { type: 'remind', raw: rest.join(' ').trim() };
+  }
   if (cmd === 'zoo' || cmd === 'pets' || cmd === 'animals' || cmd === 'collection') {
     return { type: 'zoo', targetId: mentionIds[0] ?? null };
   }
@@ -705,6 +729,298 @@ async function handle(client, message) {
           footer: { text: BRAND.footer },
         };
         await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'joke': {
+        const jokes = [
+          'Why don\'t scientists trust atoms? Because they make up everything!',
+          'Why did the scarecrow win an award? He was outstanding in his field!',
+          'What do you call a fake noodle? An impasta!',
+          'Why don\'t eggs tell jokes? They\'d crack each other up!',
+          'I told my wife she was drawing her eyebrows too high. She looked surprised.',
+          'Why did the math book look so sad? Because it was full of problems!',
+          'What do you call a bear with no teeth? A gummy bear!',
+          'Why don\'t skeletons fight each other? They don\'t have the guts!',
+          'What did the ocean say to the beach? Nothing, it just waved.',
+          'Why did the bicycle fall over? Because it was two-tired!',
+          'I\'m reading a book about anti-gravity. It\'s impossible to put down!',
+          'What do you call a dog that does magic tricks? A Labracadabrador!',
+          'Why did the cookie go to the doctor? Because it felt crummy!',
+          'What\'s a skeleton\'s least favorite room? The living room!',
+          'Why do cows have hooves instead of feet? Because they lactose.',
+          'I used to hate facial hair, but then it grew on me.',
+          'What did the grape do when it got stepped on? Nothing, it just let out a little wine.',
+          'Why can\'t you give Elsa a balloon? Because she will let it go!',
+          'What do you call a sleeping dinosaur? A dino-snore!',
+          'Why did the student eat his homework? Because the teacher told him it was a piece of cake!',
+        ];
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '😂 Random Joke',
+          description: jokes[Math.floor(Math.random() * jokes.length)],
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'quote': {
+        const quotes = [
+          { text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs' },
+          { text: 'Innovation distinguishes between a leader and a follower.', author: 'Steve Jobs' },
+          { text: 'Stay hungry, stay foolish.', author: 'Stewart Brand' },
+          { text: 'Life is what happens when you\'re busy making other plans.', author: 'John Lennon' },
+          { text: 'The future belongs to those who believe in the beauty of their dreams.', author: 'Eleanor Roosevelt' },
+          { text: 'It is during our darkest moments that we must focus to see the light.', author: 'Aristotle' },
+          { text: 'The best time to plant a tree was 20 years ago. The second best time is now.', author: 'Chinese Proverb' },
+          { text: 'Your time is limited, don\'t waste it living someone else\'s life.', author: 'Steve Jobs' },
+          { text: 'If life were predictable it would cease to be life, and be without flavor.', author: 'Eleanor Roosevelt' },
+          { text: 'In the middle of difficulty lies opportunity.', author: 'Albert Einstein' },
+          { text: 'Believe you can and you\'re halfway there.', author: 'Theodore Roosevelt' },
+          { text: 'The only impossible journey is the one you never begin.', author: 'Tony Robbins' },
+          { text: 'Success is not final, failure is not fatal: it is the courage to continue that counts.', author: 'Winston Churchill' },
+          { text: 'Be yourself; everyone else is already taken.', author: 'Oscar Wilde' },
+          { text: 'So many books, so little time.', author: 'Frank Zappa' },
+        ];
+        const q = quotes[Math.floor(Math.random() * quotes.length)];
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '💬 Random Quote',
+          description: `*"${q.text}"*
+
+— **${q.author}**`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'urban': {
+        if (!parsed.term) {
+          await message.reply({ embeds: [views.warnEmbed('Urban Dictionary', 'Usage: `!urban <term>`')] });
+          return true;
+        }
+        try {
+          const res = await fetch(`https://api.urbandictionary.com/v0/define?term=${encodeURIComponent(parsed.term)}`);
+          const data = await res.json();
+          if (!data.list || data.list.length === 0) {
+            await message.reply({ embeds: [views.warnEmbed('Not Found', `No Urban Dictionary entry for "${parsed.term}".`)] });
+            return true;
+          }
+          const entry = data.list[0];
+          const embed = {
+            color: BRAND.colors.primary,
+            title: `📖 ${entry.word}`,
+            description: entry.definition.slice(0, 2000),
+            fields: [
+              { name: '👍 Example', value: (entry.example || 'No example.').slice(0, 1000), inline: false },
+              { name: '📊 Rating', value: `👍 ${entry.thumbs_up} | 👎 ${entry.thumbs_down}`, inline: true },
+            ],
+            footer: { text: `${BRAND.footer} • Urban Dictionary` },
+            url: entry.permalink,
+          };
+          await message.reply({ embeds: [embed] });
+        } catch {
+          await message.reply({ embeds: [views.warnEmbed('Error', 'Could not reach Urban Dictionary.')] });
+        }
+        return true;
+      }
+
+      case 'wyr': {
+        const wyrs = [
+          'Have the ability to fly or be invisible?',
+          'Be able to read minds or control minds?',
+          'Live without music or live without movies?',
+          'Always be 10 minutes late or always be 20 minutes early?',
+          'Have unlimited money or unlimited time?',
+          'Be famous or be rich?',
+          'Give up social media or give up pizza?',
+          'Have a time machine or a teleportation device?',
+          'Be able to talk to animals or speak every language?',
+          'Know how you die or know when you die?',
+          'Have x-ray vision or heat vision?',
+          'Be stuck on a desert island alone or with someone you hate?',
+          'Never use social media again or never watch a movie again?',
+          'Have a personal chef or a personal driver?',
+          'Find true love or find a suitcase full of money?',
+        ];
+        const pick = wyrs[Math.floor(Math.random() * wyrs.length)];
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '🤔 Would You Rather...',
+          description: `**${pick}**
+
+React with ✅ for option 1, ❌ for option 2!`,
+          footer: { text: BRAND.footer },
+        };
+        const msg = await message.reply({ embeds: [embed] });
+        await msg.react('✅').catch(() => {});
+        await msg.react('❌').catch(() => {});
+        return true;
+      }
+
+      case 'nhie': {
+        const nhies = [
+          '...ever faked being sick to skip school/work?',
+          '...ever stalked someone\'s social media for hours?',
+          '...ever pretended to like a gift you hated?',
+          '...ever eaten food that fell on the floor?',
+          '...ever lied about your age online?',
+          '...ever checked someone\'s phone when they weren\'t looking?',
+          '...ever cried during a movie?',
+          '...ever had a crush on a friend\'s partner?',
+          '...ever cheated in a board game?',
+          '...ever googled yourself?',
+          '...ever fallen asleep in class or a meeting?',
+          '...ever pretended to be busy to avoid someone?',
+          '...ever sent a text to the wrong person?',
+          '...ever peeked at presents before your birthday?',
+          '...ever laughed at someone then felt bad about it?',
+        ];
+        const pick = nhies[Math.floor(Math.random() * nhies.length)];
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '🙈 Never Have I Ever...',
+          description: `**${pick}**
+
+React with ✋ if you HAVE done it!`,
+          footer: { text: BRAND.footer },
+        };
+        const msg = await message.reply({ embeds: [embed] });
+        await msg.react('✋').catch(() => {});
+        return true;
+      }
+
+      case 'truthdare': {
+        const truths = [
+          'What is your most embarrassing moment?',
+          'What is a secret you\'ve never told anyone?',
+          'Who is your crush right now?',
+          'What is the worst thing you\'ve ever done?',
+          'What is your biggest fear?',
+          'Have you ever cheated on a test?',
+          'What is the most childish thing you still do?',
+          'What is your most unpopular opinion?',
+          'When was the last time you lied?',
+          'What is the weirdest search in your browser history?',
+        ];
+        const dares = [
+          'Send a selfie to your crush right now.',
+          'Change your profile picture to something embarrassing for 1 hour.',
+          'Send "I love you" to the last person you texted.',
+          'Do 20 pushups right now.',
+          'Sing the chorus of your favorite song in voice chat.',
+          'Post an ugly selfie on your story.',
+          'Text your mom "I\'m pregnant" and screenshot the response.',
+          'Do your best impression of another server member.',
+          'Speak in third person for the next 10 minutes.',
+          'Let the next person to join voice chat pick your nickname for 24h.',
+        ];
+        const isTruth = parsed.kind === 'truth';
+        const pool = isTruth ? truths : dares;
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const embed = {
+          color: isTruth ? 0x2196F3 : 0xF44336,
+          title: isTruth ? '🔴 Truth!' : '🔵 Dare!',
+          description: `**${pick}**`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'rps': {
+        const choices = ['rock', 'paper', 'scissors'];
+        const emojis = { rock: '🪨', paper: '📄', scissors: '✂️' };
+        const userChoice = parsed.choice ?? choices[Math.floor(Math.random() * 3)];
+        const botChoice = choices[Math.floor(Math.random() * 3)];
+        let result, color;
+        if (userChoice === botChoice) { result = 'Tie!'; color = BRAND.colors.warn; }
+        else if ((userChoice === 'rock' && botChoice === 'scissors') || (userChoice === 'paper' && botChoice === 'rock') || (userChoice === 'scissors' && botChoice === 'paper')) { result = 'You win! 🎉'; color = BRAND.colors.success; }
+        else { result = 'You lose! 💀'; color = BRAND.colors.danger; }
+        const embed = {
+          color,
+          title: '✊ Rock Paper Scissors',
+          description: `${emojis[userChoice]} vs ${emojis[botChoice]}\n\n**${result}**`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'trivia_chat': {
+        const triviaQs = [
+          { q: 'What does GG stand for?', a: 'Good Game' },
+          { q: 'What year was Discord founded?', a: '2015' },
+          { q: 'What does AFK mean?', a: 'Away From Keyboard' },
+          { q: 'What is the rarest Minecraft ore?', a: 'Emerald' },
+          { q: 'What does OP mean in gaming?', a: 'Over Powered' },
+          { q: 'What does meta stand for?', a: 'Most Effective Tactic Available' },
+          { q: 'What is a smurf in gaming?', a: 'A high-ranked player on a new account' },
+          { q: 'What does nerf mean?', a: 'Making something weaker' },
+          { q: 'What is a clutch?', a: 'Winning a 1vX situation' },
+          { q: 'What does FPS stand for?', a: 'Frames Per Second / First Person Shooter' },
+        ];
+        const pick = triviaQs[Math.floor(Math.random() * triviaQs.length)];
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '🧠 Trivia',
+          description: `**${pick.q}**\n\nType the answer in chat!`,
+          footer: { text: BRAND.footer },
+        };
+        const msg = await message.reply({ embeds: [embed] });
+        const filter = (m) => m.author.id === userId;
+        try {
+          const collected = await message.channel.awaitMessages({ filter, max: 1, time: 15000, errors: ['time'] });
+          const answer = collected.first().content.toLowerCase().trim();
+          if (answer.includes(pick.a.toLowerCase()) || pick.a.toLowerCase().includes(answer)) {
+            await message.channel.send({ content: `✅ **Correct!** The answer is: **${pick.a}**` });
+          } else {
+            await message.channel.send({ content: `❌ **Wrong!** The answer was: **${pick.a}**` });
+          }
+        } catch {
+          await message.channel.send({ content: `⏰ Time's up! The answer was: **${pick.a}**` }).catch(() => {});
+        }
+        return true;
+      }
+
+      case 'timer': {
+        const match = (parsed.raw || '').match(/^(\d+)\s*(s|m|h|d)$/i);
+        if (!match) {
+          await message.reply({ embeds: [views.warnEmbed('Timer', 'Format: `!timer 30s`, `!timer 5m`, `!timer 2h`')] });
+          return true;
+        }
+        const amount = parseInt(match[1], 10);
+        const unit = match[2].toLowerCase();
+        const multipliers = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+        const ms = amount * multipliers[unit];
+        const unitLabels = { s: 'second', m: 'minute', h: 'hour', d: 'day' };
+        const unitLabel = amount === 1 ? unitLabels[unit] : `${unitLabels[unit]}s`;
+        await message.reply({ embeds: [{ color: BRAND.colors.success, title: '⏱️ Timer Set', description: `Timer set for **${amount} ${unitLabel}**. I\'ll ping you when it\'s done!`, footer: { text: BRAND.footer } }] });
+        setTimeout(async () => {
+          try { await message.reply({ content: `${message.author}, ⏰ **Timer's up!** ${amount} ${unitLabel} have passed.` }); } catch { /* DMs off */ }
+        }, ms);
+        return true;
+      }
+
+      case 'remind': {
+        const match = (parsed.raw || '').match(/^(\d+)\s*(s|m|h|d)\s+(.+)/i);
+        if (!match) {
+          await message.reply({ embeds: [views.warnEmbed('Remind', 'Format: `!remind 30m do homework`, `!remind 2h check oven`')] });
+          return true;
+        }
+        const amount = parseInt(match[1], 10);
+        const unit = match[2].toLowerCase();
+        const msg = match[3];
+        const multipliers = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
+        const ms = amount * multipliers[unit];
+        const unitLabels = { s: 'second', m: 'minute', h: 'hour', d: 'day' };
+        const unitLabel = amount === 1 ? unitLabels[unit] : `${unitLabels[unit]}s`;
+        await message.reply({ embeds: [{ color: BRAND.colors.success, title: '⏰ Reminder Set', description: `I\'ll remind you in **${amount} ${unitLabel}**: ${msg}`, footer: { text: BRAND.footer } }] });
+        setTimeout(async () => {
+          try { await message.reply({ content: `${message.author}, ⏰ **Reminder:** ${msg}` }); } catch { /* DMs off */ }
+        }, ms);
         return true;
       }
 

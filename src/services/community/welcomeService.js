@@ -133,18 +133,30 @@ async function onJoin(client, member) {
       if (role) await member.roles.add(role, 'FGx welcome auto-role').catch(() => {});
     }
 
-    if (!welcome.channel) return;
-    let channel = member.guild.channels.cache.get(welcome.channel);
-    // On cold start the channel may not be cached — fetch it.
+  let channel = null;
+  if (welcome.channel) {
+    channel = member.guild.channels.cache.get(welcome.channel);
     if (!channel) {
       try {
         channel = await member.guild.channels.fetch(welcome.channel);
       } catch {
         logger.warn('welcome channel fetch failed', { channelId: welcome.channel });
-        return;
       }
     }
-    if (!channel?.isTextBased?.()) return;
+  }
+  // Auto-detect: find a channel named 'welcome', 'general', or the system channel.
+  if (!channel) {
+    channel = member.guild.channels.cache.find(
+      (ch) => ch.isTextBased() && /^welcome$/i.test(ch.name),
+    ) ?? member.guild.channels.cache.find(
+      (ch) => ch.isTextBased() && /^general$/i.test(ch.name),
+    ) ?? member.guild.systemChannel;
+  }
+  if (!channel?.isTextBased?.()) return;
+  // Auto-save the detected channel so next time it's instant.
+  if (!welcome.channel && channel.id) {
+    guildConfigRepo.update(member.guild.id, { welcome: { ...welcome, channel: channel.id } });
+  }
 
     // Generate the canvas welcome card image.
     let files = [];
@@ -174,11 +186,15 @@ async function onJoin(client, member) {
       embed.setImage('attachment://welcome-card.png');
     }
 
-    // Also attach the welcome animation video.
-    try {
-      files.push({ attachment: welcomeVideoPath(config), name: 'welcome.mp4' });
-    } catch {
-      // Video file missing — send without it
+    // Also attach the welcome animation video (only if file exists).
+    const fs = require('node:fs');
+    const videoPath = welcomeVideoPath(config);
+    if (fs.existsSync(videoPath)) {
+      try {
+        files.push({ attachment: videoPath, name: 'welcome.mp4' });
+      } catch {
+        // Video attach failed — send without it
+      }
     }
 
     await channel.send({

@@ -32,7 +32,7 @@ const DEFAULT_GUILD_CONFIG = Object.freeze({
   modLogChannel: null,
   logChannel: null,
   welcome: Object.freeze({
-    enabled: false,
+    enabled: true,
     channel: null,
     message: '🎯 Compete · 🏆 Improve · ⚔️ Represent FGx',
     autoRole: null,
