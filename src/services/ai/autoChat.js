@@ -19,9 +19,9 @@ const { logger } = require('../../utils/logger');
 
 /** Per-channel cooldown: timestamp of last auto-response. */
 const cooldowns = new Map();
-const COOLDOWN_MS = 60_000; // 1 minute between auto-responses per channel
+const COOLDOWN_MS = 15_000; // 15 seconds between auto-responses per channel
 const CONTEXT_WINDOW = 15;  // messages to fetch for context
-const RANDOM_CHANCE = 0.03; // 3% chance to jump in on interesting messages
+const RANDOM_CHANCE = 0.15; // 15% chance to jump in on interesting messages
 
 /** Words that indicate someone is talking TO the bot. */
 const BOT_TRIGGERS = ['fgx', 'fgx bot', 'hey fgx', 'yo fgx', 'sup fgx'];
@@ -110,6 +110,9 @@ function buildContext(messages, currentMessage) {
  * @returns {Promise<boolean>} true if the bot responded
  */
 async function handle(client, message) {
+  // Never respond to bots
+  if (message.author.bot) return false;
+
   // Check cooldown
   const channelKey = message.channel.id;
   const lastResponse = cooldowns.get(channelKey) ?? 0;
@@ -165,8 +168,9 @@ async function handle(client, message) {
     // Rate limit: set cooldown
     cooldowns.set(channelKey, Date.now());
 
-    // Send the response
-    await message.reply({ content: cleaned });
+    // Send the response — ping @everyone if it's a question or exciting
+    const shouldPing = /\?$/.test(message.content) || /!{2,}/.test(message.content) || /\b(who|what|how|why|help)\b/i.test(message.content);
+    await message.reply({ content: shouldPing ? `@everyone ${cleaned}` : cleaned });
 
     logger.debug('auto-chat responded', {
       channelId: message.channel.id,
