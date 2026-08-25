@@ -116,8 +116,9 @@ async function handle(client, message) {
   if (Date.now() - lastResponse < COOLDOWN_MS) return false;
 
   // Decide if we should respond
-  const { shouldRespond, reason } = shouldRespond(message, client);
-  if (!shouldRespond) return false;
+  const decision = shouldRespond(message, client);
+  if (!decision.shouldRespond) return false;
+  const { reason } = decision;
 
   // Don't respond to mentions of other bots
   if (reason === 'mention' && message.mentions.users.size > 1) return false;
