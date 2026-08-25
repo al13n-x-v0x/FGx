@@ -415,6 +415,8 @@ const handlers = [
   { match: 'editbot:', fn: (i) => require('../commands/admin/editBot').handleButton(i) },
   { match: 'rb:', fn: (i) => require('../commands/fun/roastBattle').handleBattleButton(i) },
   { match: 'mc:', fn: (i) => handleMinecraftButton(i) },
+  { match: 'rps:', fn: (i) => require('../commands/fun/rps').handleButton(i) },
+  { match: 'trivia:', fn: (i) => require('../commands/fun/trivia').handleButton(i) },
 ];
 
 /** Handle nitro-style buttons. */
