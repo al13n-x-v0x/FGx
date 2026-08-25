@@ -14,6 +14,7 @@ const { analyzeMessage } = require('../services/ai/securityEngine');
 const { logger } = require('../utils/logger');
 const { logAudit } = require('../services/logging/auditLogger');
 const afkCmd = require('../commands/utility/afk');
+const autoChat = require('../services/ai/autoChat');
 
 function register(client) {
   client.on(Events.MessageCreate, async (message) => {
@@ -93,6 +94,13 @@ function register(client) {
       // OwO-style chat commands: `fgx daily`, `fgx coinflip 50`, …
       if (await chatCommands.handle(client, message)) {
         return;
+      }
+
+      // Auto-chat: bot reads messages and talks when appropriate.
+      // Only triggers if AI is configured; otherwise skips silently.
+      if (config.ai.assistantEnabled) {
+        const responded = await autoChat.handle(client, message);
+        if (responded) return; // bot spoke — skip further processing
       }
 
       // AI security layer (profanity fast-path is free; the paid AI
