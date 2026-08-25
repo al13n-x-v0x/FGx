@@ -1031,12 +1031,8 @@ React with ✋ if you HAVE done it!`,
 
       default:
         // Unknown `!`-commands are left alone (other bots may use them);
-        // unknown `fgx`-commands get guidance.
-        if (bang) return false;
-        await message.reply({
-          embeds: [views.warnEmbed('Unknown command', `\`fgx ${parsed.raw}\` isn't a thing. Try \`fgx help\` — or use \`/help\`.`)],
-        });
-        return true;
+        // unknown `fgx`-commands pass through so auto-chat can respond.
+        return false;
     }
   } catch (err) {
     const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN', 'WORK_COOLDOWN', 'CRIME_COOLDOWN', 'ROB_COOLDOWN', 'FISH_COOLDOWN', 'TARGET_POOR', 'UNKNOWN_ANIMAL', 'NOT_OWNED', 'UNKNOWN_KIND', 'VIP_LOCKED'];
