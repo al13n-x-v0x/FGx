@@ -19,6 +19,7 @@ const autoChat = require('../services/ai/autoChat');
 function register(client) {
   client.on(Events.MessageCreate, async (message) => {
     if (!message.guild || message.author.bot) return;
+    logger.debug('message received', { guild: message.guild.id, user: message.author.id, content: message.content?.slice(0, 80) });
 
     try {
       const config = guildConfigRepo.get(message.guild.id);
@@ -92,27 +93,32 @@ function register(client) {
       }
 
       // OwO-style chat commands: `fgx daily`, `fgx coinflip 50`, …
-      if (await chatCommands.handle(client, message)) {
-        return;
+      try {
+        if (await chatCommands.handle(client, message)) {
+          logger.debug('chat command handled', { user: message.author.id, content: message.content.slice(0, 50) });
+          return;
+        }
+      } catch (cmdErr) {
+        logger.error('chat command crashed', { user: message.author.id, content: message.content.slice(0, 50), error: cmdErr.message });
       }
 
       // Auto-chat: bot reads messages and talks when appropriate.
       // Only triggers if AI is configured; otherwise skips silently.
-      if (config.ai.assistantEnabled) {
+      if (config.ai && config.ai.assistantEnabled) {
         const responded = await autoChat.handle(client, message);
         if (responded) return; // bot spoke — skip further processing
       }
 
       // AI security layer (profanity fast-path is free; the paid AI
       // classification is rate-limited inside analyzeMessage).
-      if (config.ai.securityEnabled) {
+      if (config.ai && config.ai.securityEnabled) {
         await analyzeMessage(client, message);
       }
 
       // XP from participation.
       await awardForMessage(message);
     } catch (err) {
-      logger.warn('messageCreate handler failed', { guildId: message.guild.id, error: err.message });
+      logger.error('messageCreate handler FAILED', { guildId: message.guild?.id, userId: message.author?.id, content: message.content?.slice(0, 50), error: err.message, stack: err.stack?.slice(0, 200) });
     }
   });
 }
