@@ -37,10 +37,12 @@ function register(client) {
     let statusIndex = 0;
     setInterval(() => {
       statusIndex = (statusIndex + 1) % STATUSES.length;
-      client.user.setPresence({
-        activities: [STATUSES[statusIndex]],
-        status: 'online',
-      }).catch(() => {});
+      try {
+        client.user.setPresence({
+          activities: [STATUSES[statusIndex]],
+          status: 'online',
+        });
+      } catch { /* setPresence is void, not a promise */ }
     }, 10_000);
   });
 }
