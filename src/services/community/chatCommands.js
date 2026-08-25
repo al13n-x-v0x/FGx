@@ -242,48 +242,53 @@ function helpEmbed() {
     color: BRAND.colors.primary,
     title: '💰 FGx — chat commands',
     description:
-      'Type **`fgx <command>`** in chat (mentioning the bot works too: `@FGx daily`).\n\n' +
-      '**Economy** (works with `fgx` or `!` prefixes)\n' +
-      '• `fgx daily` / `!daily` — 500 ₣Ԡ🇽 daily (streak bonus!)\n' +
+      'Type **`fgx <command>`** or **`!command`** in chat.\n' +
+      'You can also **@FGx** to talk to the AI!\n\n' +
+      '**💰 Economy**\n' +
+      '• `!daily` / `!weekly` — claim rewards\n' +
       '• `fgx weekly` / `!weekly` — weekly reward\n' +
-      '• `fgx wallet [@user]` / `!bal` — check a balance\n' +
-      '• `fgx transfer @user <amount>` — send ₣Ԡ🇽 (5% tax)\n' +
-      '• `fgx coinflip <amount|all> [heads|tails]` / `!coinflip 50 heads` — 50/50 gamble\n' +
-      '• `fgx hunt` / `!hunt` — hunt animals for coins, they join your zoo (60s)\n' +
-      '• `fgx zoo` / `!zoo` — your collected animals\n' +
-      '• `fgx sell <animal>` / `!sell fox` — sell a duplicate for coins\n' +
-      '• `fgx battle` / `!battle` — fight enemies, win big or lose 10% (120s)\n' +
-      '• `fgx pray` / `!pray` — a big coin blessing (2h cooldown)\n' +
-      '• `fgx crate` / `!crate` — open a loot crate (250 ₣Ԡ🇽)\n' +
-      '• `fgx history [@user] [count]` / `!history` — last transactions\n' +
-      '• `fgx top` — richest members\n' +
-      '• `fgx work` / `!work` — do a job for coins (45s)\n' +
-      '• `fgx crime` / `!crime` — commit a crime, high risk reward (90s)\n' +
-      '• `fgx rob @user` / `!rob @user` — steal from someone (3min)\n' +
-      '• `fgx fish` / `!fish` — go fishing for coins (30s)\n' +
-      '• `!slots <amount>` — slot machine, 5x jackpot\n' +
-      '• `!dice 2d6+3` — roll dice\n\n' +
-      '**Fun** (chat only)\n' +
+      '• `!bal [@user]` — check balance\n' +
+      '• `!transfer @user <amount>` — send ₣Ԡ🇽 (5% tax)\n' +
+      '• `!coinflip <amount> [heads|tails]` — 50/50 gamble\n' +
+      '• `!work` — do a job (45s cooldown)\n' +
+      '• `!crime` — commit a crime (90s)\n' +
+      '• `!rob @user` — steal from someone (3min)\n' +
+      '• `!fish` — go fishing (30s)\n' +
+      '• `!hunt` / `!battle` / `!pray` / `!crate` — minigames\n' +
+      '• `!zoo` / `!sell <animal>` — animal collection\n' +
+      '• `!slots <amount>` — slot machine\n' +
+      '• `!dice 2d6+3` — roll dice\n' +
+      '• `!history` / `!baltop` — transactions & leaderboard\n\n' +
+      '**🎮 Fun**\n' +
       '• `!8ball <question>` — magic 8-ball\n' +
-      '• `!choose option1 | option2 | option3` — pick one\n' +
+      '• `!joke` — random joke\n' +
+      '• `!quote` — inspirational quote\n' +
+      '• `!rps [rock|paper|scissors]` — rock paper scissors\n' +
+      '• `!trivia` — gaming trivia (15s timer)\n' +
+      '• `!urban <term>` — Urban Dictionary lookup\n' +
+      '• `!choose a | b | c` — random pick\n' +
       '• `!ship @user` — love compatibility\n' +
       '• `!rate <thing>` — rate anything 0-10\n\n' +
-      '**Socials** (chat only)\n' +
-      '• `!slap` / `!clap` / `!pat` / `!hug` / `!kiss` / `!tickle` / `!poke` / `!cuddle` / `!stare` / `!boop` / `!feed` / `!highfive` / `!punch` / `!bite` / `!dance` — all with @user, counts grow\n' +
-      '• `!social [@user]` — interaction stats\n' +
-      '• `!socialtop [kind]` — who leads each interaction\n\n' +
-      '**VIP (locked until fully verified)**\n' +
-      '• `!vip` — status & how to unlock\n' +
-      '• `!vip daily` — 250 ₣Ԡ🇽 extra daily (needs link + Roblox verified)\n' +
-      '• `!vip check @user` — someone else\'s status\n\n' +
-      '**Server**\n' +
-      '• `fgx profile [@user]` — player profile\n' +
-      '• `fgx stats` / `fgx roster` / `fgx leaderboard` — competitive\n' +
-      '• `fgx scrims` / `fgx events` / `fgx wars` — schedule & history\n' +
-      '• `fgx loadout` / `fgx tryouts` — guides\n' +
-      '• `fgx roblox` / `fgx security` — verification & protection\n' +
-      '• `fgx ping` / `fgx status` — bot health',
-    footer: { text: `${BRAND.footer} • Slash versions: /fgx, /fgxcoin` },
+      '**🎲 Party Games**\n' +
+      '• `!wyr` — Would You Rather\n' +
+      '• `!nhie` — Never Have I Ever\n' +
+      '• `!truth` / `!dare` — Truth or Dare\n\n' +
+      '**🖐️ Socials**\n' +
+      '• `!slap @user` / `!hug @user` / `!kiss @user` / `!punch @user` / `!pat @user`\n' +
+      '• `!poke @user` / `!bite @user` / `!tickle @user` / `!dance @user` / `!highfive @user`\n' +
+      '• `!social [@user]` / `!socialtop [kind]` — stats & leaderboard\n\n' +
+      '**⏰ Utility**\n' +
+      '• `!timer 5m` — countdown timer (pings when done)\n' +
+      '• `!remind 30m homework` — reminder (pings when done)\n' +
+      '• `!ping` / `!status` — bot health\n\n' +
+      '**👑 VIP**\n' +
+      '• `!vip` — status & unlock info\n' +
+      '• `!vip daily` — 250 ₣Ԡ🇽 extra (needs full verification)\n\n' +
+      '**🌐 Server**\n' +
+      '• `fgx profile` / `fgx stats` / `fgx roster` / `fgx leaderboard`\n' +
+      '• `fgx scrims` / `fgx events` / `fgx wars` / `fgx loadout`\n\n' +
+      '**Slash commands:** `/help` for the full list (100 commands!)',
+    footer: { text: `${BRAND.footer} • 46+ chat commands • 100 slash commands` },
   };
 }
 
