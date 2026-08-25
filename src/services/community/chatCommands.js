@@ -139,6 +139,32 @@ function parseCommand(line, mentionIds = []) {
   if (cmd === 'battle' || cmd === 'fight') return { type: 'battle' };
   if (cmd === 'pray') return { type: 'pray' };
   if (cmd === 'crate' || cmd === 'lootbox' || cmd === 'box') return { type: 'crate' };
+  if (cmd === 'work') return { type: 'work' };
+  if (cmd === 'crime') return { type: 'crime' };
+  if (cmd === 'rob') {
+    return { type: 'rob', targetId: mentionIds[0] ?? null };
+  }
+  if (cmd === 'fish') return { type: 'fish' };
+  if (cmd === 'slots' || cmd === 'slot') {
+    const amount = parseAmount(rest[0] ?? '');
+    return { type: 'slots', amount };
+  }
+  if (cmd === 'dice' || cmd === 'roll') {
+    const raw = rest.join(' ').trim() || '1d6';
+    return { type: 'dice', raw };
+  }
+  if (cmd === '8ball' || cmd === 'eightball' || cmd === 'ask') {
+    return { type: '8ball', question: rest.join(' ').trim() };
+  }
+  if (cmd === 'choose' || cmd === 'pick') {
+    return { type: 'choose', options: rest.join(' ').split(/[|,]/).map(s => s.trim()).filter(Boolean) };
+  }
+  if (cmd === 'ship') {
+    return { type: 'ship', targetId: mentionIds[0] ?? null };
+  }
+  if (cmd === 'rate') {
+    return { type: 'rate', thing: rest.join(' ').trim() };
+  }
   if (cmd === 'zoo' || cmd === 'pets' || cmd === 'animals' || cmd === 'collection') {
     return { type: 'zoo', targetId: mentionIds[0] ?? null };
   }
@@ -206,7 +232,18 @@ function helpEmbed() {
       '• `fgx pray` / `!pray` — a big coin blessing (2h cooldown)\n' +
       '• `fgx crate` / `!crate` — open a loot crate (250 ₣Ԡ🇽)\n' +
       '• `fgx history [@user] [count]` / `!history` — last transactions\n' +
-      '• `fgx top` — richest members\n\n' +
+      '• `fgx top` — richest members\n' +
+      '• `fgx work` / `!work` — do a job for coins (45s)\n' +
+      '• `fgx crime` / `!crime` — commit a crime, high risk reward (90s)\n' +
+      '• `fgx rob @user` / `!rob @user` — steal from someone (3min)\n' +
+      '• `fgx fish` / `!fish` — go fishing for coins (30s)\n' +
+      '• `!slots <amount>` — slot machine, 5x jackpot\n' +
+      '• `!dice 2d6+3` — roll dice\n\n' +
+      '**Fun** (chat only)\n' +
+      '• `!8ball <question>` — magic 8-ball\n' +
+      '• `!choose option1 | option2 | option3` — pick one\n' +
+      '• `!ship @user` — love compatibility\n' +
+      '• `!rate <thing>` — rate anything 0-10\n\n' +
       '**Socials** (chat only)\n' +
       '• `!slap` / `!clap` / `!pat` / `!hug` / `!kiss` / `!tickle` / `!poke` / `!cuddle` / `!stare` / `!boop` / `!feed` / `!highfive` / `!punch` / `!bite` / `!dance` — all with @user, counts grow\n' +
       '• `!social [@user]` — interaction stats\n' +
@@ -333,11 +370,19 @@ async function handle(client, message) {
           });
           return true;
         }
-        // Fun animation: the coin spins, then the result lands.
+        // OwO-style: coin spins, reactions fly, result lands.
         const spinner = await message.reply({ content: '🪙 The coin spins…' });
+        await spinner.react('🪙').catch(() => {});
         const result = await economy.coinflip(guildId, userId, amount, parsed.pick ?? null);
         await new Promise((resolve) => setTimeout(resolve, 1400));
         await spinner.edit({ content: null, embeds: [views.coinflipEmbed(result)] }).catch(() => {});
+        if (result.won) {
+          await spinner.react('🎉').catch(() => {});
+          await spinner.react('💰').catch(() => {});
+        } else {
+          await spinner.react('💀').catch(() => {});
+          await spinner.react('🪦').catch(() => {});
+        }
         return true;
       }
 
@@ -476,6 +521,193 @@ async function handle(client, message) {
         return true;
       }
 
+      case 'work': {
+        try {
+          const result = await economy.work(guildId, userId);
+          await message.reply({ embeds: [views.workEmbed(result)] });
+        } catch (err) {
+          if (['WORK_COOLDOWN'].includes(err.code)) {
+            await message.reply({ embeds: [views.warnEmbed('Work', err.message)] });
+            return true;
+          }
+          throw err;
+        }
+        return true;
+      }
+
+      case 'crime': {
+        try {
+          const result = await economy.crime(guildId, userId);
+          await message.reply({ embeds: [views.crimeEmbed(result)] });
+        } catch (err) {
+          if (['CRIME_COOLDOWN'].includes(err.code)) {
+            await message.reply({ embeds: [views.warnEmbed('Crime', err.message)] });
+            return true;
+          }
+          throw err;
+        }
+        return true;
+      }
+
+      case 'rob': {
+        if (!parsed.targetId) {
+          await message.reply({ embeds: [views.warnEmbed('Who?', 'Mention someone: `!rob @user`')] });
+          return true;
+        }
+        if (parsed.targetId === userId) {
+          await message.reply({ embeds: [views.warnEmbed('Nope', "You can't rob yourself.")] });
+          return true;
+        }
+        try {
+          const result = await economy.rob(guildId, userId, parsed.targetId);
+          await message.reply({ embeds: [views.robEmbed(result)] });
+        } catch (err) {
+          if (['ROB_COOLDOWN', 'TARGET_POOR'].includes(err.code)) {
+            await message.reply({ embeds: [views.warnEmbed('Rob', err.message)] });
+            return true;
+          }
+          throw err;
+        }
+        return true;
+      }
+
+      case 'fish': {
+        try {
+          const result = await economy.fish(guildId, userId);
+          await message.reply({ embeds: [views.fishEmbed(result)] });
+        } catch (err) {
+          if (['FISH_COOLDOWN'].includes(err.code)) {
+            await message.reply({ embeds: [views.warnEmbed('Fish', err.message)] });
+            return true;
+          }
+          throw err;
+        }
+        return true;
+      }
+
+      case 'slots': {
+        const bet = parsed.amount ?? 100;
+        const row = economy.balance(guildId, userId);
+        if ((row.balance ?? 0) < bet) {
+          await message.reply({ embeds: [views.warnEmbed('Slots', `You need ${economy.format(bet)} ₣Ԡ🇽 but have ${economy.format(row.balance ?? 0)}.`)] });
+          return true;
+        }
+        const symbols = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣', '🔔'];
+        const s1 = symbols[Math.floor(Math.random() * symbols.length)];
+        const s2 = symbols[Math.floor(Math.random() * symbols.length)];
+        const s3 = symbols[Math.floor(Math.random() * symbols.length)];
+        const won = s1 === s2 && s2 === s3;
+        const partial = s1 === s2 || s2 === s3 || s1 === s3;
+        const amount = won ? bet * 5 : partial ? Math.floor(bet * 0.5) : -bet;
+        await economy.updateBalance(guildId, userId, amount);
+        economy.logTx(guildId, userId, won ? 'slots_win' : 'slots_loss', amount, `Slots: ${s1} ${s2} ${s3}`);
+        const updated = economy.balance(guildId, userId);
+        const embed = {
+          color: won ? BRAND.colors.success : partial ? BRAND.colors.warn : BRAND.colors.danger,
+          title: won ? '🎰 JACKPOT!' : partial ? '🎰 Almost!' : '🎰 No luck...',
+          description: `**[ ${s1} | ${s2} | ${s3} ]**\n\n${won ? `You won **${economy.format(amount)}** ₣Ԡ🇽!` : partial ? `Close! You got back **${economy.format(Math.abs(amount))}** ₣Ԡ🇽` : `You lost **${economy.format(Math.abs(amount))}** ₣Ԡ🇽`}\nBalance: **${economy.format(updated.balance)}** ₣Ԡ🇽`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'dice': {
+        const diceMatch = parsed.raw.match(/^(\d+)d(\d+)([+-]\d+)?$/i);
+        if (!diceMatch) {
+          await message.reply({ embeds: [views.warnEmbed('Dice', 'Format: `!dice 2d6+3` or `!dice d20`')] });
+          return true;
+        }
+        const count = Math.min(20, parseInt(diceMatch[1], 10));
+        const sides = parseInt(diceMatch[2], 10);
+        const mod = diceMatch[3] ? parseInt(diceMatch[3], 10) : 0;
+        if (sides < 1 || sides > 1000) {
+          await message.reply({ embeds: [views.warnEmbed('Dice', 'Sides must be 1-1000.')] });
+          return true;
+        }
+        const rolls = [];
+        for (let i = 0; i < count; i++) rolls.push(Math.floor(Math.random() * sides) + 1);
+        const total = rolls.reduce((a, b) => a + b, 0) + mod;
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '🎲 Dice Roll',
+          description: `**${count}d${sides}${mod ? (mod > 0 ? '+' : '') + mod : ''}**\nRolls: [${rolls.join(', ')}]${mod ? ` ${mod > 0 ? '+' : ''}${mod}` : ''}\n**Total: ${total}**`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case '8ball': {
+        const answers = [
+          '🟢 It is certain.', '🟢 It is decidedly so.', '🟢 Without a doubt.', '🟢 Yes — definitely.',
+          '🟢 You may rely on it.', '🟢 As I see it, yes.', '🟢 Most likely.', '🟢 Outlook good.',
+          '🟡 Yes.', '🟡 Reply hazy, try again.', '🟡 Ask again later.', '🟡 Better not tell you now.',
+          '🔴 Don\'t count on it.', '🔴 My reply is no.', '🔴 My sources say no.', '🔴 Outlook not so good.',
+          '🔴 Very doubtful.', '🔴 No.',
+        ];
+        const q = parsed.question || '...nothing?';
+        const a = answers[Math.floor(Math.random() * answers.length)];
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '🎱 Magic 8-Ball',
+          description: `**Q:** ${q}\n**A:** ${a}`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'choose': {
+        if (parsed.options.length < 2) {
+          await message.reply({ embeds: [views.warnEmbed('Choose', 'Give me options: `!choose option1 | option2 | option3`')] });
+          return true;
+        }
+        const pick = parsed.options[Math.floor(Math.random() * parsed.options.length)];
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '🤔 I choose...',
+          description: `**${pick}**\n\n*(from ${parsed.options.length} options)*`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'ship': {
+        const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) : null;
+        if (!target) {
+          await message.reply({ embeds: [views.warnEmbed('Ship', 'Mention someone: `!ship @user`')] });
+          return true;
+        }
+        const compat = Math.floor(Math.random() * 101);
+        const heart = compat >= 80 ? '💖' : compat >= 50 ? '💔' : compat >= 25 ? '💔' : '💀';
+        const bar = '█'.repeat(Math.round(compat / 10)) + '░'.repeat(10 - Math.round(compat / 10));
+        const verdict = compat >= 90 ? 'Soulmates! 💍' : compat >= 70 ? 'Perfect match! 💕' : compat >= 50 ? 'Could work! 🤞' : compat >= 30 ? 'Friends zone 😅' : 'Better as enemies 💀';
+        const embed = {
+          color: compat >= 50 ? BRAND.colors.success : BRAND.colors.danger,
+          title: '💘 Love Calculator',
+          description: `${message.author.username} × ${target.username}\n\n${bar} **${compat}%** ${heart}\n\n*${verdict}*`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
+      case 'rate': {
+        const thing = parsed.thing || 'this message';
+        const rating = Math.floor(Math.random() * 11);
+        const stars = '⭐'.repeat(rating) + '☆'.repeat(10 - rating);
+        const embed = {
+          color: BRAND.colors.primary,
+          title: '📊 Rating',
+          description: `I rate **${thing}** a...\n\n${stars}\n**${rating}/10**`,
+          footer: { text: BRAND.footer },
+        };
+        await message.reply({ embeds: [embed] });
+        return true;
+      }
+
       default:
         // Unknown `!`-commands are left alone (other bots may use them);
         // unknown `fgx`-commands get guidance.
@@ -486,7 +718,7 @@ async function handle(client, message) {
         return true;
     }
   } catch (err) {
-    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN', 'UNKNOWN_ANIMAL', 'NOT_OWNED', 'UNKNOWN_KIND', 'VIP_LOCKED'];
+    const codes = ['ALREADY_CLAIMED', 'INVALID_AMOUNT', 'SELF_TRANSFER', 'INSUFFICIENT', 'RATE_LIMITED', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN', 'WORK_COOLDOWN', 'CRIME_COOLDOWN', 'ROB_COOLDOWN', 'FISH_COOLDOWN', 'TARGET_POOR', 'UNKNOWN_ANIMAL', 'NOT_OWNED', 'UNKNOWN_KIND', 'VIP_LOCKED'];
     if (codes.includes(err.code)) {
       await message.reply({ embeds: [views.warnEmbed('FGx coins', err.message)] }).catch(() => {});
       return true;

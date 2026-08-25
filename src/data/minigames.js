@@ -72,6 +72,50 @@ const CRATE_COST = 250;
 const CRATE_BONUS_MIN = 100;
 const CRATE_BONUS_MAX = 400;
 
+// ── Work ───────────────────────────────────────────────────
+const JOBS = Object.freeze([
+  { id: 'delivery', name: 'Delivery Driver', emoji: '📦', min: 50, max: 200, failChance: 0.1 },
+  { id: 'miner', name: 'Miner', emoji: '⛏️', min: 80, max: 300, failChance: 0.15 },
+  { id: 'chef', name: 'Chef', emoji: '👨‍🍳', min: 100, max: 250, failChance: 0.08 },
+  { id: 'guard', name: 'Security Guard', emoji: '💂', min: 120, max: 350, failChance: 0.12 },
+  { id: 'hacker', name: 'Hacker', emoji: '💻', min: 200, max: 600, failChance: 0.25 },
+  { id: 'streamer', name: 'Streamer', emoji: '🎮', min: 30, max: 500, failChance: 0.3 },
+  { id: 'mechanic', name: 'Mechanic', emoji: '🔧', min: 90, max: 280, failChance: 0.1 },
+  { id: 'farmer', name: 'Farmer', emoji: '🌾', min: 40, max: 180, failChance: 0.05 },
+]);
+const WORK_COOLDOWN_MS = 45_000;
+
+// ── Crime ──────────────────────────────────────────────────
+const CRIMES = Object.freeze([
+  { id: 'shoplift', name: 'Shoplifting', emoji: '🏪', min: 80, max: 300, failChance: 0.35, failFine: 100 },
+  { id: 'rob_bank', name: 'Bank Robbery', emoji: '🏦', min: 300, max: 1200, failChance: 0.55, failFine: 500 },
+  { id: 'pickpocket', name: 'Pickpocket', emoji: '🤏', min: 40, max: 180, failChance: 0.25, failFine: 50 },
+  { id: 'heist', name: 'Art Heist', emoji: '🖼️', min: 500, max: 2000, failChance: 0.65, failFine: 800 },
+  { id: 'smuggle', name: 'Smuggling', emoji: '🚂', min: 200, max: 800, failChance: 0.45, failFine: 300 },
+  { id: 'hack', name: 'Hack a Mainframe', emoji: '🖥️', min: 400, max: 1500, failChance: 0.5, failFine: 400 },
+]);
+const CRIME_COOLDOWN_MS = 90_000;
+
+// ── Rob ────────────────────────────────────────────────────
+const ROB_COOLDOWN_MS = 180_000;
+const ROB_FRACTION = 0.15; // steal 15% of target's balance (capped)
+const ROB_CAP = 500;
+const ROB_FAIL_FINE = 100;
+
+// ── Fish ───────────────────────────────────────────────────
+const FISH = Object.freeze([
+  { id: 'sardine', name: 'Sardine', emoji: '🐟', rarity: 'common', weight: 30, min: 10, max: 40 },
+  { id: 'trout', name: 'Trout', emoji: '🐠', rarity: 'common', weight: 25, min: 15, max: 50 },
+  { id: 'crab', name: 'Crab', emoji: '🦀', rarity: 'common', weight: 20, min: 20, max: 60 },
+  { id: 'octopus', name: 'Octopus', emoji: '🐙', rarity: 'uncommon', weight: 12, min: 50, max: 150 },
+  { id: 'turtle', name: 'Sea Turtle', emoji: '🐢', rarity: 'uncommon', weight: 8, min: 80, max: 200 },
+  { id: 'swordfish', name: 'Swordfish', emoji: '🗡️', rarity: 'rare', weight: 5, min: 150, max: 400 },
+  { id: 'shark', name: 'Shark', emoji: '🦈', rarity: 'rare', weight: 3, min: 250, max: 600 },
+  { id: 'whale', name: 'Whale', emoji: '🐋', rarity: 'epic', weight: 1.5, min: 500, max: 1200 },
+  { id: 'golden_fish', name: 'Golden Fish', emoji: '✨', rarity: 'legendary', weight: 0.5, min: 1000, max: 3000 },
+]);
+const FISH_COOLDOWN_MS = 30_000;
+
 /** Animal lookup by id or (case-insensitive) name. */
 function findAnimal(key) {
   const k = String(key ?? '').toLowerCase().trim();
@@ -114,6 +158,10 @@ module.exports = {
   CRATE_COST,
   CRATE_BONUS_MIN,
   CRATE_BONUS_MAX,
+  JOBS, WORK_COOLDOWN_MS,
+  CRIMES, CRIME_COOLDOWN_MS,
+  ROB_COOLDOWN_MS, ROB_FRACTION, ROB_CAP, ROB_FAIL_FINE,
+  FISH, FISH_COOLDOWN_MS,
   findAnimal,
   sellPrice,
   weightedPick,

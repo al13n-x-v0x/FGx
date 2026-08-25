@@ -210,6 +210,62 @@ function warnEmbed(title, description) {
   return { color: BRAND.colors.warn, title, description, footer: { text: BRAND.footer } };
 }
 
+function workEmbed(result) {
+  const { job, failed, amount, balance } = result;
+  return {
+    color: failed ? BRAND.colors.danger : BRAND.colors.success,
+    title: failed ? `${job.emoji} Work Failed!` : `${job.emoji} Work Complete!`,
+    description: failed
+      ? `You tried working as **${job.name}** but got fired!
+Lost **${economy.format(Math.abs(amount))}** ₣Ԡ🇽. Balance: **${economy.format(balance)}** ₣Ԡ🇽`
+      : `You worked as **${job.name}** and earned **${economy.format(amount)}** ₣Ԡ🇽!
+Balance: **${economy.format(balance)}** ₣Ԡ🇽`,
+    footer: { text: BRAND.footer },
+  };
+}
+
+function crimeEmbed(result) {
+  const { crime: c, failed, amount, balance } = result;
+  return {
+    color: failed ? BRAND.colors.danger : BRAND.colors.success,
+    title: failed ? `${c.emoji} Busted!` : `${c.emoji} Crime Successful!`,
+    description: failed
+      ? `You got caught **${c.name}**! The cops fined you **${economy.format(Math.abs(amount))}** ₣Ԡ🇽.
+Balance: **${economy.format(balance)}** ₣Ԡ🇽`
+      : `You pulled off **${c.name}** and stole **${economy.format(amount)}** ₣Ԡ🇽!
+Balance: **${economy.format(balance)}** ₣Ԡ🇽`,
+    footer: { text: BRAND.footer },
+  };
+}
+
+function robEmbed(result) {
+  const { targetId, failed, amount, balance } = result;
+  return {
+    color: failed ? BRAND.colors.danger : BRAND.colors.success,
+    title: failed ? '🚨 Robbery Failed!' : '💰 Robbery Successful!',
+    description: failed
+      ? `You tried robbing <@${targetId}> but got caught!
+Lost **${economy.format(Math.abs(amount))}** ₣Ԡ🇽 as a fine.
+Balance: **${economy.format(balance)}** ₣Ԡ🇽`
+      : `You robbed <@${targetId}> and stole **${economy.format(amount)}** ₣Ԡ🇽!
+Balance: **${economy.format(balance)}** ₣Ԡ🇽`,
+    footer: { text: BRAND.footer },
+  };
+}
+
+function fishEmbed(result) {
+  const { fish: f, amount, balance } = result;
+  const rarity = require('../../data/minigames').RARITY[f.rarity];
+  return {
+    color: BRAND.colors.primary,
+    title: `${f.emoji} You caught a ${f.name}!`,
+    description: `${rarity.emoji} **${rarity.label}** rarity
+Earned **${economy.format(amount)}** ₣Ԡ🇽!
+Balance: **${economy.format(balance)}** ₣Ԡ🇽`,
+    footer: { text: BRAND.footer },
+  };
+}
+
 module.exports = {
   walletEmbed,
   claimEmbed,
@@ -226,4 +282,8 @@ module.exports = {
   txLabel,
   TX_LABELS,
   warnEmbed,
+  workEmbed,
+  crimeEmbed,
+  robEmbed,
+  fishEmbed,
 };

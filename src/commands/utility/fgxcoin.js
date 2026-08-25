@@ -65,7 +65,16 @@ module.exports = {
         .setName('sell')
         .setDescription('Sell a duplicate animal for coins')
         .addStringOption((o) => o.setName('animal').setDescription('Animal id or name, e.g. fox').setRequired(true)),
-    ),
+    )
+    .addSubcommand((s) => s.setName('work').setDescription('Do a job for coins (45s cooldown)'))
+    .addSubcommand((s) => s.setName('crime').setDescription('Commit a crime — high risk, high reward (90s cooldown)'))
+    .addSubcommand((s) =>
+      s
+        .setName('rob')
+        .setDescription('Rob another member (3min cooldown)')
+        .addUserOption((o) => o.setName('user').setDescription('Who to rob').setRequired(true)),
+    )
+    .addSubcommand((s) => s.setName('fish').setDescription('Go fishing for coins (30s cooldown)')),
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
     const userId = interaction.user.id;
@@ -90,6 +99,35 @@ module.exports = {
       } catch (err) {
         if (['INSUFFICIENT', 'HUNT_COOLDOWN', 'BATTLE_COOLDOWN', 'PRAY_COOLDOWN'].includes(err.code)) {
           return interaction.reply({ embeds: [views.warnEmbed('Minigame', err.message)], ephemeral: true });
+        }
+        throw err;
+      }
+    }
+
+    if (sub === 'work' || sub === 'crime' || sub === 'fish') {
+      try {
+        const result = await economy[sub](guildId, userId);
+        const embed = sub === 'work' ? views.workEmbed(result) : sub === 'crime' ? views.crimeEmbed(result) : views.fishEmbed(result);
+        return interaction.reply({ embeds: [embed] });
+      } catch (err) {
+        if (['WORK_COOLDOWN', 'CRIME_COOLDOWN', 'FISH_COOLDOWN'].includes(err.code)) {
+          return interaction.reply({ embeds: [views.warnEmbed('Cooldown', err.message)], ephemeral: true });
+        }
+        throw err;
+      }
+    }
+
+    if (sub === 'rob') {
+      const target = interaction.options.getUser('user', true);
+      if (target.id === userId) {
+        return interaction.reply({ embeds: [views.warnEmbed('Nope', 'You can\'t rob yourself.')], ephemeral: true });
+      }
+      try {
+        const result = await economy.rob(guildId, userId, target.id);
+        return interaction.reply({ embeds: [views.robEmbed(result)] });
+      } catch (err) {
+        if (['ROB_COOLDOWN', 'TARGET_POOR'].includes(err.code)) {
+          return interaction.reply({ embeds: [views.warnEmbed('Rob Failed', err.message)], ephemeral: true });
         }
         throw err;
       }

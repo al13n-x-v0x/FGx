@@ -326,6 +326,107 @@ async function battle(guildId, userId) {
   return { enemy, won, amount, balance: updated.balance, row: updated };
 }
 
+/**
+ * Work — do a job for coins. 45s cooldown.
+ */
+async function work(guildId, userId) {
+  const key = `work:${guildId}:${userId}`;
+  const left = minigameCooldown.remaining(key);
+  if (left > 0) {
+    const err = new Error(`You're still working.休息 in **${Math.ceil(left / 1000)}s**.`);
+    err.code = 'WORK_COOLDOWN';
+    throw err;
+  }
+  minigameCooldown.set(key, minigames.WORK_COOLDOWN_MS);
+
+  const job = minigames.weightedPick(minigames.JOBS, rng);
+  const failed = rng() < job.failChance;
+  const amount = failed ? -Math.min(50, Math.floor(job.min * 0.5)) : minigames.range(job.min, job.max, rng);
+  economyRepo.updateBalance(guildId, userId, amount);
+  economyRepo.logTx(guildId, userId, failed ? 'work_fail' : 'work', amount, `${failed ? 'Failed' : 'Worked as'} ${job.name}`);
+  const updated = economyRepo.get(guildId, userId);
+  return { job, failed, amount, balance: updated.balance };
+}
+
+/**
+ * Crime — commit a crime. 90s cooldown. High risk, high reward.
+ */
+async function crime(guildId, userId) {
+  const key = `crime:${guildId}:${userId}`;
+  const left = minigameCooldown.remaining(key);
+  if (left > 0) {
+    const err = new Error(`You're laying low. Wait **${Math.ceil(left / 1000)}s**.`);
+    err.code = 'CRIME_COOLDOWN';
+    throw err;
+  }
+  minigameCooldown.set(key, minigames.CRIME_COOLDOWN_MS);
+
+  const crimeEntry = minigames.weightedPick(minigames.CRIMES, rng);
+  const failed = rng() < crimeEntry.failChance;
+  const amount = failed ? -crimeEntry.failFine : minigames.range(crimeEntry.min, crimeEntry.max, rng);
+  economyRepo.updateBalance(guildId, userId, amount);
+  economyRepo.logTx(guildId, userId, failed ? 'crime_fail' : 'crime', amount, `${failed ? 'Caught during' : 'Completed'} ${crimeEntry.name}`);
+  const updated = economyRepo.get(guildId, userId);
+  return { crime: crimeEntry, failed, amount, balance: updated.balance };
+}
+
+/**
+ * Rob — steal from another member. 3 min cooldown.
+ */
+async function rob(guildId, userId, targetId) {
+  const key = `rob:${guildId}:${userId}`;
+  const left = minigameCooldown.remaining(key);
+  if (left > 0) {
+    const err = new Error(`You're too hot. Lay low for **${Math.ceil(left / 1000)}s**.`);
+    err.code = 'ROB_COOLDOWN';
+    throw err;
+  }
+  minigameCooldown.set(key, minigames.ROB_COOLDOWN_MS);
+
+  const targetRow = economyRepo.get(guildId, targetId);
+  const targetBalance = targetRow?.balance ?? 0;
+  if (targetBalance < 50) {
+    const err = new Error('That person is too poor to rob.');
+    err.code = 'TARGET_POOR';
+    throw err;
+  }
+
+  const failed = rng() < 0.4; // 40% chance to fail
+  let amount;
+  if (failed) {
+    amount = -minigames.ROB_FAIL_FINE;
+  } else {
+    amount = Math.min(minigames.ROB_CAP, Math.floor(targetBalance * minigames.ROB_FRACTION));
+    economyRepo.updateBalance(guildId, targetId, -amount);
+    economyRepo.logTx(guildId, targetId, 'robbed', -amount, `Robbed by <@${userId}>`);
+  }
+  economyRepo.updateBalance(guildId, userId, amount);
+  economyRepo.logTx(guildId, userId, failed ? 'rob_fail' : 'rob', amount, failed ? 'Failed to rob' : `Robbed <@${targetId}>`);
+  const updated = economyRepo.get(guildId, userId);
+  return { targetId, failed, amount, balance: updated.balance };
+}
+
+/**
+ * Fish — catch a fish. 30s cooldown.
+ */
+async function fish(guildId, userId) {
+  const key = `fish:${guildId}:${userId}`;
+  const left = minigameCooldown.remaining(key);
+  if (left > 0) {
+    const err = new Error(`Reeling in... wait **${Math.ceil(left / 1000)}s**.`);
+    err.code = 'FISH_COOLDOWN';
+    throw err;
+  }
+  minigameCooldown.set(key, minigames.FISH_COOLDOWN_MS);
+
+  const fishEntry = minigames.weightedPick(minigames.FISH, rng);
+  const amount = minigames.range(fishEntry.min, fishEntry.max, rng);
+  economyRepo.updateBalance(guildId, userId, amount);
+  economyRepo.logTx(guildId, userId, 'fish', amount, `Caught a ${fishEntry.name}`);
+  const updated = economyRepo.get(guildId, userId);
+  return { fish: fishEntry, amount, balance: updated.balance };
+}
+
 module.exports = {
   CURRENCY,
   DAILY_BASE,
@@ -344,6 +445,12 @@ module.exports = {
   battle,
   pray,
   crate,
+  work,
+  crime,
+  rob,
+  fish,
+  updateBalance: (...a) => economyRepo.updateBalance(...a),
+  logTx: (...a) => economyRepo.logTx(...a),
   rewardMatch,
   MATCH_WIN_REWARD,
   MATCH_DRAW_REWARD,
