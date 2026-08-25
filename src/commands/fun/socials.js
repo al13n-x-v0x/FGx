@@ -5,7 +5,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { BRAND } = require('../../config/constants');
 const { getGif, getGifsRandom } = require('../../utils/gifLibrary');
-const { ACTIONS, randomFrom } = require('../../data/actions');
+const { ACTIONS } = require('../../data/actions');
 
 /**
  * Factory — generates individual slash commands for each action type.
@@ -32,7 +32,7 @@ function buildCommand(actionName) {
       const target = interaction.options.getUser('target') ?? interaction.user;
       const self = target.id === interaction.user.id;
 
-      const line = randomFrom(action.lines)
+      const line = action.lines[Math.floor(Math.random() * action.lines.length)]
         .replaceAll('{actor}', interaction.user.username)
         .replaceAll('{target}', self ? 'themselves' : target.username);
 

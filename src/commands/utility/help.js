@@ -127,8 +127,6 @@ const CATEGORIES = [
     description: 'Ask the AI anything about FGx, BloxStrike, rules, or players.',
     commands: [
       { name: '/ask', desc: 'Ask the AI assistant about rules, events, strategies, or players' },
-      { name: '/ai', desc: 'Alias of /ask' },
-      { name: '/bloxai', desc: 'Ask the BloxStrike-specific AI assistant' },
     ],
   },
   {
@@ -151,7 +149,7 @@ const CATEGORIES = [
     name: '🖐️ Socials & Fun',
     description: 'Fun interactions, games, and social commands.',
     commands: [
-      { name: '/social slap', desc: 'Give someone a slap (+11 more: hug, kiss, punch, destroy...)' },
+      { name: '/slap @user', desc: 'Slap someone (+19 more: hug, kiss, punch, kill, bonk...)' },
       { name: '/roast @user', desc: 'AI-powered savage roasts with heat levels' },
       { name: '/roast-battle @user', desc: '3-round roast battle with AI commentary' },
       { name: '/rps', desc: 'Rock Paper Scissors — button rematches' },

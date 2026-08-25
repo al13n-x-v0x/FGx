@@ -41,53 +41,44 @@ module.exports = {
     .setDescription('Test your gaming knowledge with a trivia question!'),
 
   async execute(interaction) {
-    const trivia = TRIVIA_BANK[Math.floor(Math.random() * TRIVIA_BANK.length)];
+    const idx = Math.floor(Math.random() * TRIVIA_BANK.length);
+    const trivia = TRIVIA_BANK[idx];
 
-    const desc = trivia.options
-      .map((opt, i) => `${NUMBERS[i]} **${opt}**`)
-      .join('\n');
+    const desc = trivia.options.map((opt, i) => `${NUMBERS[i]} **${opt}**`).join('\n');
 
     const embed = new EmbedBuilder()
       .setColor(BRAND.colors.primary)
       .setTitle('🧠 Trivia Time!')
       .setDescription(trivia.q + '\n\n' + desc)
-      .setFooter({ text: `${BRAND.footer} • You have 30 seconds` })
+      .setFooter({ text: BRAND.footer })
       .setTimestamp(new Date());
 
+    // Encode question index in customId so handleButton can look it up
     const row = new ActionRowBuilder().addComponents(
       new StringSelectMenuBuilder()
-        .setCustomId(`trivia:${trivia.answer}`)
+        .setCustomId(`trivia:${idx}:${trivia.answer}`)
         .setPlaceholder('Pick your answer...')
-        .addOptions(
-          trivia.options.map((opt, i) => ({
-            label: opt,
-            value: String(i),
-            emoji: NUMBERS[i],
-          })),
-        ),
+        .addOptions(trivia.options.map((opt, i) => ({ label: opt, value: String(i), emoji: NUMBERS[i] }))),
     );
 
-    await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+    await interaction.reply({ embeds: [embed], components: [row] });
   },
 
-  /** Handle select menu answer */
   async handleButton(interaction) {
-    const correctIdx = parseInt(interaction.customId.split(':')[1], 10);
+    // customId format: trivia:<questionIdx>:<correctIdx>
+    const parts = interaction.customId.split(':');
+    const questionIdx = parseInt(parts[1], 10);
+    const correctIdx = parseInt(parts[2], 10);
     const chosenIdx = parseInt(interaction.values[0], 10);
+    const trivia = TRIVIA_BANK[questionIdx] || TRIVIA_BANK[0];
     const isCorrect = chosenIdx === correctIdx;
 
-    const trivia = TRIVIA_BANK.find((t) => t.options[correctIdx] !== undefined) || TRIVIA_BANK[0];
-
-    const color = isCorrect ? BRAND.colors.success : BRAND.colors.danger;
-    const title = isCorrect ? '✅ Correct!' : '❌ Wrong!';
-    const desc = isCorrect
-      ? `The answer was **${trivia.options[correctIdx]}**`
-      : `The answer was **${trivia.options[correctIdx]}**, not **${trivia.options[chosenIdx]}**`;
-
     const embed = new EmbedBuilder()
-      .setColor(color)
-      .setTitle(title)
-      .setDescription(desc)
+      .setColor(isCorrect ? BRAND.colors.success : BRAND.colors.danger)
+      .setTitle(isCorrect ? '✅ Correct!' : '❌ Wrong!')
+      .setDescription(isCorrect
+        ? `The answer was **${trivia.options[correctIdx]}**`
+        : `The answer was **${trivia.options[correctIdx]}**, not **${trivia.options[chosenIdx]}**`)
       .setFooter({ text: BRAND.footer })
       .setTimestamp(new Date());
 

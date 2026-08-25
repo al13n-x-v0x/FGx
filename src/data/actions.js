@@ -270,8 +270,4 @@ const ACTIONS = {
   },
 };
 
-function randomFrom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-module.exports = { ACTIONS, randomFrom };
+module.exports = { ACTIONS };

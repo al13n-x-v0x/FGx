@@ -41,7 +41,6 @@ const SEARCH_TERMS = {
   kill: ['anime kill', 'kill anime', 'anime death', 'anime eliminate', 'anime destroy', 'anime fatality'],
   bonk: ['anime bonk', 'bonk anime', 'anime jail', 'horny jail anime', 'frying pan bonk', 'anime hammer'],
   yeet: ['anime throw', 'yeet anime', 'anime toss', 'anime yeet', 'anime launch', 'anime yeet throw'],
-  dance: ['anime dance', 'dance anime', 'anime party', 'anime vibes dance', 'anime groovy', 'anime disco'],
   shoot: ['anime shoot', 'anime gun', 'anime pistol', 'anime sniper', 'anime eliminate', 'anime pew pew'],
   stab: ['anime stab', 'anime knife', 'anime sword', 'anime backstab', 'anime assassin', 'anime blade'],
   destroy: ['anime destroy', 'anime rekt', 'anime owned', 'anime wrecked', 'anime explosion', 'anime annihilation'],

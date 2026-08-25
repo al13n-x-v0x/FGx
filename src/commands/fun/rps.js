@@ -11,29 +11,43 @@ const CHOICES = {
   scissors: { emoji: '✂️', name: 'Scissors', beats: 'paper' },
 };
 
-const WIN_MESSAGES = [
-  'You actually won? impressive.',
-  'Lucky shot, I\'ll give you that.',
-  'OK fine, you win this one.',
-  'Skill? No. Pure luck.',
-  'GG, you got me.',
-];
-const LOSE_MESSAGES = [
-  'Too slow, too weak.',
-  'Better luck next time.',
-  'EZ.',
-  'Was that supposed to be a challenge?',
-  'GG, try harder next time.',
-];
-const TIE_MESSAGES = [
-  'We think alike... or equally bad.',
-  'A tie? Boring.',
-  'Great minds think alike.',
-  'Nobody wins. Just like in life.',
-];
+const MESSAGES = {
+  win: ['You actually won? impressive.', 'Lucky shot, I\'ll give you that.', 'OK fine, you win this one.', 'GG, you got me.'],
+  lose: ['Too slow, too weak.', 'Better luck next time.', 'EZ.', 'GG, try harder next time.'],
+  tie: ['We think alike... or equally bad.', 'A tie? Boring.', 'Great minds think alike.'],
+};
 
-function pickRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+const RESULT_TEXT = { win: '🏆 **You Win!**', lose: '💀 **You Lose!**', tie: '🤝 **Tie!**' };
+const RESULT_COLORS = { win: BRAND.colors.success, lose: BRAND.colors.danger, tie: BRAND.colors.warn };
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function playRps(userChoice) {
+  const botChoice = Object.keys(CHOICES)[Math.floor(Math.random() * 3)];
+  const result = userChoice === botChoice ? 'tie' : CHOICES[userChoice].beats === botChoice ? 'win' : 'lose';
+  return { result, botChoice };
+}
+
+function buildEmbed(userChoice, botChoice, result) {
+  return new EmbedBuilder()
+    .setColor(RESULT_COLORS[result])
+    .setTitle('✊ Rock Paper Scissors')
+    .setDescription(RESULT_TEXT[result])
+    .addFields(
+      { name: 'You', value: `${CHOICES[userChoice].emoji} **${CHOICES[userChoice].name}**`, inline: true },
+      { name: 'vs', value: '⚡', inline: true },
+      { name: 'Bot', value: `${CHOICES[botChoice].emoji} **${CHOICES[botChoice].name}**`, inline: true },
+    )
+    .setFooter({ text: pick(MESSAGES[result]) })
+    .setTimestamp(new Date());
+}
+
+function buildRow() {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('rps:rock').setStyle(ButtonStyle.Secondary).setEmoji('🪨').setLabel('Rock'),
+    new ButtonBuilder().setCustomId('rps:paper').setStyle(ButtonStyle.Secondary).setEmoji('📄').setLabel('Paper'),
+    new ButtonBuilder().setCustomId('rps:scissors').setStyle(ButtonStyle.Secondary).setEmoji('✂️').setLabel('Scissors'),
+  );
 }
 
 module.exports = {
@@ -41,10 +55,7 @@ module.exports = {
     .setName('rps')
     .setDescription('Play Rock Paper Scissors against the bot!')
     .addStringOption((o) =>
-      o
-        .setName('choice')
-        .setDescription('Your choice')
-        .setRequired(true)
+      o.setName('choice').setDescription('Your choice').setRequired(true)
         .addChoices(
           { name: '🪨 Rock', value: 'rock' },
           { name: '📄 Paper', value: 'paper' },
@@ -53,110 +64,13 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    const userChoice = interaction.options.getString('choice');
-    const botChoice = Object.keys(CHOICES)[Math.floor(Math.random() * 3)];
-
-    let result;
-    let color;
-    let message;
-
-    if (userChoice === botChoice) {
-      result = 'tie';
-      color = BRAND.colors.warn;
-      message = pickRandom(TIE_MESSAGES);
-    } else if (CHOICES[userChoice].beats === botChoice) {
-      result = 'win';
-      color = BRAND.colors.success;
-      message = pickRandom(WIN_MESSAGES);
-    } else {
-      result = 'lose';
-      color = BRAND.colors.danger;
-      message = pickRandom(LOSE_MESSAGES);
-    }
-
-    const resultText =
-      result === 'win' ? '🏆 **You Win!**' :
-      result === 'lose' ? '💀 **You Lose!**' :
-      '🤝 **Tie!**';
-
-    const embed = new EmbedBuilder()
-      .setColor(color)
-      .setTitle('✊ Rock Paper Scissors')
-      .setDescription(resultText)
-      .addFields(
-        {
-          name: 'You',
-          value: `${CHOICES[userChoice].emoji} **${CHOICES[userChoice].name}**`,
-          inline: true,
-        },
-        { name: 'vs', value: '⚡', inline: true },
-        {
-          name: 'Bot',
-          value: `${CHOICES[botChoice].emoji} **${CHOICES[botChoice].name}**`,
-          inline: true,
-        },
-      )
-      .setFooter({ text: message })
-      .setTimestamp(new Date());
-
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`rps:rock`)
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji('🪨')
-        .setLabel('Rock'),
-      new ButtonBuilder()
-        .setCustomId(`rps:paper`)
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji('📄')
-        .setLabel('Paper'),
-      new ButtonBuilder()
-        .setCustomId(`rps:scissors`)
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji('✂️')
-        .setLabel('Scissors'),
-    );
-
-    await interaction.reply({ embeds: [embed], components: [row] });
+    const { result, botChoice } = playRps(interaction.options.getString('choice'));
+    await interaction.reply({ embeds: [buildEmbed(interaction.options.getString('choice'), botChoice, result)], components: [buildRow()] });
   },
 
-  /** Handle button rematches */
   async handleButton(interaction) {
     const userChoice = interaction.customId.split(':')[1];
-    const botChoice = Object.keys(CHOICES)[Math.floor(Math.random() * 3)];
-
-    let result, color, message;
-    if (userChoice === botChoice) {
-      result = 'tie'; color = BRAND.colors.warn; message = pickRandom(TIE_MESSAGES);
-    } else if (CHOICES[userChoice].beats === botChoice) {
-      result = 'win'; color = BRAND.colors.success; message = pickRandom(WIN_MESSAGES);
-    } else {
-      result = 'lose'; color = BRAND.colors.danger; message = pickRandom(LOSE_MESSAGES);
-    }
-
-    const resultText =
-      result === 'win' ? '🏆 **You Win!**' :
-      result === 'lose' ? '💀 **You Lose!**' :
-      '🤝 **Tie!**';
-
-    const embed = new EmbedBuilder()
-      .setColor(color)
-      .setTitle('✊ Rock Paper Scissors')
-      .setDescription(resultText)
-      .addFields(
-        { name: 'You', value: `${CHOICES[userChoice].emoji} **${CHOICES[userChoice].name}**`, inline: true },
-        { name: 'vs', value: '⚡', inline: true },
-        { name: 'Bot', value: `${CHOICES[botChoice].emoji} **${CHOICES[botChoice].name}**`, inline: true },
-      )
-      .setFooter({ text: message })
-      .setTimestamp(new Date());
-
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('rps:rock').setStyle(ButtonStyle.Secondary).setEmoji('🪨').setLabel('Rock'),
-      new ButtonBuilder().setCustomId('rps:paper').setStyle(ButtonStyle.Secondary).setEmoji('📄').setLabel('Paper'),
-      new ButtonBuilder().setCustomId('rps:scissors').setStyle(ButtonStyle.Secondary).setEmoji('✂️').setLabel('Scissors'),
-    );
-
-    await interaction.update({ embeds: [embed], components: [row] });
+    const { result, botChoice } = playRps(userChoice);
+    await interaction.update({ embeds: [buildEmbed(userChoice, botChoice, result)], components: [buildRow()] });
   },
 };
