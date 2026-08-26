@@ -205,6 +205,12 @@ function parseCommand(line, mentionIds = []) {
   if (cmd === 'mcstatus' || cmd === 'mcstats') {
     return { type: 'mcstatus' };
   }
+  if (cmd === 'trick' || cmd === 'ai') {
+    const trickCmd = (rest[0] || '').toLowerCase();
+    const trickUser = mentionIds[0] || null;
+    const trickText = rest.slice(1).join(' ').trim();
+    return { type: 'trick', trick: trickCmd || 'roast', targetId: trickUser, text: trickText };
+  }
   if (socialService.KINDS.includes(cmd)) {
     return { type: 'social', kind: cmd, targetId: mentionIds[0] ?? null };
   }
@@ -277,7 +283,10 @@ function helpEmbed() {
       '• `!urban <term>` — Urban Dictionary lookup\n' +
       '• `!choose a | b | c` — random pick\n' +
       '• `!ship @user` — love compatibility\n' +
-      '• `!rate <thing>` — rate anything 0-10\n\n' +
+      '• `!rate <thing>` — rate anything 0-10\n' +
+      '• `!trick roast @user` / `!trick predict @user` — AI tricks with GIFs\n' +
+      '• `!trick poem @user` / `!trick pickup @user` / `!trick translate <text>`\n' +
+      '• `!trick debate <topic>` / `!trick story <topic>` / `!trick simulate <what>`\n\n' +
       '**🎲 Party Games**\n' +
       '• `!wyr` — Would You Rather\n' +
       '• `!nhie` — Never Have I Ever\n' +
@@ -603,6 +612,49 @@ async function handle(client, message) {
         } catch (err) {
           const text = err.safe ? err.message : '❌ AI is temporarily unavailable. Try again in a moment.';
           await message.reply({ embeds: [views.warnEmbed('AI', text)] }).catch(() => {});
+        }
+        return true;
+      }
+
+      case 'trick': {
+        const { EmbedBuilder } = require('discord.js');
+        const assistant = require('../../services/ai/assistant');
+        const trick = parsed.trick || 'roast';
+        const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) : null;
+        const text = parsed.text || '';
+        const targetName = target ? target.username : message.author.username;
+
+        const prompts = {
+          roast: { sys: `Savage roast comedian. Roast ${targetName} in one line max 120 chars. Swearing OK. No markdown.`, prompt: `Roast ${targetName} HARD` },
+          compliment: { sys: `Sweet person. Give ${targetName} a heartwarming compliment max 120 chars.`, prompt: `Compliment ${targetName}` },
+          insult: { sys: `Savage roaster. Insult ${targetName} in one line max 100 chars. Funny, not cruel.`, prompt: `Insult ${targetName}` },
+          predict: { sys: `Mystical fortune teller. Predict ${targetName}'s future max 150 chars with emojis.`, prompt: `Predict ${targetName}'s future` },
+          pickup: { sys: `Smoothest person alive. Cheesy pickup line for ${targetName} max 100 chars.`, prompt: `Pickup line for ${targetName}` },
+          poem: { sys: `Poet. Write a funny 4-line poem about ${targetName}. Max 200 chars.`, prompt: `Poem about ${targetName}` },
+          fortune: { sys: `Fortune teller. Cryptic fun fortune for ${targetName} max 150 chars with emojis.`, prompt: `Fortune for ${targetName}` },
+          translate: { sys: `Translator. Translate to pirate language. Beep boop pirate speak.`, prompt: `Translate to pirate: ${text || 'hello friend'}` },
+          debate: { sys: `Debate champion. Argue FOR or AGAINST a topic max 200 chars.`, prompt: `Debate: ${text || 'pineapple on pizza'}` },
+          story: { sys: `Fiction writer. Short funny story max 300 chars about: ${text || 'a gamer'}`, prompt: `Story about: ${text || 'a gamer'}` },
+          roastbattle: { sys: `Roast battle host. Roast TWO users alternating lines max 300 chars.`, prompt: `Roast battle: ${targetName} vs everyone` },
+          simulate: { sys: `Dramatic narrator. Describe: ${text || 'a gaming moment'} max 250 chars with emojis.`, prompt: `Simulate: ${text || 'a gaming moment'}` },
+        };
+
+        const trickData = prompts[trick] || prompts.roast;
+        try {
+          const response = await assistant.chat(trickData.prompt, { system: trickData.sys, user: message.author.username, guild: message.guild?.name });
+          const colors = { roast: 0xFF4500, compliment: 0xFF69B4, insult: 0x8B0000, predict: 0x9B59B6, pickup: 0xFF69B4, poem: 0x3498DB, fortune: 0x9B59B6, translate: 0xE67E22, debate: 0x2ECC71, story: 0x1ABC9C, simulate: 0xF39C12 };
+          const emojis = { roast: '🔥', compliment: '💜', insult: '💀', predict: '🔮', pickup: '💘', poem: '📝', fortune: '🔮', translate: '🌍', debate: '🔥', story: '📖', simulate: '🎭' };
+          const embed = new EmbedBuilder()
+            .setColor(colors[trick] || 0x00ff00)
+            .setTitle(`${emojis[trick] || '✨'} ${trick.charAt(0).toUpperCase() + trick.slice(1)}: ${targetName}`)
+            .setDescription(response?.slice(0, 2000) || 'AI got shy... try again!')
+            .setThumbnail(target?.displayAvatarURL({ size: 64 }))
+            .setFooter({ text: BRAND.footer })
+            .setTimestamp();
+          await message.reply({ embeds: [embed] });
+        } catch (err) {
+          const text = err.safe ? err.message : '❌ AI is taking a break... try again!';
+          await message.reply({ embeds: [views.warnEmbed('AI Trick', text)] }).catch(() => {});
         }
         return true;
       }
