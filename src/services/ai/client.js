@@ -1,34 +1,9 @@
 'use strict';
 
-/*
- * Copyright © 2026 FGx.
- * All rights reserved.
- */
+/* Copyright (c) 2026 FGx. All rights reserved. */
 
 const { env, aiConfigured, aiTimeoutMs, resolveProvider, fallbackProviders, keyList, modelList } = require('../../config/env');
 const { logger } = require('../../utils/logger');
-
-/**
- * Provider-agnostic AI client (fetch-based, no SDK) with resilience.
- *
- * Supported providers (selected by AI_PROVIDER or auto-detected from keys):
- *  - openai : OpenAI-compatible /chat/completions (OpenAI, OpenRouter, Azure,
- *             local Ollama, …) via AI_BASE_URL
- *  - gemini : Google Gemini generateContent API
- *  - groq   : Groq (OpenAI-compatible)
- *
- * Key & model shuffling: each provider can have multiple API keys
- * (AI_KEYS / GEMINI_KEYS / GROQ_KEYS) and multiple models (AI_MODELS /
- * GEMINI_MODELS / GROQ_MODELS). AI_FAILOVER_MODE controls selection:
- *  - failover   (default) always try the primary first, then the next on error
- *  - roundrobin rotate the starting candidate per call
- *  - shuffle    pick a random starting candidate per call
- * On a failed candidate (network error, timeout, 4xx/5xx, empty reply) the
- * next candidate is tried automatically. When the whole pool of one provider
- * is exhausted, every other configured provider is tried as a fallback
- * (AI_PROVIDER picks the primary; the rest are fallbacks automatically).
- * Keys are never logged — only provider, model, and key index.
- */
 
 class AIUnavailableError extends Error {
   constructor(message = 'AI is not configured on this server.') {
@@ -38,38 +13,26 @@ class AIUnavailableError extends Error {
   }
 }
 
-/** Build the request for an OpenAI-compatible provider. */
 async function callOpenAiCompatible(baseUrl, apiKey, model, { system, messages, maxTokens, temperature }) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), aiTimeoutMs());
   try {
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    };
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model,
-        messages: [
-          ...(system ? [{ role: 'system', content: system }] : []),
-          ...messages,
-        ],
+        messages: [...(system ? [{ role: 'system', content: system }] : []), ...messages],
         temperature,
         max_tokens: maxTokens,
       }),
       signal: controller.signal,
     });
-
     const rawBody = await response.json();
-    if (!response.ok) {
-      throw providerHttpError(response.status, rawBody);
-    }
+    if (!response.ok) throw providerHttpError(response.status, rawBody);
     const content = rawBody?.choices?.[0]?.message?.content;
     if (typeof content !== 'string' || content.length === 0) {
-      const hint = rawBody?.error ? ` (${rawBody.error})` : rawBody?.choices ? ' (choices empty)' : '';
-      throw new AIUnavailableError(`AI returned an empty response${hint}.`);
+      throw new AIUnavailableError(`Empty response from ${model}${rawBody?.error ? ': ' + rawBody.error : ''}`);
     }
     return content;
   } finally {
@@ -77,23 +40,73 @@ async function callOpenAiCompatible(baseUrl, apiKey, model, { system, messages, 
   }
 }
 
-/** Build the request for Google Gemini. */
+async function callHuggingFace(apiKey, model, { system, messages, maxTokens, temperature }) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), Math.max(aiTimeoutMs(), 45000));
+  try {
+    // Build a single prompt string since not all HF models support chat completions
+    let prompt = '';
+    if (system) prompt += system + '\n\n';
+    for (const m of messages) {
+      prompt += (m.role === 'assistant' ? 'Assistant: ' : 'User: ') + m.content + '\n';
+    }
+    prompt += 'Assistant:';
+
+    const response = await fetch(
+      `https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_new_tokens: maxTokens,
+            temperature: temperature,
+            return_full_text: false,
+          },
+        }),
+        signal: controller.signal,
+      }
+    );
+
+    const rawBody = await response.json();
+
+    // 503 = model is loading (cold start)
+    if (response.status === 503) {
+      const msg = rawBody?.error || rawBody?.estimated_time ? `Model loading (~${Math.round(rawBody.estimated_time)}s)` : 'Model loading';
+      throw new AIUnavailableError(`HuggingFace: ${msg}`);
+    }
+
+    if (!response.ok) throw providerHttpError(response.status, rawBody);
+
+    // HF inference API returns { generated_text: "..." } or [{ generated_text: "..." }]
+    let text;
+    if (Array.isArray(rawBody)) {
+      text = rawBody.map(r => r.generated_text || '').join('');
+    } else if (rawBody?.generated_text) {
+      text = rawBody.generated_text;
+    } else if (rawBody?.[0]?.generated_text) {
+      text = rawBody[0].generated_text;
+    } else {
+      text = JSON.stringify(rawBody);
+    }
+
+    if (!text || text.trim().length === 0) {
+      throw new AIUnavailableError('HuggingFace returned an empty response.');
+    }
+    return text.trim();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function callGemini(apiKey, model, { system, messages, maxTokens, temperature }) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), aiTimeoutMs());
   try {
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-    const contents = messages.map((m) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }));
-
-    const body = {
-      contents,
-      generationConfig: { temperature, maxOutputTokens: maxTokens },
-    };
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const contents = messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+    const body = { contents, generationConfig: { temperature, maxOutputTokens: maxTokens } };
     if (system) body.systemInstruction = { parts: [{ text: system }] };
 
     const response = await fetch(url, {
@@ -102,17 +115,12 @@ async function callGemini(apiKey, model, { system, messages, maxTokens, temperat
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-
     const rawBody = await response.json();
-    if (!response.ok) {
-      throw providerHttpError(response.status, rawBody);
-    }
-    const text = rawBody?.candidates?.[0]?.content?.parts
-      ?.map((p) => p.text ?? '')
-      .join('');
+    if (!response.ok) throw providerHttpError(response.status, rawBody);
+    const text = rawBody?.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('');
     if (typeof text !== 'string' || text.length === 0) {
       const hint = rawBody?.error?.message || '';
-      throw new AIUnavailableError(`Gemini returned an empty response${hint ? ': ' + hint : ''}.`);
+      throw new AIUnavailableError(`Gemini empty response${hint ? ': ' + hint : ''}`);
     }
     return text;
   } finally {
@@ -122,23 +130,17 @@ async function callGemini(apiKey, model, { system, messages, maxTokens, temperat
 
 function providerHttpError(status, body) {
   let detail = `HTTP ${status}`;
-  if (status === 401) detail = 'AI provider rejected the API key';
-  if (status === 403) detail = 'AI provider denied access (check key permissions or accept model license on HuggingFace)';
-  if (status === 404) detail = 'AI provider does not know that model';
-  if (status === 429) detail = 'AI provider rate limit hit';
-  if (status === 503) detail = 'Model is loading on HuggingFace (try again in 20s)';
-  const hfHint = status >= 400 && body && typeof body === 'object' && body.error
-    ? ` — ${body.error}` : '';
-  return new AIUnavailableError(`AI request failed (${detail}${hfHint}).`);
+  if (status === 401) detail = 'Invalid API key';
+  if (status === 403) detail = 'Access denied (check key or accept model license)';
+  if (status === 404) detail = 'Model not found';
+  if (status === 429) detail = 'Rate limit hit';
+  if (status === 503) detail = 'Model loading on HuggingFace';
+  const hint = body?.error ? `: ${body.error}` : '';
+  return new AIUnavailableError(`${detail}${hint}`);
 }
 
-/** Per-provider round-robin cursor. */
 const roundRobinCursors = new Map();
 
-/**
- * Build the candidate pool for a provider: key[i] paired with model[i % n].
- * A single key with several models (or several keys with one model) both work.
- */
 function buildPool(provider) {
   const keys = keyList(provider);
   const models = modelList(provider);
@@ -149,145 +151,82 @@ function buildPool(provider) {
   return pool;
 }
 
-/** Order of candidate indices to try, given the failover mode. */
 function candidateOrder(count, mode, roundIndex = 0) {
-  const start =
-    mode === 'roundrobin'
-      ? roundIndex % count
-      : mode === 'shuffle'
-        ? Math.floor(Math.random() * count)
-        : 0; // failover: always primary first
+  const start = mode === 'roundrobin' ? roundIndex % count
+    : mode === 'shuffle' ? Math.floor(Math.random() * count) : 0;
   return Array.from({ length: count }, (_, i) => (start + i) % count);
 }
 
-/**
- * Send a chat completion request using the resolved provider, with
- * automatic key/model failover and optional rotation.
- * @param {object} options
- * @param {string} options.system System prompt.
- * @param {Array<{role: string, content: string}>} options.messages Conversation messages.
- * @param {number} [options.maxTokens]
- * @param {number} [options.temperature]
- * @returns {Promise<string>} assistant text
- */
 async function chatCompletion({ system, messages, maxTokens = 800, temperature = 0.3 }) {
   if (!aiConfigured()) throw new AIUnavailableError();
 
-  // Primary provider first (AI_PROVIDER or auto-detect), then every other
-  // configured provider as automatic fallback.
   const providers = [resolveProvider(), ...fallbackProviders()];
   const mode = env.AI_FAILOVER_MODE;
   let lastError = null;
+
   for (const provider of providers) {
     const pool = buildPool(provider);
-    if (pool.length === 0) continue; // e.g. explicit AI_PROVIDER without a key
+    if (pool.length === 0) continue;
 
     const cursor = roundRobinCursors.get(provider) ?? 0;
     const order = candidateOrder(pool.length, mode, cursor);
     roundRobinCursors.set(provider, cursor + 1);
 
-    for (const index of order) {
-      const entry = pool[index];
-      let attempts = 0;
+    for (const idx of order) {
+      const entry = pool[idx];
       const maxAttempts = provider === 'huggingface' ? 3 : 1;
-      while (attempts < maxAttempts) {
-        attempts += 1;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          const result =
-            provider === 'gemini'
-              ? await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature })
-              : await callOpenAiCompatible(
-                  provider === 'groq'
-                    ? 'https://api.groq.com/openai/v1'
-                    : provider === 'huggingface'
-                      ? 'https://api-inference.huggingface.co/v1'
-                      : env.AI_BASE_URL,
-                  entry.key,
-                  entry.model,
-                  { system, messages, maxTokens, temperature },
-                );
-          if (provider !== providers[0] || attempts > 1) {
-            logger.warn('ai provider fallback used', { provider, model: entry.model });
+          let result;
+          if (provider === 'gemini') {
+            result = await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature });
+          } else if (provider === 'huggingface') {
+            result = await callHuggingFace(entry.key, entry.model, { system, messages, maxTokens, temperature });
           } else {
-            logger.debug('ai request ok', { provider, model: entry.model, keyIndex: index + 1 });
+            const base = provider === 'groq' ? 'https://api.groq.com/openai/v1' : env.AI_BASE_URL;
+            result = await callOpenAiCompatible(base, entry.key, entry.model, { system, messages, maxTokens, temperature });
           }
+          logger.info('ai ok', { provider, model: entry.model });
           return result;
         } catch (err) {
           lastError = err;
-          const isColdStart = provider === 'huggingface' && attempts < maxAttempts && err.message.includes('503');
+          const isColdStart = provider === 'huggingface' && attempt < maxAttempts && err.message.includes('loading');
           if (isColdStart) {
-            logger.warn('huggingface model loading, retrying in 10s', { model: entry.model, attempt: attempts });
-            await new Promise((r) => setTimeout(r, 10000));
+            logger.warn('hf model loading, retrying 10s', { model: entry.model, attempt });
+            await new Promise(r => setTimeout(r, 10000));
             continue;
           }
-          if (pool.length > 1) {
-            logger.warn('ai candidate failed, trying next', {
-              provider,
-              model: entry.model,
-              keyIndex: index + 1,
-              error: err.message,
-            });
-          }
+          logger.warn('ai fail', { provider, model: entry.model, error: err.message });
           break;
         }
       }
     }
-    if (providers.length > 1) {
-      logger.warn('ai provider pool exhausted, trying next provider', {
-        provider,
-        error: lastError?.message,
-      });
-    }
   }
-  throw lastError ?? new AIUnavailableError('The AI service is temporarily unavailable.');
+  throw lastError ?? new AIUnavailableError('AI service unavailable.');
 }
 
-/**
- * Ask the model to classify content, expecting a JSON object.
- * Returns parsed JSON or null if the response could not be parsed.
- */
 async function classify(content, { context = '' } = {}) {
-  const system =
-    'You are a content safety classifier for a competitive gaming Discord server. ' +
-    'Analyze the given message for: harassment, threats, hate-related abuse, sexual content, ' +
-    'scam attempts, phishing, malicious links, severe toxicity, and advertisement spam. ' +
-    'Respond with ONLY a JSON object of the form ' +
-    '{"risk":"LOW|MEDIUM|HIGH","category":"...","reason":"short reason","confidence":0.0-1.0,"recommendedAction":"...",' +
-    '"suggestedPunishment":"NONE|DELETE|TIMEOUT|BAN"}. ' +
-    'Be conservative: assign HIGH risk only with strong evidence. Confidence is your certainty, 0-1.';
-
-  const user = `${context ? `Context: ${context}\n` : ''}Message to classify:\n"""\n${content.slice(0, 3000)}\n"""`;
-
-  const raw = await chatCompletion({ system, messages: [{ role: 'user', content: user }], maxTokens: 800, temperature: 0 });
+  const system = 'You are a content safety classifier for a competitive gaming Discord server. Respond with ONLY a JSON object: {"risk":"LOW|MEDIUM|HIGH","category":"...","reason":"...","confidence":0.0-1.0,"suggestedPunishment":"NONE|DELETE|TIMEOUT|BAN"}. Be conservative.';
+  const user = `${context ? context + '\n' : ''}Classify:\n"${content.slice(0, 3000)}"`;
+  const raw = await chatCompletion({ system, messages: [{ role: 'user', content: user }], maxTokens: 500, temperature: 0 });
   const parsed = extractJson(raw);
   if (!parsed || typeof parsed.risk !== 'string') return null;
   return {
-    risk: parsed.risk,
-    category: parsed.category ?? 'unknown',
-    reason: parsed.reason ?? '',
-    confidence: Number(parsed.confidence) || 0,
-    recommendedAction: parsed.recommendedAction ?? '',
-    suggestedPunishment: parsed.suggestedPunishment ?? 'NONE',
+    risk: parsed.risk, category: parsed.category || 'unknown',
+    reason: parsed.reason || '', confidence: Number(parsed.confidence) || 0,
+    recommendedAction: parsed.recommendedAction || '',
+    suggestedPunishment: parsed.suggestedPunishment || 'NONE',
   };
 }
 
-/** Pull the first balanced JSON object out of a model response. */
 function extractJson(text) {
   const start = text.indexOf('{');
   if (start === -1) return null;
   let depth = 0;
-  for (let i = start; i < text.length; i += 1) {
-    if (text[i] === '{') depth += 1;
-    else if (text[i] === '}') {
-      depth -= 1;
-      if (depth === 0) {
-        try {
-          return JSON.parse(text.slice(start, i + 1));
-        } catch {
-          return null;
-        }
-      }
-    }
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}') { depth--; if (depth === 0) { try { return JSON.parse(text.slice(start, i + 1)); } catch { return null; } } }
   }
   return null;
 }

@@ -1,61 +1,30 @@
-# Render Blueprint — deploys FGx with one click.
-# How to use: Render dashboard → New → Blueprint → pick this repo (FGx).
-# Render reads this file and creates the web service automatically.
-# Docs: https://render.com/docs/blueprint-spec
+# Render configuration for FGx Discord Bot
 services:
   - type: web
     name: fgx
     runtime: node
     plan: free
+    env: node
+    region: oregon
     buildCommand: npm install
     startCommand: node src/index.js
     healthCheckPath: /health
-    autoDeploy: true
     envVars:
-      - key: PORT
-        value: '10000'
       - key: NODE_ENV
         value: production
-      - key: DATABASE_PATH
-        value: data/fgx.db
       - key: DISCORD_INTENTS
         value: full
-      # AI: Gemini primary, Groq as fallback.
-      - key: AI_PROVIDER
-        value: gemini
-      - key: GEMINI_MODEL
-        value: gemini-3.5-flash-lite
-      - key: GEMINI_VISION_MODEL
-        value: gemini-3.5-flash-lite
-      - key: GROQ_MODELS
-        value: groq/compound,groq/compound-mini
-      - key: AI_FAILOVER_MODE
-        value: shuffle
-      - key: AI_ACTION_MODE
-        value: LOG
-      - key: AI_TIMEOUT_MS
-        value: '30000'
-      # Minecraft server config
       - key: MC_SERVER_HOST
         value: FGxx.aternos.me
       - key: MC_SERVER_PORT
         value: '25565'
       - key: MC_SERVER_NAME
         value: FGxx Aternos Server
-      # Secrets — set these in Render dashboard Environment tab.
-      - key: DISCORD_TOKEN
-        sync: false
-      - key: CLIENT_ID
-        sync: false
-      - key: GEMINI_KEYS
-        sync: false
-      - key: GROQ_KEYS
-        sync: false
-      - key: ATERNOS_USERNAME
-        sync: false
       - key: HF_API_KEY
         value: ''
       - key: HF_MODEL
-        value: 'meta-llama/Meta-Llama-3-8B-Instruct'
+        value: 'mistralai/Mistral-7B-Instruct-v0.3,microsoft/DialoGPT-medium'
+      - key: ATERNOS_USERNAME
+        sync: false
       - key: ATERNOS_PASSWORD
         sync: false

@@ -54,7 +54,7 @@ const OPTIONAL_DEFAULTS = {
   MC_SERVER_NAME: 'FGxx Aternos Server',
   // HuggingFace (Meta Llama, etc.) — OpenAI-compatible API
   HF_API_KEY: '',
-  HF_MODEL: 'mistralai/Mistral-7B-Instruct-v0.3,meta-llama/Meta-Llama-3-8B-Instruct',
+  HF_MODEL: 'mistralai/Mistral-7B-Instruct-v0.3,microsoft/DialoGPT-medium',
 };
 
 /** @type {Record<string, string>} */
