@@ -135,17 +135,16 @@ async function getBrowser() {
   }
   _browserLaunching = true;
   try {
-    // Check if playwright is even installed (not on Render free tier)
+    const fs = require('fs');
     let chromium;
     try {
       chromium = require('playwright').chromium;
     } catch {
-      logger.info('aternos: playwright not installed — using manual start fallback');
+      logger.info('aternos: playwright not installed — manual start only');
       return null;
     }
 
-    // Try system Chrome/Chromium first (lighter than downloading)
-    const fs = require('fs');
+    // Find Chrome/Chromium binary — try system paths, then Playwright's cache
     const systemPaths = [
       '/usr/bin/chromium',
       '/usr/bin/chromium-browser',
@@ -158,9 +157,36 @@ async function getBrowser() {
       if (fs.existsSync(p)) { execPath = p; break; }
     }
 
-    _browser = await chromium.launch({
+    // Also check Playwright's own installed browsers
+    if (!execPath) {
+      const pwDir = require('path').join(
+        process.env.PLAYWRIGHT_BROWSERS_PATH ||
+          (process.platform === 'win32'
+            ? `${process.env.LOCALAPPDATA}/ms-playwright`
+            : `${process.env.HOME}/.cache/ms-playwright`),
+      );
+      try {
+        const chromiumDirs = fs.readdirSync(pwDir).filter((d) => d.startsWith('chromium'));
+        if (chromiumDirs.length > 0) {
+          const latest = chromiumDirs.sort().pop();
+          // Linux Chromium path inside Playwright cache
+          const possiblePaths = [
+            `${pwDir}/${latest}/chrome-linux/chrome`,
+            `${pwDir}/${latest}/chrome-linux64/chrome`,
+          ];
+          for (const p of possiblePaths) {
+            if (fs.existsSync(p)) { execPath = p; break; }
+          }
+        }
+      } catch {}
+    }
+
+    if (!execPath) {
+      logger.warn('aternos: no Chrome/Chromium binary found — trying default playwright path');
+    }
+
+    const launchOpts = {
       headless: true,
-      executablePath: execPath || undefined,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -171,8 +197,11 @@ async function getBrowser() {
         '--disable-extensions',
         '--disable-background-networking',
       ],
-    });
-    logger.info('aternos: playwright browser launched', { execPath: execPath || 'bundled' });
+    };
+    if (execPath) launchOpts.executablePath = execPath;
+
+    _browser = await chromium.launch(launchOpts);
+    logger.info('aternos: playwright browser launched', { execPath: execPath || 'default' });
     return _browser;
   } catch (err) {
     logger.warn('aternos: failed to launch browser', { error: err.message });
