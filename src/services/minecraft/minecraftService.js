@@ -128,7 +128,6 @@ let _browserLaunching = false;
 async function getBrowser() {
   if (_browser && _browser.isConnected()) return _browser;
   if (_browserLaunching) {
-    // Wait for existing launch to finish (max 30s)
     for (let i = 0; i < 60; i++) {
       if (_browser && _browser.isConnected()) return _browser;
       await new Promise(r => setTimeout(r, 500));
@@ -137,8 +136,24 @@ async function getBrowser() {
   _browserLaunching = true;
   try {
     const { chromium } = require('playwright');
+
+    // Try system Chrome/Chromium first (lighter than downloading)
+    const fs = require('fs');
+    const systemPaths = [
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/google-chrome',
+      '/usr/bin/google-chrome-stable',
+      '/snap/bin/chromium',
+    ];
+    let execPath = null;
+    for (const p of systemPaths) {
+      if (fs.existsSync(p)) { execPath = p; break; }
+    }
+
     _browser = await chromium.launch({
       headless: true,
+      executablePath: execPath || undefined,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -146,12 +161,14 @@ async function getBrowser() {
         '--disable-gpu',
         '--single-process',
         '--no-zygote',
+        '--disable-extensions',
+        '--disable-background-networking',
       ],
     });
-    logger.info('aternos: playwright browser launched');
+    logger.info('aternos: playwright browser launched', { execPath: execPath || 'bundled' });
     return _browser;
   } catch (err) {
-    logger.error('aternos: failed to launch browser', { error: err.message });
+    logger.warn('aternos: failed to launch browser', { error: err.message });
     return null;
   } finally {
     _browserLaunching = false;

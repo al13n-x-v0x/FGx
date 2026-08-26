@@ -7,7 +7,7 @@ services:
     name: fgx
     runtime: node
     plan: free
-    buildCommand: npm install && npx playwright install chromium --with-deps
+    buildCommand: npm install
     startCommand: node src/index.js
     healthCheckPath: /health
     autoDeploy: true
