@@ -52,6 +52,9 @@ const OPTIONAL_DEFAULTS = {
   ATERNOS_PASSWORD: '',
   // Server display name for embeds
   MC_SERVER_NAME: 'FGxx Aternos Server',
+  // HuggingFace (Meta Llama, etc.) — OpenAI-compatible API
+  HF_API_KEY: '',
+  HF_MODEL: 'meta-llama/Meta-Llama-3-8B-Instruct',
 };
 
 /** @type {Record<string, string>} */
@@ -101,7 +104,7 @@ if (!Number.isInteger(webhookPort) || webhookPort < 1 || webhookPort > 65535) {
 }
 env.WEBHOOK_PORT = String(webhookPort);
 
-const AI_PROVIDERS = ['openai', 'gemini', 'groq'];
+const AI_PROVIDERS = ['openai', 'gemini', 'groq', 'huggingface'];
 
 /** Discord gateway intents: 'full' requires privileged intents enabled in the Developer Portal. */
 const DISCORD_INTENTS_MODES = ['full', 'basic'];
@@ -119,7 +122,9 @@ function keyList(provider) {
       ? env.GEMINI_KEYS || env.GEMINI_API_KEY
       : provider === 'groq'
         ? env.GROQ_KEYS || env.GROQ_API_KEY
-        : env.AI_KEYS || env.AI_API_KEY;
+        : provider === 'huggingface'
+          ? env.HF_API_KEY
+          : env.AI_KEYS || env.AI_API_KEY;
   const list = (raw || '').split(',').map((s) => s.trim()).filter(Boolean);
   return list;
 }
@@ -131,7 +136,9 @@ function modelList(provider) {
       ? env.GEMINI_MODELS || env.GEMINI_MODEL
       : provider === 'groq'
         ? env.GROQ_MODELS || env.GROQ_MODEL
-        : env.AI_MODELS || env.AI_MODEL;
+        : provider === 'huggingface'
+          ? env.HF_MODEL
+          : env.AI_MODELS || env.AI_MODEL;
   return (raw || '').split(',').map((s) => s.trim()).filter(Boolean);
 }
 
@@ -160,7 +167,7 @@ function aiConfigured() {
 }
 
 /** Auto-detect priority: first provider with a key wins. */
-const AUTO_DETECT_ORDER = ['openai', 'groq', 'gemini'];
+const AUTO_DETECT_ORDER = ['openai', 'groq', 'gemini', 'huggingface'];
 
 /** All providers that have at least one key, in auto-detect priority order. */
 function configuredProviders() {
@@ -183,6 +190,7 @@ function providerLabel() {
   if (!provider) return 'not configured';
   if (provider === 'openai') return 'OpenAI';
   if (provider === 'gemini') return 'Gemini';
+  if (provider === 'huggingface') return 'HuggingFace (Meta Llama)';
   return 'Groq';
 }
 

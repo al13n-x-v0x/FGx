@@ -51,15 +51,41 @@ async function queryServer(host, port) {
   try {
     const result = await Promise.race([queryPromise, timeoutPromise]);
 
+    const rawVersion = result.version?.name ?? 'Unknown';
+    const rawMotd = result.motd?.clean ?? result.motd?.raw ?? '';
+    const onlinePlayers = result.players?.online ?? 0;
+
+    // Aternos responds to MC queries even when the server is OFFLINE.
+    // Detect this by checking the version string and MOTD for offline indicators.
+    const isAternosOffline = (
+      rawVersion.toLowerCase().includes('offline') ||
+      rawVersion.includes('§c') ||
+      rawMotd.toLowerCase().includes('server is offline') ||
+      rawMotd.toLowerCase().includes('get this server more ram') ||
+      rawMotd.includes('§c')
+    );
+
+    if (isAternosOffline) {
+      return {
+        online: false,
+        host: serverHost,
+        port: serverPort,
+        error: 'ATERNOS_OFFLINE',
+        message: 'Aternos proxy is responding but the actual Minecraft server is offline. Start it on Aternos.',
+        rawVersion,
+        rawMotd,
+      };
+    }
+
     return {
       online: true,
       host: serverHost,
       port: serverPort,
-      version: result.version?.name ?? 'Unknown',
+      version: rawVersion,
       protocol: result.version?.protocol ?? 0,
-      motd: result.motd?.clean ?? result.motd?.raw ?? '',
+      motd: rawMotd,
       players: {
-        online: result.players?.online ?? 0,
+        online: onlinePlayers,
         max: result.players?.max ?? 0,
         sample: (result.players?.sample ?? []).map((p) => p.name ?? p.id ?? 'Unknown'),
       },

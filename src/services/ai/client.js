@@ -188,7 +188,11 @@ async function chatCompletion({ system, messages, maxTokens = 800, temperature =
           provider === 'gemini'
             ? await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature })
             : await callOpenAiCompatible(
-                provider === 'groq' ? 'https://api.groq.com/openai/v1' : env.AI_BASE_URL,
+                provider === 'groq'
+                  ? 'https://api.groq.com/openai/v1'
+                  : provider === 'huggingface'
+                    ? 'https://api-inference.huggingface.co/v1'
+                    : env.AI_BASE_URL,
                 entry.key,
                 entry.model,
                 { system, messages, maxTokens, temperature },

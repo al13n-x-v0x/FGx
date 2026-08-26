@@ -9,8 +9,8 @@ const assert = require('node:assert/strict');
 
 const { env, resolveProvider, providerLabel, aiConfigured, AI_PROVIDERS } = require('../src/config/env');
 
-test('provider list matches the three supported providers', () => {
-  assert.deepEqual(AI_PROVIDERS.sort(), ['gemini', 'groq', 'openai']);
+test('provider list matches the supported providers', () => {
+  assert.deepEqual(AI_PROVIDERS.sort(), ['gemini', 'groq', 'huggingface', 'openai']);
 });
 
 test('explicit AI_PROVIDER wins over keys', () => {
