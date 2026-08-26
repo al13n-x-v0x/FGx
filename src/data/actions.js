@@ -125,19 +125,6 @@ const ACTIONS = {
       '{actor} can\'t stop patting {target} — too adorable 🐾',
     ],
   },
-  stare: {
-    label: 'Stared at',
-    emoji: '👀',
-    color: 0x99AAB5,
-    gifKey: 'stare',
-    lines: [
-      '{actor} is staring intensely at {target}... 👀',
-      '*stares* — {actor} is giving {target} the look 👀',
-      '{actor} is giving {target} the side-eye 👀',
-      'Why is {actor} staring at {target} like that... 👀',
-      '{actor} hasn\'t blinked once while looking at {target} 👀',
-    ],
-  },
   poke: {
     label: 'Poked',
     emoji: '👆',
@@ -188,32 +175,6 @@ const ACTIONS = {
       '{actor} and {target} are celebrating with a high-five! 🖐️',
       'EPIC HIGH-FIVE between {actor} and {target}! 🖐️',
       '{actor} gave {target} the most satisfying high-five ever 🖐️',
-    ],
-  },
-  blame: {
-    label: 'Blamed',
-    emoji: '👆',
-    color: 0xE67E22,
-    gifKey: 'facepalm',
-    lines: [
-      '{actor} just **blamed** {target} for everything! 👆',
-      '{target} is being blamed by {actor} — not again! 👆',
-      '{actor} pointed at {target} and said "it was all their fault" 👆',
-      'IT WAS {target} — {actor} is pointing fingers 👆',
-      '{actor} threw {target} under the bus — hard 👆',
-    ],
-  },
-  simp: {
-    label: 'Simped for',
-    emoji: '💘',
-    color: 0xEB459E,
-    gifKey: 'simp',
-    lines: [
-      '{actor} is **simping** for {target}! 💘',
-      '{target} has a new fan — it\'s {actor}! 💘',
-      'SIMP ALERT — {actor} is down bad for {target} 💘',
-      '{actor} just sent {target} a love letter — cringe 💘',
-      'Caught in 4K — {actor} is absolutely simping for {target} 💘',
     ],
   },
   revive: {

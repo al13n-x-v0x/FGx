@@ -641,4 +641,4 @@ const shipCmd = {
   },
 };
 
-module.exports = [roastCmd, complimentCmd, insultCmd, eightBallCmd, chooseCmd, rateCmd, shipCmd];
+module.exports = [roastCmd, rateCmd, shipCmd];

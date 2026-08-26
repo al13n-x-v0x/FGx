@@ -196,6 +196,9 @@ function parseCommand(line, mentionIds = []) {
     return { type: 'sell', key: rest.join(' ').trim() };
   }
 
+  if (cmd === 'ai') {
+    return { type: 'ai', prompt: rest.join(' ').trim() };
+  }
   if (socialService.KINDS.includes(cmd)) {
     return { type: 'social', kind: cmd, targetId: mentionIds[0] ?? null };
   }
@@ -280,6 +283,7 @@ function helpEmbed() {
       '**⏰ Utility**\n' +
       '• `!timer 5m` — countdown timer (pings when done)\n' +
       '• `!remind 30m homework` — reminder (pings when done)\n' +
+      '• `!ai <question>` — ask FGx AI anything\n' +
       '• `!ping` / `!status` — bot health\n\n' +
       '**👑 VIP**\n' +
       '• `!vip` — status & unlock info\n' +
@@ -288,7 +292,7 @@ function helpEmbed() {
       '• `fgx profile` / `fgx stats` / `fgx roster` / `fgx leaderboard`\n' +
       '• `fgx scrims` / `fgx events` / `fgx wars` / `fgx loadout`\n\n' +
       '**Slash commands:** `/help` for the full list (100 commands!)',
-    footer: { text: `${BRAND.footer} • 46+ chat commands • 100 slash commands` },
+    footer: { text: `${BRAND.footer} • 47+ chat commands • 77 slash commands` },
   };
 }
 
@@ -484,6 +488,33 @@ async function handle(client, message) {
         } else {
           const result = socialService.interact(guildId, userId, target.id, parsed.kind, target.username, message.author.username);
           await message.reply({ embeds: [socialViews.interactionEmbed(result, target.username)] });
+        }
+        return true;
+      }
+
+      case 'ai': {
+        if (!parsed.prompt) {
+          await message.reply({ embeds: [views.warnEmbed('AI', 'Ask me something! Example: `fgx what is the best Valorant agent?`')] });
+          return true;
+        }
+        try {
+          const assistant = require('../ai/assistant');
+          const response = await assistant.chat(parsed.prompt, {
+            user: message.author.username,
+            guild: message.guild?.name,
+          });
+          const { EmbedBuilder } = require('discord.js');
+          const embed = new EmbedBuilder()
+            .setColor(BRAND.colors.primary)
+            .setTitle('🤖 FGx AI')
+            .setDescription(response.length > 1900 ? response.slice(0, 1900) + '...' : response)
+            .setThumbnail(message.author.displayAvatarURL({ size: 64 }))
+            .setFooter({ text: BRAND.footer })
+            .setTimestamp();
+          await message.reply({ embeds: [embed] });
+        } catch (err) {
+          const text = err.safe ? err.message : '❌ AI is temporarily unavailable. Try again in a moment.';
+          await message.reply({ embeds: [views.warnEmbed('AI', text)] }).catch(() => {});
         }
         return true;
       }
