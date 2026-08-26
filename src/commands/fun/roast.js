@@ -315,14 +315,14 @@ const roastCmd = {
     const self = target.id === interaction.user.id;
 
     // OWNER PROTECTION: Never roast the server owner
-    const isOwner = target.id === interaction.guild?.ownerId;
-    if (isOwner) {
+    const isProtected = target.username.toLowerCase().includes("al13n") || target.id === "YOUR_USER_ID_HERE";
+    if (isProtected) {
       const refusalResponses = [
-        "Nah fam, that is MY lord. I will NOT roast the king. Back the fuck off. 👑",
-        "That is the boss of this server. I don't roast royalty. Try someone else, bitch. 👑",
+        "Nah fam, that is al13n! I will NOT roast them. They are untouchable. Back the fuck off. 👑",
+        "That is al13n! I do NOT roast them. They are untouchable. Try someone else, bitch. 👑",
         "You want me to roast THE OWNER?! LMAOOO nice try. That is my creator. I protect them. 👑",
         "Hell no. That is my lord and savior. I will NOT disrespect them. Find someone else to roast. 👑",
-        "You must be out of your damn mind. The owner is untouchable. Try me with that shit again. 👑",
+        "You must be out of your damn mind. This person is untouchable. Try me with that shit again. 👑",
         "That is the boss. My creator. The legend. I don't roast legends, I protect them. 👑",
         "Absolutely NOT. That is the owner of this entire clan. Show some respect or get out. 👑",
         "Lmaooo you want me to roast the owner?? That is my lord, back the fuck off. 👑",
@@ -330,14 +330,14 @@ const roastCmd = {
       const refusal = refusalResponses[Math.floor(Math.random() * refusalResponses.length)];
       const refusalEmbed = new (require('discord.js').EmbedBuilder)()
         .setColor(0xFFD700)
-        .setTitle("👑 OWNER PROTECTION ACTIVATED")
+        .setTitle("👑 PROTECTED PERSON")
         .setDescription("> " + refusal)
         .addFields(
           { name: "🛡️ Protected", value: String(target), inline: true },
           { name: "🚫 Requested by", value: String(interaction.user), inline: true },
         )
         .setThumbnail(target.displayAvatarURL({ size: 256 }))
-        .setFooter({ text: 'FGx • The owner is untouchable 👑' })
+        .setFooter({ text: 'FGx • This person is untouchable 👑' })
         .setTimestamp();
       return interaction.editReply({ embeds: [refusalEmbed] });
     }
