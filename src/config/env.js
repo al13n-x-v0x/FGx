@@ -54,7 +54,7 @@ const OPTIONAL_DEFAULTS = {
   MC_SERVER_NAME: 'FGxx Aternos Server',
   // HuggingFace (Meta Llama, etc.) — OpenAI-compatible API
   HF_API_KEY: '',
-  HF_MODEL: 'meta-llama/Meta-Llama-3-8B-Instruct',
+  HF_MODEL: 'mistralai/Mistral-7B-Instruct-v0.3,meta-llama/Meta-Llama-3-8B-Instruct',
 };
 
 /** @type {Record<string, string>} */
@@ -158,6 +158,7 @@ function resolveProvider() {
   if (keyList('openai').length > 0) return 'openai';
   if (keyList('groq').length > 0) return 'groq';
   if (keyList('gemini').length > 0) return 'gemini';
+  if (keyList('huggingface').length > 0) return 'huggingface';
   return null;
 }
 
@@ -214,7 +215,7 @@ function aiSummary() {
   const keys = keyList(provider).length;
   const model = models.length > 1 ? `${models.length} models` : models[0];
   const fb = fallbackProviders()
-    .map((p) => (p === 'openai' ? 'OpenAI' : p === 'gemini' ? 'Gemini' : 'Groq'))
+    .map((p) => p === 'openai' ? 'OpenAI' : p === 'gemini' ? 'Gemini' : p === 'huggingface' ? 'HF (Llama)' : 'Groq')
     .join(', ');
   const fallback = fb ? ` • fallback: ${fb}` : '';
   return `${providerLabel()} • ${model} • ${keys} key${keys === 1 ? '' : 's'} • ${env.AI_FAILOVER_MODE}${fallback}`;

@@ -62,13 +62,14 @@ async function callOpenAiCompatible(baseUrl, apiKey, model, { system, messages, 
       signal: controller.signal,
     });
 
+    const rawBody = await response.json();
     if (!response.ok) {
-      throw providerHttpError(response.status);
+      throw providerHttpError(response.status, rawBody);
     }
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content;
+    const content = rawBody?.choices?.[0]?.message?.content;
     if (typeof content !== 'string' || content.length === 0) {
-      throw new AIUnavailableError('AI returned an empty response.');
+      const hint = rawBody?.error ? ` (${rawBody.error})` : rawBody?.choices ? ' (choices empty)' : '';
+      throw new AIUnavailableError(`AI returned an empty response${hint}.`);
     }
     return content;
   } finally {
@@ -102,15 +103,16 @@ async function callGemini(apiKey, model, { system, messages, maxTokens, temperat
       signal: controller.signal,
     });
 
+    const rawBody = await response.json();
     if (!response.ok) {
-      throw providerHttpError(response.status);
+      throw providerHttpError(response.status, rawBody);
     }
-    const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts
+    const text = rawBody?.candidates?.[0]?.content?.parts
       ?.map((p) => p.text ?? '')
       .join('');
     if (typeof text !== 'string' || text.length === 0) {
-      throw new AIUnavailableError('AI returned an empty response.');
+      const hint = rawBody?.error?.message || '';
+      throw new AIUnavailableError(`Gemini returned an empty response${hint ? ': ' + hint : ''}.`);
     }
     return text;
   } finally {
@@ -118,13 +120,16 @@ async function callGemini(apiKey, model, { system, messages, maxTokens, temperat
   }
 }
 
-function providerHttpError(status) {
+function providerHttpError(status, body) {
   let detail = `HTTP ${status}`;
   if (status === 401) detail = 'AI provider rejected the API key';
-  if (status === 403) detail = 'AI provider denied access (check key permissions)';
+  if (status === 403) detail = 'AI provider denied access (check key permissions or accept model license on HuggingFace)';
   if (status === 404) detail = 'AI provider does not know that model';
   if (status === 429) detail = 'AI provider rate limit hit';
-  return new AIUnavailableError(`AI request failed (${detail}).`);
+  if (status === 503) detail = 'Model is loading on HuggingFace (try again in 20s)';
+  const hfHint = status >= 400 && body && typeof body === 'object' && body.error
+    ? ` — ${body.error}` : '';
+  return new AIUnavailableError(`AI request failed (${detail}${hfHint}).`);
 }
 
 /** Per-provider round-robin cursor. */
@@ -183,35 +188,47 @@ async function chatCompletion({ system, messages, maxTokens = 800, temperature =
 
     for (const index of order) {
       const entry = pool[index];
-      try {
-        const result =
-          provider === 'gemini'
-            ? await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature })
-            : await callOpenAiCompatible(
-                provider === 'groq'
-                  ? 'https://api.groq.com/openai/v1'
-                  : provider === 'huggingface'
-                    ? 'https://api-inference.huggingface.co/v1'
-                    : env.AI_BASE_URL,
-                entry.key,
-                entry.model,
-                { system, messages, maxTokens, temperature },
-              );
-        if (provider !== providers[0]) {
-          logger.warn('ai provider fallback used', { provider, model: entry.model });
-        } else {
-          logger.debug('ai request ok', { provider, model: entry.model, keyIndex: index + 1 });
-        }
-        return result;
-      } catch (err) {
-        lastError = err;
-        if (pool.length > 1) {
-          logger.warn('ai candidate failed, trying next', {
-            provider,
-            model: entry.model,
-            keyIndex: index + 1,
-            error: err.message,
-          });
+      let attempts = 0;
+      const maxAttempts = provider === 'huggingface' ? 3 : 1;
+      while (attempts < maxAttempts) {
+        attempts += 1;
+        try {
+          const result =
+            provider === 'gemini'
+              ? await callGemini(entry.key, entry.model, { system, messages, maxTokens, temperature })
+              : await callOpenAiCompatible(
+                  provider === 'groq'
+                    ? 'https://api.groq.com/openai/v1'
+                    : provider === 'huggingface'
+                      ? 'https://api-inference.huggingface.co/v1'
+                      : env.AI_BASE_URL,
+                  entry.key,
+                  entry.model,
+                  { system, messages, maxTokens, temperature },
+                );
+          if (provider !== providers[0] || attempts > 1) {
+            logger.warn('ai provider fallback used', { provider, model: entry.model });
+          } else {
+            logger.debug('ai request ok', { provider, model: entry.model, keyIndex: index + 1 });
+          }
+          return result;
+        } catch (err) {
+          lastError = err;
+          const isColdStart = provider === 'huggingface' && attempts < maxAttempts && err.message.includes('503');
+          if (isColdStart) {
+            logger.warn('huggingface model loading, retrying in 10s', { model: entry.model, attempt: attempts });
+            await new Promise((r) => setTimeout(r, 10000));
+            continue;
+          }
+          if (pool.length > 1) {
+            logger.warn('ai candidate failed, trying next', {
+              provider,
+              model: entry.model,
+              keyIndex: index + 1,
+              error: err.message,
+            });
+          }
+          break;
         }
       }
     }
