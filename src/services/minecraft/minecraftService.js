@@ -97,120 +97,196 @@ function humanizeError(code) {
 
 /**
  * Attempt to start an Aternos server via their unofficial web API.
- * This uses Aternos's internal AJAX endpoints — may break if they change.
+ * NOTE: Aternos uses Cloudflare bot protection which often blocks requests from
+ * cloud servers like Render. This method tries with browser-like headers but may
+ * fail — in that case, it returns a manual start link for the user.
  *
- * @returns {Promise<{success: boolean, message: string}>}
+ * @returns {Promise<{success: boolean, message: string, manualUrl?: string}>}
  */
 async function startAternos() {
   const username = env.ATERNOS_USERNAME;
   const password = env.ATERNOS_PASSWORD;
+  const serverName = env.MC_SERVER_HOST?.replace('.aternos.me', '') || '';
 
   if (!username || !password) {
     return {
       success: false,
-      message: 'Aternos credentials not configured. Set `ATERNOS_USERNAME` and `ATERNOS_PASSWORD` in Render env vars.',
+      message: 'Aternos credentials not configured. Set ATERNOS_USERNAME and ATERNOS_PASSWORD in Render env vars.',
+      manualUrl: 'https://aternos.org/panel/',
     };
   }
 
-  // Aternos uses a two-step auth flow:
-  // 1. GET the login page to get cookies and a CSRF-like token
-  // 2. POST credentials to authenticate
-  // 3. GET the server panel page to get the server ID and start token
-  // 4. POST to the start endpoint
-
   const BASE = 'https://aternos.org';
+  const panelUrl = `${BASE}/panel/`;
+
+  // Browser-like headers to bypass basic Cloudflare checks
   const fetchOpts = {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
       'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Cache-Control': 'no-cache',
+      'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+      'Sec-Ch-Ua-Mobile': '?0',
+      'Sec-Ch-Ua-Platform': '"Windows"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
     },
     redirect: 'follow',
   };
 
-  try {
-    // Step 1: Get login page
-    const loginPage = await fetch(`${BASE}/login/`, { ...fetchOpts, method: 'GET' });
-    const loginHtml = await loginPage.text();
-    const cookies = extractCookies(loginPage);
+  // Retry up to 2 times (Cloudflare sometimes allows on retry)
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      logger.info('aternos: login attempt', { attempt });
 
-    // Extract login token
-    const tokenMatch = loginHtml.match(/name="token"\s+value="([^"]+)"/);
-    const token = tokenMatch ? tokenMatch[1] : '';
+      // Step 1: Get login page
+      const loginPage = await fetch(`${BASE}/login/`, { ...fetchOpts, method: 'GET' });
+      const loginHtml = await loginPage.text();
+      const cookies = extractCookies(loginPage);
 
-    // Step 2: Submit login
-    const formData = new URLSearchParams();
-    formData.append('username', username);
-    formData.append('password', password);
-    formData.append('token', token);
-    formData.append('remember', '1');
+      // Check for Cloudflare challenge (indicates bot detection)
+      if (loginHtml.includes('cf-challenge') || loginHtml.includes('Just a moment') ||
+          loginHtml.includes('challenge-platform') || loginPage.status === 403) {
+        logger.warn('aternos: Cloudflare challenge detected', { attempt });
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
+        return {
+          success: false,
+          message: '❌ Aternos is blocking automated access (Cloudflare protection).\n' +
+                   'Click the button below to start your server manually!',
+          manualUrl: panelUrl,
+        };
+      }
 
-    const loginResp = await fetch(`${BASE}/login/`, {
-      ...fetchOpts,
-      method: 'POST',
-      body: formData,
-      headers: {
-        ...fetchOpts.headers,
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': cookies,
-      },
-    });
+      // Extract CSRF token
+      const tokenMatch = loginHtml.match(/name="token"\s+value="([^"]+)"/);
+      const token = tokenMatch ? tokenMatch[1] : '';
 
-    const loginCookies = mergeCookies(cookies, loginResp);
+      // Step 2: Submit login
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+      formData.append('token', token);
+      formData.append('remember', '1');
 
-    // Check if login succeeded (redirect to /panel/)
-    if (loginResp.status >= 400 && loginResp.status < 500) {
-      return { success: false, message: '❌ Aternos login failed — check your username and password.' };
+      const loginResp = await fetch(`${BASE}/login/`, {
+        ...fetchOpts,
+        method: 'POST',
+        body: formData,
+        headers: {
+          ...fetchOpts.headers,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Cookie': cookies,
+          'Origin': BASE,
+          'Referer': `${BASE}/login/`,
+        },
+      });
+
+      const loginCookies = mergeCookies(cookies, loginResp);
+
+      // Check login result
+      if (loginResp.status >= 400 && loginResp.status < 500) {
+        return {
+          success: false,
+          message: '❌ Aternos login failed — the credentials may be blocked by Cloudflare bot protection.\n' +
+                   'Click below to start your server manually!',
+          manualUrl: panelUrl,
+        };
+      }
+
+      // Step 3: Get server panel
+      const panelResp = await fetch(panelUrl, {
+        ...fetchOpts,
+        method: 'GET',
+        headers: { ...fetchOpts.headers, Cookie: loginCookies },
+      });
+      const panelHtml = await panelResp.text();
+      const panelCookies = mergeCookies(loginCookies, panelResp);
+
+      // Check if panel is Cloudflare challenged
+      if (panelHtml.includes('cf-challenge') || panelHtml.includes('Just a moment')) {
+        return {
+          success: false,
+          message: '❌ Aternos panel blocked by Cloudflare bot protection.\n' +
+                   'Click below to start your server manually!',
+          manualUrl: panelUrl,
+        };
+      }
+
+      // Extract server ID
+      const serverIdMatch = panelHtml.match(/data-server-id="([^"]+)"/);
+      const serverId = serverIdMatch ? serverIdMatch[1] : null;
+
+      if (!serverId) {
+        // Could be a Cloudflare redirect or the page didn't load properly
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
+        return {
+          success: false,
+          message: '❌ Could not find server on Aternos panel. It may be behind Cloudflare protection.\n' +
+                   'Click below to start your server manually!',
+          manualUrl: panelUrl,
+        };
+      }
+
+      // Step 4: Start the server
+      const startResp = await fetch(`${BASE}/ajax/server/start.php`, {
+        ...fetchOpts,
+        method: 'GET',
+        headers: {
+          ...fetchOpts.headers,
+          'Cookie': panelCookies,
+          'X-Requested-With': 'XMLHttpRequest',
+          'Referer': panelUrl,
+        },
+      });
+
+      const startData = await startResp.json().catch(() => ({}));
+
+      if (startData.success === false || startData.error) {
+        const errMsg = startData.text || startData.error || 'Unknown error';
+        return {
+          success: false,
+          message: `❌ Aternos start failed: ${errMsg}`,
+          manualUrl: panelUrl,
+        };
+      }
+
+      logger.info('aternos: server start requested', { serverId });
+      return {
+        success: true,
+        message: '🚀 Aternos server start requested! It usually takes 1-3 minutes to come online.',
+        serverId,
+      };
+    } catch (err) {
+      logger.warn('aternos: attempt failed', { attempt, error: err.message });
+      if (attempt >= 2) {
+        return {
+          success: false,
+          message: `❌ Aternos auto-start failed (Cloudflare may be blocking): ${err.message}\n` +
+                   'Click below to start your server manually!',
+          manualUrl: panelUrl,
+        };
+      }
+      await new Promise(r => setTimeout(r, 2000));
     }
-
-    // Step 3: Get server panel
-    const panelResp = await fetch(`${BASE}/panel/`, {
-      ...fetchOpts,
-      method: 'GET',
-      headers: { ...fetchOpts.headers, Cookie: loginCookies },
-    });
-    const panelHtml = await panelResp.text();
-    const panelCookies = mergeCookies(loginCookies, panelResp);
-
-    // Extract server ID
-    const serverIdMatch = panelHtml.match(/data-server-id="([^"]+)"/);
-    const serverId = serverIdMatch ? serverIdMatch[1] : null;
-
-    if (!serverId) {
-      return { success: false, message: '❌ Could not find your Aternos server. Make sure you have a server created.' };
-    }
-
-    // Step 4: Start the server
-    const startResp = await fetch(`${BASE}/ajax/server/start.php`, {
-      ...fetchOpts,
-      method: 'GET',
-      headers: {
-        ...fetchOpts.headers,
-        'Cookie': panelCookies,
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-    });
-
-    const startData = await startResp.json().catch(() => ({}));
-
-    if (startData.success === false || startData.error) {
-      const errMsg = startData.text || startData.error || 'Unknown error';
-      return { success: false, message: `❌ Aternos start failed: ${errMsg}` };
-    }
-
-    logger.info('aternos: server start requested', { serverId });
-    return {
-      success: true,
-      message: '🚀 Aternos server start requested! It usually takes 1-3 minutes to come online.',
-      serverId,
-    };
-  } catch (err) {
-    logger.error('aternos: start failed', { error: err.message });
-    return {
-      success: false,
-      message: `❌ Failed to communicate with Aternos: ${err.message}. Their API may have changed.`,
-    };
   }
+
+  // Should not reach here, but just in case
+  return {
+    success: false,
+    message: '❌ Auto-start failed after retries. Please start your server manually.',
+    manualUrl: panelUrl,
+  };
 }
 
 /**

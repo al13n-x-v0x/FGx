@@ -217,38 +217,28 @@ module.exports = {
         .setFooter({ text: BRAND.footer })
         .setTimestamp();
 
-      if (result.success) {
-        const host = env.MC_SERVER_HOST;
-        const port = Number(env.MC_SERVER_PORT);
+      const host = env.MC_SERVER_HOST;
+      const port = Number(env.MC_SERVER_PORT);
+      const manualUrl = result.manualUrl || 'https://aternos.org/panel/';
 
-        const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId(`mc:monitor:${host}:${port}`)
-            .setLabel('📡 Auto-Monitor (Notify when UP)')
-            .setStyle(ButtonStyle.Primary),
-          new ButtonBuilder()
-            .setURL('https://aternos.org')
-            .setLabel('🌐 Open Aternos')
-            .setStyle(ButtonStyle.Link),
-        );
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`mc:monitor:${host}:${port}`)
+          .setLabel(result.success ? '📡 Auto-Monitor (Notify when UP)' : '📡 Start Monitoring & Notify When UP')
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+          .setURL(manualUrl)
+          .setLabel('🌐 Start on Aternos')
+          .setStyle(ButtonStyle.Link),
+      );
 
-        await interaction.editReply({ embeds: [embed], components: [row] });
+      await interaction.editReply({ embeds: [embed], components: [row] });
 
-        // Start monitoring in background
-        mc().startMonitor(interaction.channel, host, port, 30000, 60);
-        await interaction.followUp({
-          content: '📡 **Auto-monitor started** — I\'ll ping the server every 30s and notify here when it\'s online!',
-        });
-      } else {
-        const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setURL('https://aternos.org')
-            .setLabel('🌐 Start Manually on Aternos')
-            .setStyle(ButtonStyle.Link),
-        );
-
-        await interaction.editReply({ embeds: [embed], components: [row] });
-      }
+      // Always start monitoring so we notify when server comes online
+      mc().startMonitor(interaction.channel, host, port, 30000, 120);
+      await interaction.followUp({
+        content: '📡 **Auto-monitor started** — I\'ll ping the server every 30s and notify here when it\'s online!',
+      });
     }
 
     // ─── MONITOR ───────────────────────────────────────────────────────────

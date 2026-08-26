@@ -126,10 +126,39 @@ async function startMinecraftAutoMonitor() {
       const startResult = await mcService.startAternos();
       if (startResult.success) {
         await channel.send({
-          content: `🚀 Auto-started **${env.MC_SERVER_NAME}** on Aternos! Monitoring for it to come online...`,
+          embeds: [new (require('discord.js').EmbedBuilder)()
+            .setTitle('🚀 Server Auto-Started')
+            .setDescription(`**${env.MC_SERVER_NAME}** started on Aternos!\nMonitoring for it to come online...`)
+            .setColor(0x00ff00)
+            .setFooter({ text: 'FGx • Auto-start' })],
+          components: [new (require('discord.js').ActionRowBuilder()).addComponents(
+            new (require('discord.js').ButtonBuilder())
+              .setURL('https://aternos.org/panel/')
+              .setLabel('🌐 Open Aternos Panel')
+              .setStyle(require('discord.js').ButtonStyle.Link),
+          )],
         }).catch(() => {});
       } else {
+        // Auto-start failed (likely Cloudflare) — notify with manual link
         logger.warn('aternos: auto-start failed on startup', { message: startResult.message });
+        const manualUrl = startResult.manualUrl || 'https://aternos.org/panel/';
+        await channel.send({
+          embeds: [new (require('discord.js').EmbedBuilder)()
+            .setTitle('⚠️ Auto-Start Blocked by Cloudflare')
+            .setDescription(
+              `Aternos is blocking automated access.\n\n` +
+              `**Click the button below to start your server manually.**\n` +
+              `I'll keep monitoring and notify you when it's online!`
+            )
+            .setColor(0xff6600)
+            .setFooter({ text: 'FGx • Manual start required' })],
+          components: [new (require('discord.js').ActionRowBuilder()).addComponents(
+            new (require('discord.js').ButtonBuilder())
+              .setLabel('🚀 Start Server Manually')
+              .setURL(manualUrl)
+              .setStyle(require('discord.js').ButtonStyle.Link),
+          )],
+        }).catch(() => {});
       }
     } else {
       logger.info('minecraft: no Aternos credentials — monitoring only (no auto-start)', {
