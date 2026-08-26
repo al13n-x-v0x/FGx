@@ -135,7 +135,14 @@ async function getBrowser() {
   }
   _browserLaunching = true;
   try {
-    const { chromium } = require('playwright');
+    // Check if playwright is even installed (not on Render free tier)
+    let chromium;
+    try {
+      chromium = require('playwright').chromium;
+    } catch {
+      logger.info('aternos: playwright not installed — using manual start fallback');
+      return null;
+    }
 
     // Try system Chrome/Chromium first (lighter than downloading)
     const fs = require('fs');
