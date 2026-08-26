@@ -37,11 +37,11 @@ services:
         value: '30000'
       # Minecraft server config
       - key: MC_SERVER_HOST
-        value: aternos.org
+        value: FGxx.aternos.me
       - key: MC_SERVER_PORT
         value: '25565'
       - key: MC_SERVER_NAME
-        value: FGx Minecraft Server
+        value: FGxx Aternos Server
       # Secrets — set these in Render dashboard Environment tab.
       - key: DISCORD_TOKEN
         sync: false

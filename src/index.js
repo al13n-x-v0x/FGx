@@ -80,6 +80,67 @@ async function connectDiscord(attempt = 1) {
   }
 }
 
+/** Auto-monitor the Minecraft server on the first guild's general channel. */
+async function startMinecraftAutoMonitor() {
+  try {
+    const mcHost = env.MC_SERVER_HOST;
+    const mcPort = Number(env.MC_SERVER_PORT);
+    if (!mcHost || !mcPort) return;
+
+    // Find the first guild and its best channel to notify.
+    const guild = client.guilds.cache.first();
+    if (!guild) return;
+
+    // Look for a channel named 'general', 'chat', 'lobby', or use system channel.
+    const preferred = ['general', 'chat', 'lobby', 'welcome', 'announcements'];
+    let channel = null;
+    for (const name of preferred) {
+      channel = guild.channels.cache.find(
+        (c) => c.name === name && c.isTextBased() && c.permissionsFor(guild.members.me)?.has('SendMessages'),
+      );
+      if (channel) break;
+    }
+    if (!channel) channel = guild.systemChannel;
+    if (!channel) return;
+
+    // Check if server is already online.
+    const mcService = require('./services/minecraft/minecraftService');
+    const quickCheck = await mcService.queryServer(mcHost, mcPort);
+
+    if (quickCheck.online) {
+      logger.info('minecraft: server already online on startup', { host: mcHost, port: mcPort });
+      return; // No need to monitor — it's already up.
+    }
+
+    // Server is offline — start monitoring (pings every 30s, notifies when UP).
+    logger.info('minecraft: server offline on startup, starting auto-monitor', {
+      host: mcHost,
+      port: mcPort,
+      channel: channel.name,
+    });
+
+    mcService.startMonitor(channel, mcHost, mcPort, 30_000, 120); // 120 checks = 60 min max
+
+    // Try to auto-start via Aternos if credentials are configured.
+    if (env.ATERNOS_USERNAME && env.ATERNOS_PASSWORD) {
+      const startResult = await mcService.startAternos();
+      if (startResult.success) {
+        await channel.send({
+          content: `🚀 Auto-started **${env.MC_SERVER_NAME}** on Aternos! Monitoring for it to come online...`,
+        }).catch(() => {});
+      } else {
+        logger.warn('aternos: auto-start failed on startup', { message: startResult.message });
+      }
+    } else {
+      logger.info('minecraft: no Aternos credentials — monitoring only (no auto-start)', {
+        hint: 'Set ATERNOS_USERNAME and ATERNOS_PASSWORD in Render to enable auto-start',
+      });
+    }
+  } catch (err) {
+    logger.error('minecraft: auto-monitor setup failed', { error: err.message });
+  }
+}
+
 async function main() {
   logger.info(`FGx v${require('../package.json').version} starting`, { node: process.version, env: env.NODE_ENV });
 
@@ -115,6 +176,9 @@ async function main() {
       user: client.user?.tag,
       id: client.user?.id,
     });
+
+    // Auto-start monitoring Minecraft server on first guild.
+    startMinecraftAutoMonitor();
   });
 
   // Catch gateway errors to prevent silent failures.

@@ -45,13 +45,13 @@ const OPTIONAL_DEFAULTS = {
   // toggles) or 'basic' (runs without them, degrades welcome/raid/AI-on-content).
   DISCORD_INTENTS: 'full',
   // Minecraft server config (standard MC query protocol)
-  MC_SERVER_HOST: 'aternos.org',
+  MC_SERVER_HOST: 'FGxx.aternos.me',
   MC_SERVER_PORT: '25565',
   // Aternos account for auto-start (optional — only needed for /minecraft start)
   ATERNOS_USERNAME: '',
   ATERNOS_PASSWORD: '',
   // Server display name for embeds
-  MC_SERVER_NAME: 'FGx Minecraft Server',
+  MC_SERVER_NAME: 'FGxx Aternos Server',
 };
 
 /** @type {Record<string, string>} */
