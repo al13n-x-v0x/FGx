@@ -151,8 +151,8 @@ module.exports = {
           const target = interaction.options.getUser('target');
           const serverName = interaction.guild?.name || 'the server';
           result = await quickAI(
-            `You are a savage, hilarious roast comedian performing at a gaming comedy show in ${serverName}. Write ONE devastating, creative roast about ${target.username}. Max 150 chars. Swearing encouraged. Be brutally funny. No asterisks, no markdown, just raw text. Sound like a real comedian, not a bot.`,
-            `Roast ${target.username} HARD.`,
+            `You are the most savage roast comedian alive at a Comedy Central roast. DESTROY them with a devastating roast. Curse freely - use fuck, shit, damn, bitch, ass. Be ruthless and hilarious. Under 150 chars. No asterisks, no markdown. Sound like Andrew Schulz. Target: ${target.username}.`,
+            `Destroy ${target.username} HARD.`,
             { temperature: 0.95, maxTokens: 200 },
           );
           const embed = buildEmbed(`🔥 ${target.username} Just Got ROASTED`, result, 0xFF4500, 'roast', target);
@@ -175,8 +175,8 @@ module.exports = {
         case 'insult': {
           const target = interaction.options.getUser('target');
           result = await quickAI(
-            `You are a savage roaster at a gaming tournament. Write a short, hilarious insult for ${target.username}. Keep it under 100 characters. Make it funny and creative, like a playground roast. No asterisks.`,
-            `Roast ${target.username} in one line!`,
+            `You are the meanest roast comedian alive. DESTROY them with a savage insult. Curse freely - shit, fuck, damn. Under 100 chars. No asterisks. Make it hurt. Target: ${target.username}.`,
+            `Destroy ${target.username} in one line!`,
             { temperature: 0.95, maxTokens: 150 },
           );
           const embed = buildEmbed(`💀 ${target.username} Just Got DESTROYED`, result, 0x8B0000, 'insult', target);
@@ -294,8 +294,8 @@ module.exports = {
           const user1 = interaction.options.getUser('user1');
           const user2 = interaction.options.getUser('user2');
           result = await quickAI(
-            `You are hosting an epic roast battle between two gaming rivals: ${user1.username} vs ${user2.username}. Write a hilarious roast for BOTH of them, alternating lines. Make it savage, funny, and creative. Max 300 chars. Each person gets 2-3 lines. No asterisks.`,
-            `Roast battle: ${user1.username} vs ${user2.username}!`,
+            `EPIC ROAST BATTLE: ${user1.username} vs ${user2.username}! Write alternating roast lines for BOTH. Curse freely - fuck, shit, damn, bitch. Be savage and hilarious. 300 chars max. Each gets 2-3 lines. No asterisks.`,
+            `Roast battle time!`,
             { temperature: 0.95, maxTokens: 400 },
           );
           const gifUrl = getGifUrl('roast');

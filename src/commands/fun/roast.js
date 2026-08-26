@@ -406,51 +406,38 @@ async function generateRoast(target, heat, isSelf) {
   return { text: randomFrom(MEGA_ROASTS[heat]), method: 'fallback' };
 }
 
+
 async function generateVisionRoast(avatarUrl, username, heat) {
-  const heatLevel = {
-    light: 'mildly funny, light teasing',
-    medium: 'savage and brutal, no mercy',
-    nuclear: 'absolutely devastating and merciless, swear words allowed',
-    savage: 'THE MOST BRUTAL ROAST POSSIBLE. Use every swear word, be absolutely ruthless, no filter whatsoever',
+  const severity = {
+    light: 'mild teasing, PG-13, playful burns',
+    medium: 'hard roasting, swear words, brutal burns',
+    nuclear: 'DESTROY THEM. Curse freely. Zero filter. Savage as hell.',
+    savage: 'MAXIMUM DESTRUCTION. Curse every word. Destroy them completely. Meanest roast alive.',
   }[heat];
 
-  const prompt = `You are the most savage roast comedian alive. Look at this person's Discord profile picture. Their username is "${username}".
-
-Write ONE absolutely DESTROYING roast about their avatar. Be ${heatLevel}.
-
-RULES:
-- Be specific about what you SEE in the image
-- Use clever wordplay, callbacks, and devastating burns
-- Reference their username if it's funny
-- Sound like a real stand-up comedian at a roast battle, not a robot
-- Swearing is ENCOURAGED — this is a ROAST, not a tea party
-- Under 200 characters
-- NO asterisks, NO markdown, NO formatting
-- Just the raw roast text, nothing else
-- Do NOT start with quotes or dashes
-- Be MEAN and FUNNY, not hurtful — big difference
-- Think Andrew Schulz, Kevin Hart, Dave Chappelle at a celebrity roast
-
-Write ONE roast. Start immediately.`;
+  const prompt = 'You are the most savage roast comedian alive. Look at their Discord avatar. Username: ' + username + '. Write ONE DESTROYING roast about what you see. Severity: ' + severity + '. Curse freely - shit, fuck, damn, bitch - this is a ROAST. Reference their username cleverly. Sound like Andrew Schulz at a roast battle. Under 200 chars. No asterisks no markdown no quotes. Start immediately. Be funnier than Dave Chappelle.';
 
   return analyzeImage(avatarUrl, prompt);
 }
 
 async function generateAIRoast(username, heat, isSelf) {
-  const heatLevel = {
-    light: 'mildly funny, light teasing, keep it playful',
-    medium: 'savage, brutal, no mercy, swearing allowed',
-    nuclear: 'absolutely devastating, nuclear level, use swear words freely, zero chill',
-    savage: 'THE MOST BRUTAL ROAST POSSIBLE. Drop every swear word, be absolutely ruthless, savage as fuck, no filter, zero mercy',
+  const severity = {
+    light: 'mild teasing, playful, PG-13',
+    medium: 'hard roasting, swear words like shit and damn, brutal',
+    nuclear: 'NUCLEAR DESTROY THEM. Fuck, shit, damn. Zero filter.',
+    savage: 'MAXIMUM DESTRUCTION. Curse EVERYTHING. Destroy their soul. Meanest roast comedian alive.',
   }[heat];
 
-  const system = `You are the most savage roast comedian in history. You perform at celebrity roasts where everyone gets destroyed. Your style is sharp, quick, devastating, and hilarious. You swear freely and make people laugh while destroying them. You are NOT a polite AI — you're a ROAST COMEDIAN.`;
+  const system = 'You are the most savage roast comedian alive. You perform at Comedy Central roasts. You curse freely, destroy people, and make them cry laughing. You are NOT polite. You are a ROAST COMEDIAN.';
 
-  const prompt = isSelf
-    ? `Someone just asked you to roast THEMSELVES on stage. They're sitting right there, ready to take it.\n\nWrite ONE absolutely savage, hilarious self-roast. Be ${heatLevel}.\nThe audience is dying laughing.\n\nRULES:\n- Under 200 characters\n- NO asterisks, NO markdown, NO formatting\n- Just the raw roast text\n- Sound like a real comedian, not a chatbot\n- Swearing is encouraged\n- Be creative and unique\n\nWrite the roast now.`
-    : `You're roasting someone named "${username}" at a sold-out show. They're sitting in the front row.\n\nWrite ONE absolutely savage, hilarious roast about them. Be ${heatLevel}.\n\nRULES:\n- Under 200 characters\n- NO asterisks, NO markdown, NO formatting\n- Just the raw roast text\n- Reference their username if it's funny\n- Swearing is encouraged\n- Be creative and unique, not generic\n- Sound like Andrew Schulz or Dave Chappelle at a roast battle\n\nWrite the roast now.`;
+  let prompt;
+  if (isSelf) {
+    prompt = 'Self-roast challenge! Someone said roast me harder. The crowd waits. Be DESTROYING. Severity: ' + severity + '. Write ONE savage self-roast. Curse freely. Under 200 chars. No asterisks no markdown no quotes. Be funnier than Andrew Schulz.';
+  } else {
+    prompt = 'ROAST BATTLE! Someone named ' + username + ' is in the front row talking shit. DESTROY THEM. Severity: ' + severity + '. Curse freely - shit fuck damn bitch. Reference their username. Under 200 chars. No asterisks no markdown no quotes. Be funnier than Dave Chappelle at a roast.';
+  }
 
-  const result = await quickAI(system, prompt, { maxTokens: 300, temperature: 0.9 });
+  const result = await quickAI(system, prompt, { maxTokens: 300, temperature: 0.95 });
   if (!result) throw new Error('AI unavailable');
   return result;
 }
