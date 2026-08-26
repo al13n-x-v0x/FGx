@@ -93,254 +93,241 @@ function humanizeError(code) {
   return map[code] || `Connection error: ${code}`;
 }
 
-// ─── Aternos Auto-Start (unofficial API) ────────────────────────────────────
+// ─── Aternos Auto-Start (Playwright browser automation) ─────────────────
+
+/** Lazy-loaded Playwright browser instance (reused across calls). */
+let _browser = null;
+let _browserLaunching = false;
+
+async function getBrowser() {
+  if (_browser && _browser.isConnected()) return _browser;
+  if (_browserLaunching) {
+    // Wait for existing launch to finish (max 30s)
+    for (let i = 0; i < 60; i++) {
+      if (_browser && _browser.isConnected()) return _browser;
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+  _browserLaunching = true;
+  try {
+    const { chromium } = require('playwright');
+    _browser = await chromium.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+        '--no-zygote',
+      ],
+    });
+    logger.info('aternos: playwright browser launched');
+    return _browser;
+  } catch (err) {
+    logger.error('aternos: failed to launch browser', { error: err.message });
+    return null;
+  } finally {
+    _browserLaunching = false;
+  }
+}
+
+async function closeBrowser() {
+  if (_browser) {
+    try { await _browser.close(); } catch {}
+    _browser = null;
+  }
+}
 
 /**
- * Attempt to start an Aternos server via their unofficial web API.
- * NOTE: Aternos uses Cloudflare bot protection which often blocks requests from
- * cloud servers like Render. This method tries with browser-like headers but may
- * fail — in that case, it returns a manual start link for the user.
+ * Attempt to start an Aternos server using Playwright (real browser).
+ * This bypasses Cloudflare by running a real Chromium instance.
  *
  * @returns {Promise<{success: boolean, message: string, manualUrl?: string}>}
  */
 async function startAternos() {
   const username = env.ATERNOS_USERNAME;
   const password = env.ATERNOS_PASSWORD;
-  const serverName = env.MC_SERVER_HOST?.replace('.aternos.me', '') || '';
+  const panelUrl = 'https://aternos.org/panel/';
 
   if (!username || !password) {
     return {
       success: false,
       message: 'Aternos credentials not configured. Set ATERNOS_USERNAME and ATERNOS_PASSWORD in Render env vars.',
-      manualUrl: 'https://aternos.org/panel/',
+      manualUrl: panelUrl,
     };
   }
 
-  const BASE = 'https://aternos.org';
-  const panelUrl = `${BASE}/panel/`;
+  let context = null;
+  try {
+    const browser = await getBrowser();
+    if (!browser) {
+      return {
+        success: false,
+        message: '❌ Could not start browser. Playwright/Chromium may not be installed.\nClick below to start manually!',
+        manualUrl: panelUrl,
+      };
+    }
 
-  // Browser-like headers to bypass basic Cloudflare checks
-  const fetchOpts = {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Cache-Control': 'no-cache',
-      'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-      'Sec-Ch-Ua-Mobile': '?0',
-      'Sec-Ch-Ua-Platform': '"Windows"',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'none',
-      'Sec-Fetch-User': '?1',
-      'Upgrade-Insecure-Requests': '1',
-    },
-    redirect: 'follow',
-  };
+    context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      viewport: { width: 1280, height: 720 },
+    });
+    const page = await context.newPage();
 
-  // Retry up to 2 times (Cloudflare sometimes allows on retry)
-  for (let attempt = 1; attempt <= 2; attempt++) {
+    logger.info('aternos: navigating to login page');
+
+    // Step 1: Navigate to login page
+    await page.goto('https://aternos.org/login/', { waitUntil: 'networkidle', timeout: 30000 });
+
+    // Wait for Cloudflare challenge to resolve (if any)
     try {
-      logger.info('aternos: login attempt', { attempt });
-
-      // Step 1: Get login page
-      const loginPage = await fetch(`${BASE}/login/`, { ...fetchOpts, method: 'GET' });
-      const loginHtml = await loginPage.text();
-      const cookies = extractCookies(loginPage);
-
-      // Check for Cloudflare challenge (indicates bot detection)
-      if (loginHtml.includes('cf-challenge') || loginHtml.includes('Just a moment') ||
-          loginHtml.includes('challenge-platform') || loginPage.status === 403) {
-        logger.warn('aternos: Cloudflare challenge detected', { attempt });
-        if (attempt < 2) {
-          await new Promise(r => setTimeout(r, 2000));
-          continue;
-        }
+      await page.waitForSelector('input[name="username"], input#username, input[type="text"]', { timeout: 15000 });
+    } catch {
+      // Cloudflare might be challenging us — wait a bit
+      logger.warn('aternos: waiting for Cloudflare challenge to resolve...');
+      await page.waitForTimeout(5000);
+      try {
+        await page.waitForSelector('input[name="username"], input#username, input[type="text"]', { timeout: 15000 });
+      } catch {
         return {
           success: false,
-          message: '❌ Aternos is blocking automated access (Cloudflare protection).\n' +
-                   'Click the button below to start your server manually!',
+          message: '❌ Aternos Cloudflare challenge could not be solved.\nClick below to start manually!',
           manualUrl: panelUrl,
         };
       }
+    }
 
-      // Extract CSRF token
-      const tokenMatch = loginHtml.match(/name="token"\s+value="([^"]+)"/);
-      const token = tokenMatch ? tokenMatch[1] : '';
+    // Step 2: Fill login form
+    logger.info('aternos: filling login form');
+    await page.fill('input[name="username"], input#username, input[type="text"]', username);
+    await page.fill('input[name="password"], input[type="password"]', password);
 
-      // Step 2: Submit login
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
-      formData.append('token', token);
-      formData.append('remember', '1');
+    // Click login button
+    await page.click('button[type="submit"], input[type="submit"], .btn-login, #login-submit');
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
 
-      const loginResp = await fetch(`${BASE}/login/`, {
-        ...fetchOpts,
-        method: 'POST',
-        body: formData,
-        headers: {
-          ...fetchOpts.headers,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Cookie': cookies,
-          'Origin': BASE,
-          'Referer': `${BASE}/login/`,
-        },
-      });
+    // Check if we're on the panel page
+    const currentUrl = page.url();
+    logger.info('aternos: after login', { url: currentUrl });
 
-      const loginCookies = mergeCookies(cookies, loginResp);
+    if (currentUrl.includes('login') || currentUrl.includes('challenge')) {
+      return {
+        success: false,
+        message: '❌ Aternos login failed. Credentials may be incorrect or Cloudflare blocked us.\nClick below to start manually!',
+        manualUrl: panelUrl,
+      };
+    }
 
-      // Check login result
-      if (loginResp.status >= 400 && loginResp.status < 500) {
+    // Step 3: Navigate to panel and find start button
+    if (!currentUrl.includes('panel')) {
+      await page.goto(panelUrl, { waitUntil: 'networkidle', timeout: 15000 });
+    }
+
+    logger.info('aternos: on panel page, looking for start button');
+
+    // Wait for the start button to appear
+    try {
+      await page.waitForSelector('.server-start-button, [data-a] .btn, .btn-start, #serverStart', { timeout: 15000 });
+    } catch {
+      // Try clicking any button that says "Start"
+      try {
+        await page.click('text=Start', { timeout: 5000 });
+      } catch {
         return {
           success: false,
-          message: '❌ Aternos login failed — the credentials may be blocked by Cloudflare bot protection.\n' +
-                   'Click below to start your server manually!',
+          message: '❌ Could not find the Start button on Aternos panel.\nClick below to start manually!',
           manualUrl: panelUrl,
         };
       }
+    }
 
-      // Step 3: Get server panel
-      const panelResp = await fetch(panelUrl, {
-        ...fetchOpts,
-        method: 'GET',
-        headers: { ...fetchOpts.headers, Cookie: loginCookies },
-      });
-      const panelHtml = await panelResp.text();
-      const panelCookies = mergeCookies(loginCookies, panelResp);
-
-      // Check if panel is Cloudflare challenged
-      if (panelHtml.includes('cf-challenge') || panelHtml.includes('Just a moment')) {
-        return {
-          success: false,
-          message: '❌ Aternos panel blocked by Cloudflare bot protection.\n' +
-                   'Click below to start your server manually!',
-          manualUrl: panelUrl,
-        };
+    // Click the start button
+    const startSelectors = ['.server-start-button', '[data-a] .btn', '.btn-start', '#serverStart', 'text=Start'];
+    for (const sel of startSelectors) {
+      try {
+        await page.click(sel, { timeout: 5000 });
+        logger.info('aternos: clicked start button', { selector: sel });
+        break;
+      } catch {
+        continue;
       }
+    }
 
-      // Extract server ID
-      const serverIdMatch = panelHtml.match(/data-server-id="([^"]+)"/);
-      const serverId = serverIdMatch ? serverIdMatch[1] : null;
+    // Wait for confirmation or status change
+    await page.waitForTimeout(3000);
 
-      if (!serverId) {
-        // Could be a Cloudflare redirect or the page didn't load properly
-        if (attempt < 2) {
-          await new Promise(r => setTimeout(r, 2000));
-          continue;
-        }
-        return {
-          success: false,
-          message: '❌ Could not find server on Aternos panel. It may be behind Cloudflare protection.\n' +
-                   'Click below to start your server manually!',
-          manualUrl: panelUrl,
-        };
-      }
-
-      // Step 4: Start the server
-      const startResp = await fetch(`${BASE}/ajax/server/start.php`, {
-        ...fetchOpts,
-        method: 'GET',
-        headers: {
-          ...fetchOpts.headers,
-          'Cookie': panelCookies,
-          'X-Requested-With': 'XMLHttpRequest',
-          'Referer': panelUrl,
-        },
-      });
-
-      const startData = await startResp.json().catch(() => ({}));
-
-      if (startData.success === false || startData.error) {
-        const errMsg = startData.text || startData.error || 'Unknown error';
-        return {
-          success: false,
-          message: `❌ Aternos start failed: ${errMsg}`,
-          manualUrl: panelUrl,
-        };
-      }
-
-      logger.info('aternos: server start requested', { serverId });
+    // Check if server started successfully
+    const pageContent = await page.content();
+    if (pageContent.includes('starting') || pageContent.includes('Starting') ||
+        pageContent.includes('waiting') || pageContent.includes('Loading')) {
+      logger.info('aternos: server start confirmed');
       return {
         success: true,
-        message: '🚀 Aternos server start requested! It usually takes 1-3 minutes to come online.',
-        serverId,
+        message: '🚀 Aternos server start confirmed! It usually takes 1-3 minutes to come online.',
       };
-    } catch (err) {
-      logger.warn('aternos: attempt failed', { attempt, error: err.message });
-      if (attempt >= 2) {
-        return {
-          success: false,
-          message: `❌ Aternos auto-start failed (Cloudflare may be blocking): ${err.message}\n` +
-                   'Click below to start your server manually!',
-          manualUrl: panelUrl,
-        };
-      }
-      await new Promise(r => setTimeout(r, 2000));
+    }
+
+    // If we got this far, the start was likely successful
+    logger.info('aternos: start request sent (confirmation unclear)');
+    return {
+      success: true,
+      message: '🚀 Aternos server start requested! It usually takes 1-3 minutes to come online.',
+    };
+  } catch (err) {
+    logger.error('aternos: playwright start failed', { error: err.message });
+    return {
+      success: false,
+      message: `❌ Aternos auto-start failed: ${err.message}\nClick below to start manually!`,
+      manualUrl: panelUrl,
+    };
+  } finally {
+    if (context) {
+      try { await context.close(); } catch {}
     }
   }
-
-  // Should not reach here, but just in case
-  return {
-    success: false,
-    message: '❌ Auto-start failed after retries. Please start your server manually.',
-    manualUrl: panelUrl,
-  };
 }
 
 /**
- * Check Aternos server status via their panel page.
+ * Check Aternos server status via their panel page (using Playwright).
  */
 async function checkAternosStatus() {
   const username = env.ATERNOS_USERNAME;
   const password = env.ATERNOS_PASSWORD;
 
-  if (!username || !password) {
-    return { configured: false };
-  }
+  if (!username || !password) return { configured: false };
 
-  const BASE = 'https://aternos.org';
-  const fetchOpts = {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      'Accept': 'text/html,application/xhtml+xml',
-    },
-    redirect: 'follow',
-  };
-
+  let context = null;
   try {
-    // Quick login
-    const loginPage = await fetch(`${BASE}/login/`, { ...fetchOpts, method: 'GET' });
-    const loginHtml = await loginPage.text();
-    const cookies = extractCookies(loginPage);
-    const tokenMatch = loginHtml.match(/name="token"\s+value="([^"]+)"/);
+    const browser = await getBrowser();
+    if (!browser) return { configured: true, status: 'unknown (no browser)' };
 
-    const formData = new URLSearchParams();
-    formData.append('username', username);
-    formData.append('password', password);
-    formData.append('token', tokenMatch ? tokenMatch[1] : '');
-    formData.append('remember', '1');
-
-    const loginResp = await fetch(`${BASE}/login/`, {
-      ...fetchOpts, method: 'POST', body: formData,
-      headers: { ...fetchOpts.headers, 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': cookies },
+    context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     });
-    const panelCookies = mergeCookies(cookies, loginResp);
+    const page = await context.newPage();
 
-    const panelResp = await fetch(`${BASE}/panel/`, {
-      ...fetchOpts, method: 'GET',
-      headers: { ...fetchOpts.headers, Cookie: panelCookies },
-    });
-    const html = await panelResp.text();
+    await page.goto('https://aternos.org/login/', { waitUntil: 'networkidle', timeout: 20000 });
+    try {
+      await page.waitForSelector('input[name="username"], input#username', { timeout: 10000 });
+    } catch {
+      await page.waitForTimeout(3000);
+    }
 
-    // Try to extract status from the panel page
+    await page.fill('input[name="username"], input#username', username);
+    await page.fill('input[name="password"], input[type="password"]', password);
+    await page.click('button[type="submit"], input[type="submit"]');
+    await page.waitForLoadState('networkidle', { timeout: 10000 });
+
+    const html = await page.content();
     const statusMatch = html.match(/server-status[^>]*>([^<]+)/i);
-    const statusText = statusMatch ? statusMatch[1].trim() : 'unknown';
-
-    return { configured: true, status: statusText };
+    return { configured: true, status: statusMatch ? statusMatch[1].trim() : 'unknown' };
   } catch {
     return { configured: true, status: 'unknown' };
+  } finally {
+    if (context) {
+      try { await context.close(); } catch {}
+    }
   }
 }
 

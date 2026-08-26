@@ -35,6 +35,7 @@ async function shutdown(signal) {
   try {
     dashboard.stop();
     db.close();
+    try { require('./services/minecraft/minecraftService').closeBrowser(); } catch {}
     client.destroy();
     logger.info('shutdown: complete');
     process.exit(0);
