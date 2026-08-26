@@ -141,6 +141,51 @@ async function startMinecraftAutoMonitor() {
   }
 }
 
+/** Start the MC health monitor that checks every 30s and auto-restarts on RAM spikes. */
+function startMinecraftHealthMonitor() {
+  const mcHost = env.MC_SERVER_HOST;
+  const mcPort = Number(env.MC_SERVER_PORT);
+  if (!mcHost || !mcPort) return;
+
+  const guild = client.guilds.cache.first();
+  if (!guild) return;
+
+  // Find the same notification channel.
+  const preferred = ['general', 'chat', 'lobby', 'welcome', 'announcements'];
+  let notifyChannel = null;
+  for (const name of preferred) {
+    notifyChannel = guild.channels.cache.find(
+      (c) => c.name === name && c.isTextBased() && c.permissionsFor(guild.members.me)?.has('SendMessages'),
+    );
+    if (notifyChannel) break;
+  }
+  if (!notifyChannel) notifyChannel = guild.systemChannel;
+  if (!notifyChannel) return;
+
+  const mcService = require('./services/minecraft/minecraftService');
+  const { HEALTH_CONFIG } = mcService;
+
+  logger.info('minecraft: health monitor started', {
+    interval: `${HEALTH_CONFIG.checkIntervalMs / 1000}s`,
+    autoRestartOnFail: HEALTH_CONFIG.maxConsecutiveFailures,
+    latencyThreshold: `${HEALTH_CONFIG.maxLatencyMs}ms`,
+  });
+
+  const intervalId = setInterval(async () => {
+    try {
+      await mcService.healthCheck(async (msg) => {
+        await notifyChannel.send({ content: msg }).catch(() => {});
+      });
+    } catch (err) {
+      logger.error('minecraft: health check error', { error: err.message });
+    }
+  }, HEALTH_CONFIG.checkIntervalMs);
+
+  // Cleanup on shutdown.
+  process.on('SIGTERM', () => clearInterval(intervalId));
+  process.on('SIGINT', () => clearInterval(intervalId));
+}
+
 async function main() {
   logger.info(`FGx v${require('../package.json').version} starting`, { node: process.version, env: env.NODE_ENV });
 
@@ -179,6 +224,9 @@ async function main() {
 
     // Auto-start monitoring Minecraft server on first guild.
     startMinecraftAutoMonitor();
+
+    // Auto-restart monitor: check MC server health every 30s, restart if RAM spikes.
+    startMinecraftHealthMonitor();
   });
 
   // Catch gateway errors to prevent silent failures.

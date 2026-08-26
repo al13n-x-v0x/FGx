@@ -374,6 +374,124 @@ function isMonitoring(channelId) {
   return monitors.has(channelId);
 }
 
+// ─── Auto-Restart Health Monitor ─────────────────────────────────────────
+
+/** Health check state: tracks consecutive failures and last restart time. */
+const healthState = {
+  consecutiveFailures: 0,   // How many times in a row the server was unreachable
+  lastRestartTime: 0,       // Timestamp of last restart trigger
+  lastQueryTime: 0,         // Timestamp of last successful query
+  latencySpikeCount: 0,     // Consecutive high-latency readings (RAM pressure indicator)
+};
+
+// Thresholds for auto-restart (RAM pressure indicators via latency/player proxy)
+const HEALTH_CONFIG = {
+  maxConsecutiveFailures: 3,  // Restart after 3 failed queries in a row (90s offline)
+  maxLatencyMs: 2000,         // Latency spike threshold (server struggling)
+  maxLatencySpikes: 5,        // Consecutive spikes before restart (2.5 min of lag)
+  minRestartGapMs: 300000,    // Min 5 min between restarts to prevent loops
+  checkIntervalMs: 30000,     // Check every 30 seconds
+};
+
+/**
+ * Run a health check on the server and auto-restart if needed.
+ * Checks: consecutive timeouts, latency spikes, player saturation.
+ *
+ * @param {Function} notifyFn - async (message) => void — sends to Discord
+ */
+async function healthCheck(notifyFn) {
+  const host = env.MC_SERVER_HOST;
+  const port = Number(env.MC_SERVER_PORT);
+  const now = Date.now();
+
+  const result = await queryServer(host, port);
+
+  // ── Server is OFFLINE ──
+  if (!result.online) {
+    healthState.consecutiveFailures++;
+    healthState.latencySpikeCount = 0;
+
+    if (healthState.consecutiveFailures >= HEALTH_CONFIG.maxConsecutiveFailures) {
+      const timeSinceRestart = now - healthState.lastRestartTime;
+      if (timeSinceRestart > HEALTH_CONFIG.minRestartGapMs) {
+        logger.warn('minecraft health: server offline, triggering auto-restart', {
+          consecutiveFailures: healthState.consecutiveFailures,
+          error: result.error,
+        });
+        await triggerRestart(notifyFn, 'Server went offline — auto-restarting');
+      } else {
+        logger.debug('minecraft health: restart suppressed (cooldown)', {
+          cooldownRemaining: HEALTH_CONFIG.minRestartGapMs - timeSinceRestart,
+        });
+      }
+    }
+    return;
+  }
+
+  // ── Server is ONLINE — check health metrics ──
+  healthState.consecutiveFailures = 0;
+  healthState.lastQueryTime = now;
+
+  const issues = [];
+
+  // Check latency (high latency = server RAM/CPU struggling)
+  if (result.latency > HEALTH_CONFIG.maxLatencyMs) {
+    healthState.latencySpikeCount++;
+    if (healthState.latencySpikeCount >= HEALTH_CONFIG.maxLatencySpikes) {
+      issues.push(`High latency: ${result.latency}ms (${healthState.latencySpikeCount} consecutive spikes)`);
+    }
+  } else {
+    healthState.latencySpikeCount = 0;
+  }
+
+  // Check if server is full (saturation = RAM pressure)
+  if (result.players.max > 0 && result.players.online >= result.players.max) {
+    issues.push(`Server full: ${result.players.online}/${result.players.max} — may need restart to free RAM`);
+  }
+
+  // If critical issues found and cooldown passed, restart
+  if (issues.length > 0) {
+    const timeSinceRestart = now - healthState.lastRestartTime;
+    if (timeSinceRestart > HEALTH_CONFIG.minRestartGapMs) {
+      logger.warn('minecraft health: issues detected, triggering auto-restart', { issues });
+      await triggerRestart(notifyFn, issues.join('\n') + '\n\n🔄 Auto-restarting to free RAM...');
+    }
+  }
+}
+
+/**
+ * Trigger an auto-restart of the Minecraft server via Aternos.
+ */
+async function triggerRestart(notifyFn, reason) {
+  healthState.lastRestartTime = Date.now();
+
+  const result = await startAternos();
+  if (result.success) {
+    const msg = [
+      '🔄 **Auto-Restart Triggered!**',
+      `**Reason:** ${reason}`,
+      '',
+      '🚀 Server is restarting on Aternos...',
+      '📡 Monitoring for it to come back online.',
+    ].join('\n');
+    await notifyFn(msg).catch(() => {});
+  } else {
+    const msg = [
+      '⚠️ **Auto-Restart Failed!**',
+      `**Reason:** ${reason}`,
+      `**Error:** ${result.message}`,
+      '',
+      ' manual restart may be needed on [Aternos](https://aternos.org).',
+    ].join('\n');
+    await notifyFn(msg).catch(() => {});
+  }
+}
+
+/** Get current health status (for /minecraft status command). */
+function getHealthStatus() {
+  return { ...healthState };
+}
+
 // ─── Cookie Helpers ─────────────────────────────────────────────────────────
 
 function extractCookies(response) {
@@ -408,4 +526,9 @@ module.exports = {
   startMonitor,
   stopMonitor,
   isMonitoring,
+  healthCheck,
+  getHealthStatus,
+  triggerRestart,
+  healthState,
+  HEALTH_CONFIG,
 };
