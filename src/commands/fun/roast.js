@@ -313,6 +313,35 @@ const roastCmd = {
   async execute(interaction) {
     const target = interaction.options.getUser('target') ?? interaction.user;
     const self = target.id === interaction.user.id;
+
+    // OWNER PROTECTION: Never roast the server owner
+    const isOwner = target.id === interaction.guild?.ownerId;
+    if (isOwner) {
+      const refusalResponses = [
+        "Nah fam, that is MY lord. I will NOT roast the king. Back the fuck off. 👑",
+        "That is the boss of this server. I don't roast royalty. Try someone else, bitch. 👑",
+        "You want me to roast THE OWNER?! LMAOOO nice try. That is my creator. I protect them. 👑",
+        "Hell no. That is my lord and savior. I will NOT disrespect them. Find someone else to roast. 👑",
+        "You must be out of your damn mind. The owner is untouchable. Try me with that shit again. 👑",
+        "That is the boss. My creator. The legend. I don't roast legends, I protect them. 👑",
+        "Absolutely NOT. That is the owner of this entire clan. Show some respect or get out. 👑",
+        "Lmaooo you want me to roast the owner?? That is my lord, back the fuck off. 👑",
+      ];
+      const refusal = refusalResponses[Math.floor(Math.random() * refusalResponses.length)];
+      const refusalEmbed = new (require('discord.js').EmbedBuilder)()
+        .setColor(0xFFD700)
+        .setTitle("👑 OWNER PROTECTION ACTIVATED")
+        .setDescription("> " + refusal)
+        .addFields(
+          { name: "🛡️ Protected", value: String(target), inline: true },
+          { name: "🚫 Requested by", value: String(interaction.user), inline: true },
+        )
+        .setThumbnail(target.displayAvatarURL({ size: 256 }))
+        .setFooter({ text: 'FGx • The owner is untouchable 👑' })
+        .setTimestamp();
+      return interaction.editReply({ embeds: [refusalEmbed] });
+    }
+
     const heat = interaction.options.getString('heat') ?? randomFrom(['light', 'medium', 'nuclear', 'savage']);
     const heatInfo = HEAT[heat];
 

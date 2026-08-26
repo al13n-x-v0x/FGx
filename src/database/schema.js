@@ -333,6 +333,21 @@ const MIGRATIONS = [
 
   CREATE INDEX IF NOT EXISTS idx_rr_message ON reaction_roles (guild_id, message_id);
   `,
+  // Migration 8 — inventory for shop items.
+  `
+  CREATE TABLE IF NOT EXISTS inventory (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id    TEXT NOT NULL,
+    user_id     TEXT NOT NULL,
+    item_id     TEXT NOT NULL,
+    item_name   TEXT NOT NULL,
+    quantity    INTEGER NOT NULL DEFAULT 1,
+    purchased_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (guild_id, user_id, item_id)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_inv_user ON inventory (guild_id, user_id);
+  `,
 ];
 
 module.exports = { MIGRATIONS };

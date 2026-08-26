@@ -107,6 +107,26 @@ const economyRepo = {
     );
     return row ? row.n + 1 : 1;
   },
+
+  // Inventory
+  addInventoryItem(guildId, userId, itemId, itemName) {
+    const existing = db.get(
+      'SELECT * FROM inventory WHERE guild_id = ? AND user_id = ? AND item_id = ?',
+      guildId, userId, itemId
+    );
+    if (existing) {
+      db.run('UPDATE inventory SET quantity = quantity + 1 WHERE guild_id = ? AND user_id = ? AND item_id = ?', guildId, userId, itemId);
+    } else {
+      db.run('INSERT INTO inventory (guild_id, user_id, item_id, item_name) VALUES (?, ?, ?, ?)', guildId, userId, itemId, itemName);
+    }
+  },
+
+  getInventory(guildId, userId) {
+    return db.all(
+      'SELECT * FROM inventory WHERE guild_id = ? AND user_id = ? ORDER BY purchased_at DESC',
+      guildId, userId
+    );
+  },
 };
 
 module.exports = { economyRepo };
