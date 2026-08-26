@@ -165,4 +165,25 @@ async function ask(client, guild, userId, question, { extraSystem } = {}) {
   return reply.slice(0, 3800);
 }
 
-module.exports = { ask, buildContext, limiter };
+/**
+ * Lightweight chat wrapper for commands that don't have guild/client objects.
+ * Calls chatCompletion directly with a simplified prompt.
+ */
+async function chat(prompt, { system, user, guild } = {}) {
+  const s = [
+    system || 'You are FGx, a helpful, witty community assistant for a competitive gaming Discord server called BloxStrike Clan.',
+    'Answer in clean, readable Discord markdown. Be concise: aim for under 250 words.',
+    guild ? `You are chatting in the Discord server: ${guild}.` : '',
+    user ? `The user asking is: ${user}.` : '',
+  ].filter(Boolean).join('\n\n');
+
+  const reply = await chatCompletion({
+    system: s,
+    messages: [{ role: 'user', content: prompt.slice(0, 2000) }],
+    maxTokens: 800,
+    temperature: 0.4,
+  });
+  return reply.slice(0, 3800);
+}
+
+module.exports = { ask, chat, buildContext, limiter };
