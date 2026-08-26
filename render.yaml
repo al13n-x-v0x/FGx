@@ -20,10 +20,16 @@ services:
         value: '25565'
       - key: MC_SERVER_NAME
         value: FGxx Aternos Server
+      - key: AI_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        value: ''
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
       - key: HF_API_KEY
         value: ''
       - key: HF_MODEL
-        value: 'mistralai/Mistral-7B-Instruct-v0.3,microsoft/DialoGPT-medium'
+        value: 'mistralai/Mistral-7B-Instruct-v0.3'
       - key: ATERNOS_USERNAME
         sync: false
       - key: ATERNOS_PASSWORD
