@@ -315,7 +315,7 @@ const roastCmd = {
     const self = target.id === interaction.user.id;
 
     // OWNER PROTECTION: Never roast the server owner
-    const isProtected = target.username.toLowerCase().includes("al13n") || target.id === "YOUR_USER_ID_HERE";
+    const isProtected = target.username.toLowerCase().includes('al13n') || target.username.toLowerCase().includes('vox.dev');
     if (isProtected) {
       const refusalResponses = [
         "Nah fam, that is al13n! I will NOT roast them. They are untouchable. Back the fuck off. 👑",

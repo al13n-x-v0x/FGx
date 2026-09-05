@@ -234,6 +234,15 @@ function parseCommand(line, mentionIds = []) {
     return { type: 'history', targetId: mentionIds[0] ?? null, count };
   }
 
+  if (cmd === 'giverole' || cmd === 'give-role' || cmd === 'giverole') {
+    const roleId = rest.find((t) => /^<@&\d+>$/.test(t));
+    const targetId = mentionIds[0] ?? null;
+    if (!roleId) {
+      return { type: 'unknown', raw: line };
+    }
+    return { type: 'giverole', roleId, targetId };
+  }
+
   if (cmd === 'profile') {
     return { type: 'profile', targetId: mentionIds[0] ?? null };
   }
@@ -434,6 +443,44 @@ async function handle(client, message) {
           await spinner.react('💀').catch(() => {});
           await spinner.react('🪦').catch(() => {});
         }
+        return true;
+      }
+
+      case 'giverole': {
+        const { EmbedBuilder } = require('discord.js');
+        const roleId = parsed.roleId ? parsed.roleId.replace(/<@&|>/g, '') : null;
+        const targetId = parsed.targetId ?? userId;
+        const role = message.guild.roles.cache.get(roleId);
+        if (!role) {
+          await message.reply({ embeds: [views.warnEmbed('Role not found', 'That role does not exist in this server.')] });
+          return true;
+        }
+        if (!message.member.permissions.has(PermissionFlagsBits.ManageRoles) && message.member.roles.highest?.position <= (message.guild.members.me?.roles.highest?.position ?? 0)) {
+          await message.reply({ embeds: [views.warnEmbed('Not allowed', 'Only staff with Manage Roles or a higher role than the bot can use this.')] });
+          return true;
+        }
+        const target = message.mentions.users.get(targetId) ?? message.author;
+        const targetMember = message.guild.members.cache.get(targetId) ?? await message.guild.members.fetch(targetId).catch(() => null);
+        // Protected check
+        const tName = (targetMember?.user?.username ?? target.username).toLowerCase();
+        const isProtected = tName.includes('al13n') || tName.includes('vox.dev');
+        if (isProtected) {
+          await message.reply({ embeds: [{ color: 0xFFD700, title: '👑 PROTECTED PERSON', description: '> That is al13n! I will NOT touch their roles. They are untouchable. Back the fuck off. 👑', footer: { text: BRAND.footer } }] });
+          return true;
+        }
+        // Bot hierarchy
+        const botTop = message.guild.members.me?.roles.highest?.position ?? 0;
+        if (botTop <= role.position) {
+          await message.reply({ embeds: [views.warnEmbed('Bot too low', 'Move the FGx bot role above the role you want to give.')] });
+          return true;
+        }
+        if (targetMember && targetMember.roles.highest?.position >= role.position) {
+          await message.reply({ embeds: [views.warnEmbed('Already has it', 'That person already has a role at or above the one you are trying to give.')] });
+          return true;
+        }
+        await targetMember.roles.add(role);
+        const isSelf = targetId === userId;
+        await message.reply({ embeds: [new EmbedBuilder().setColor(0x2fbf71).setTitle(isSelf ? '✅ Role Given to You' : '✅ Role Given').setDescription(isSelf ? `You now have the **${role.name}** role.` : `You gave **${role.name}** to ${targetMember ? targetMember.user.tag : target.tag}.`).addFields({ name: '🎭 Role', value: `<@&${role.id}>`, inline: true }, { name: '👤 Recipient', value: targetMember ? targetMember.user.tag : target.tag, inline: true }).setFooter({ text: BRAND.footer })] });
         return true;
       }
 
