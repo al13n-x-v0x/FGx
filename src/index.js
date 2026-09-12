@@ -34,9 +34,7 @@ async function shutdown(signal) {
   logger.info(`shutdown: received ${signal}`);
   try {
     dashboard.stop();
-    db.close();
-    try { require('./services/minecraft/minecraftService').closeBrowser(); } catch {}
-    client.destroy();
+    db.close();    client.destroy();
     logger.info('shutdown: complete');
     process.exit(0);
   } catch (err) {
@@ -252,11 +250,7 @@ async function main() {
       id: client.user?.id,
     });
 
-    // Auto-start monitoring Minecraft server on first guild.
-    startMinecraftAutoMonitor();
-
-    // Auto-restart monitor: check MC server health every 30s, restart if RAM spikes.
-    startMinecraftHealthMonitor();
+    // (Minecraft auto-monitor removed — /minecraft command deleted)
   });
 
   // Catch gateway errors to prevent silent failures.
@@ -292,6 +286,10 @@ async function main() {
   } else {
     logger.error('DISCORD_TOKEN is missing or invalid — bot cannot connect to Discord');
   }
+
+  // Bind MC start credentials to the client for the /minecraft embed
+  client[Symbol.for('mcServerId')] = env.ATERNOS_USERNAME || 'FGXstart';
+  client[Symbol.for('mcServerPass')] = env.ATERNOS_PASSWORD || 'FGXBLOXSTRIKE';
 }
 
 main().catch((err) => {

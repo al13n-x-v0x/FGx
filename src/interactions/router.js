@@ -414,7 +414,7 @@ const handlers = [
   { match: 'nitro:', fn: (i) => handleNitroButton(i) },
   { match: 'editbot:', fn: (i) => require('../commands/admin/editBot').handleButton(i) },
   { match: 'rb:', fn: (i) => require('../commands/fun/roastBattle').handleBattleButton(i) },
-  { match: 'mc:', fn: (i) => handleMinecraftButton(i) },
+  // mc: buttons removed — /minecraft command deleted
   { match: 'rps:', fn: (i) => require('../commands/fun/rps').handleButton(i) },
   { match: 'trivia:', fn: (i) => require('../commands/fun/trivia').handleButton(i) },
 ];
@@ -491,87 +491,7 @@ async function handleEmojiPick(interaction) {
   });
 }
 
-/** Handle /minecraft buttons. */
-async function handleMinecraftButton(interaction) {
-  const mc = require('../services/minecraft/minecraftService');
-  const { BRAND } = require('../config/constants');
-  const env = require('../config/env').env;
-  const parts = interaction.customId.split(':');
-
-  // mc:start — start Aternos server
-  if (parts[1] === 'start') {
-    await interaction.deferReply({ ephemeral: true });
-    const result = await mc.startAternos();
-    const embed = new EmbedBuilder()
-      .setColor(result.success ? BRAND.colors.success : BRAND.colors.danger)
-      .setTitle(result.success ? '🚀 Starting Server' : '❌ Start Failed')
-      .setDescription(result.message)
-      .setFooter({ text: BRAND.footer });
-    await interaction.editReply({ embeds: [embed] });
-    if (result.success) {
-      mc.startMonitor(interaction.channel, env.MC_SERVER_HOST, Number(env.MC_SERVER_PORT), 30000, 60);
-    }
-    return;
-  }
-
-  // mc:monitor:host:port — start monitoring
-  if (parts[1] === 'monitor') {
-    const host = parts[2] || env.MC_SERVER_HOST;
-    const port = Number(parts[3] || env.MC_SERVER_PORT);
-    if (mc.isMonitoring(interaction.channel.id)) {
-      return interaction.reply({ content: '📡 Already monitoring this channel!', ephemeral: true });
-    }
-    mc.startMonitor(interaction.channel, host, port, 30000, 60);
-    const embed = new EmbedBuilder()
-      .setColor(BRAND.colors.warn)
-      .setTitle('📡 Monitor Started')
-      .setDescription(`Monitoring \`${host}:${port}\` every 30s. I'll notify when it's online!`)
-      .setFooter({ text: BRAND.footer });
-    return interaction.reply({ embeds: [embed], ephemeral: true });
-  }
-
-  // mc:refresh:host:port — re-check server status
-  if (parts[1] === 'refresh') {
-    await interaction.deferUpdate();
-    const host = parts[2] || env.MC_SERVER_HOST;
-    const port = Number(parts[3] || env.MC_SERVER_PORT);
-    const result = await mc.queryServer(host, port);
-    if (result.online) {
-      const embed = new EmbedBuilder()
-        .setColor(BRAND.colors.success)
-        .setTitle('🟢 Server is ONLINE')
-        .setDescription(
-          `**${env.MC_SERVER_NAME}**\n\n` +
-          `**IP:** \`${host}:${port}\`\n` +
-          `**Version:** ${result.version}\n` +
-          `**Players:** ${result.players.online}/${result.players.max}\n` +
-          `**Latency:** ${result.latency}ms\n` +
-          (result.motd ? `**MOTD:** ${result.motd}` : '')
-        )
-        .setFooter({ text: BRAND.footer })
-        .setTimestamp();
-      return interaction.editReply({ embeds: [embed] });
-    }
-    return interaction.editReply({
-      embeds: [
-        new EmbedBuilder()
-          .setColor(BRAND.colors.danger)
-          .setTitle('🔴 Still Offline')
-          .setDescription(`\`${host}:${port}\` — ${result.message || 'Not responding'}`)
-          .setFooter({ text: BRAND.footer }),
-      ],
-    });
-  }
-
-  // mc:stop-monitor
-  if (parts[1] === 'stop-monitor') {
-    const stopped = mc.stopMonitor(interaction.channel.id);
-    return interaction.reply({
-      content: stopped ? '⛔ Monitor stopped.' : 'No active monitor found.',
-      ephemeral: true,
-    });
-  }
-}
+/* handleMinecraftButton removed — /minecraft command deleted */
 
 /** Route a component/modal interaction by customId prefix. */
 async function route(interaction) {

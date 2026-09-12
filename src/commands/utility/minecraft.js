@@ -6,13 +6,6 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const { BRAND } = require('../../config/constants');
 const { env } = require('../../config/env');
 
-// Lazy-load the MC service — it has heavy deps that can hang on require.
-let _mc = null;
-function mc() {
-  if (!_mc) _mc = require('../../services/minecraft/minecraftService');
-  return _mc;
-}
-
 /** Generate star rating based on latency (lower = better). */
 function latencyStars(ms) {
   if (ms <= 50) return '⭐⭐⭐⭐⭐';
@@ -52,7 +45,7 @@ function serverType(version) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('minecraft')
-    .setDescription('Minecraft server tools — status, start, monitor')
+    .setDescription('Check FGx Minecraft server status — IP, players, version')
     .addSubcommand((sub) =>
       sub
         .setName('status')
@@ -63,59 +56,31 @@ module.exports = {
         .addIntegerOption((opt) =>
           opt.setName('port').setDescription('Server port (default 25565)').setRequired(false),
         ),
-    )
-    .addSubcommand((sub) =>
-      sub
-        .setName('start')
-        .setDescription('Start the Aternos server (auto-start)'),
-    )
-    .addSubcommand((sub) =>
-      sub
-        .setName('monitor')
-        .setDescription('Auto-monitor server and notify when online')
-        .addStringOption((opt) =>
-          opt.setName('host').setDescription('Server IP to monitor').setRequired(false),
-        )
-        .addIntegerOption((opt) =>
-          opt.setName('port').setDescription('Server port to monitor').setRequired(false),
-        ),
-    )
-    .addSubcommand((sub) =>
-      sub
-        .setName('stop')
-        .setDescription('Stop monitoring the server in this channel'),
-    )
-    .addSubcommand((sub) =>
-      sub
-        .setName('rate')
-        .setDescription('Rate the server experience (1-5 stars)')
-        .addIntegerOption((opt) =>
-          opt.setName('stars')
-            .setDescription('Your rating (1-5)')
-            .setRequired(true)
-            .addChoices(
-              { name: '⭐ Terrible', value: 1 },
-              { name: '⭐⭐ Bad', value: 2 },
-              { name: '⭐⭐⭐ Okay', value: 3 },
-              { name: '⭐⭐⭐⭐ Good', value: 4 },
-              { name: '⭐⭐⭐⭐⭐ Amazing', value: 5 },
-            ),
-        ),
     ),
 
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
 
-    // ─── STATUS ────────────────────────────────────────────────────────────
     if (sub === 'status') {
       await interaction.deferReply();
 
       const host = interaction.options.getString('host') || env.MC_SERVER_HOST;
       const port = interaction.options.getInteger('port') || Number(env.MC_SERVER_PORT);
 
+      // Lazy-load minecraft-server-util (native dep, loaded on demand).
+      let _mcUtil = null;
+      function getMcUtil() {
+        if (!_mcUtil) _mcUtil = require('minecraft-server-util');
+        return _mcUtil;
+      }
+
       let result;
       try {
-        result = await mc().queryServer(host, port);
+        const queryPromise = getMcUtil().status(host, port, { timeout: 4000, enableSRV: true });
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(Object.assign(new Error('Query timed out'), { code: 'TIMEOUT' })), 5000);
+        });
+        result = await Promise.race([queryPromise, timeoutPromise]);
       } catch (err) {
         result = { online: false, host, port, error: 'CRASH', message: `Query crashed: ${err.message}` };
       }
@@ -142,7 +107,7 @@ module.exports = {
             `\n**👥 Players** ${bar} **${result.players.online}/${result.players.max}**\n` +
             `> ${size}` +
             (result.players.sample.length > 0
-              ? `\n> ${result.players.sample.map((p) => `\`${p}\``).join(' • ')}`
+              ? `\n> ${result.players.sample.map((p) => \`${p}\`).join(' • ')}`
               : '') +
             `\n\n━━━━━━━━━━━━━━━━━━━━━━━` +
             (result.motd ? `\n> 💬 *${result.motd}*` : ''),
@@ -156,17 +121,17 @@ module.exports = {
 
         const row = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId(`mc:refresh:${host}:${port}`)
-            .setLabel('🔄 Refresh')
-            .setStyle(ButtonStyle.Secondary),
-          new ButtonBuilder()
-            .setCustomId(`mc:monitor:${host}:${port}`)
-            .setLabel('📡 Monitor')
-            .setStyle(ButtonStyle.Primary),
+            .setLabel('🌐 Open Aternos')
+            .setURL('https://aternos.org/panel/')
+            .setStyle(ButtonStyle.Link),
         );
 
         await interaction.editReply({ embeds: [embed], components: [row] });
       } else {
+        // Offline — show server credentials and the "access blocked" image
+        const SERV_START_ID = env.ATERNOS_USERNAME || 'FGXstart';
+        const SERV_START_PASS = env.ATERNOS_PASSWORD || 'FGXBLOXSTRIKE';
+
         const embed = new EmbedBuilder()
           .setColor(BRAND.colors.danger)
           .setTitle(`🔴 ${env.MC_SERVER_NAME} — OFFLINE`)
@@ -177,199 +142,34 @@ module.exports = {
             `> **IP:** \`${host}:${port}\`\n` +
             `> **Status:** Offline\n` +
             `> **Reason:** ${result.message || 'Server not responding'}\n\n` +
-            `━━━━━━━━━━━━━━━━━━━━━━━` +
-            (env.ATERNOS_USERNAME
-              ? `\n\n🚀 **Click Start below to bring the server online!**`
-              : `\n\nUse \`/minecraft start\` or start manually on Aternos.`),
+            `━━━━━━━━━━━━━━━━━━━━━━━`,
           )
+          .setImage('https://cdn.discordapp.com/attachments/1538504231013589094/1542063766899007518/ChatGPT_Image_Aug_26_2026_12_19_46_PM.png?ex=6a8fde4c&is=6a8e8ccc&hm=159a3acfdfc807a84c621c46ea5b3d33c9c4f5c1fba4e84eb45a561dd65a66c3&=&format=webp&quality=lossless&width=768&height=384')
           .setFooter({ text: BRAND.footer })
           .setTimestamp();
 
+        const startAccessEmbed = new EmbedBuilder()
+          .setColor(0x00ff00)
+          .setTitle('🚀 SERVER START ACCESS  @everyone')
+          .setDescription(
+            `Want to turn the server on? ⚡ Use the Aternos access below.\n\n` +
+            `🟢 **ID:** ${SERV_START_ID}\n` +
+            `🔑 **Password:** ${SERV_START_PASS}\n\n` +
+            `📌 **Permissions:** Server START only\n` +
+            `❌ Do not change account settings, permissions, or password.\n\n` +
+            `🔥 Get the server online and let everyone play!`,
+          )
+          .setFooter({ text: BRAND.footer });
+
         const row = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId('mc:start')
-            .setLabel('🚀 Start Server')
-            .setStyle(ButtonStyle.Success),
-          new ButtonBuilder()
-            .setCustomId(`mc:monitor:${host}:${port}`)
-            .setLabel('📡 Auto-Monitor')
-            .setStyle(ButtonStyle.Primary),
-          new ButtonBuilder()
-            .setURL('https://aternos.org')
-            .setLabel('🌐 Open Aternos')
+            .setLabel('🌐 Open Aternos (Manual Start)')
+            .setURL('https://aternos.org/panel/')
             .setStyle(ButtonStyle.Link),
         );
 
-        await interaction.editReply({ embeds: [embed], components: [row] });
+        await interaction.editReply({ embeds: [embed, startAccessEmbed], components: [row] });
       }
-    }
-
-    // ─── START ─────────────────────────────────────────────────────────────
-    if (sub === 'start') {
-      await interaction.deferReply();
-
-      const result = await mc().startAternos();
-
-      const embed = new EmbedBuilder()
-        .setColor(result.success ? BRAND.colors.success : BRAND.colors.danger)
-        .setTitle(result.success ? '🚀 Starting Server' : '❌ Start Failed')
-        .setDescription(result.message)
-        .setFooter({ text: BRAND.footer })
-        .setTimestamp();
-
-      const host = env.MC_SERVER_HOST;
-      const port = Number(env.MC_SERVER_PORT);
-      const manualUrl = result.manualUrl || 'https://aternos.org/panel/';
-
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId(`mc:monitor:${host}:${port}`)
-          .setLabel(result.success ? '📡 Auto-Monitor (Notify when UP)' : '📡 Start Monitoring & Notify When UP')
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setURL(manualUrl)
-          .setLabel('🌐 Start on Aternos')
-          .setStyle(ButtonStyle.Link),
-      );
-
-      await interaction.editReply({ embeds: [embed], components: [row] });
-
-      // Always start monitoring so we notify when server comes online
-      mc().startMonitor(interaction.channel, host, port, 30000, 120);
-      await interaction.followUp({
-        content: '📡 **Auto-monitor started** — I\'ll ping the server every 30s and notify here when it\'s online!',
-      });
-    }
-
-    // ─── MONITOR ───────────────────────────────────────────────────────────
-    if (sub === 'monitor') {
-      const host = interaction.options.getString('host') || env.MC_SERVER_HOST;
-      const port = interaction.options.getInteger('port') || Number(env.MC_SERVER_PORT);
-
-      if (mc().isMonitoring(interaction.channel.id)) {
-        return interaction.reply({
-          content: '📡 This channel is already being monitored! I\'ll notify when the server comes online.',
-          ephemeral: true,
-        });
-      }
-
-      // Quick check — if already online, no need to monitor
-      const quickCheck = await mc().queryServer(host, port);
-      if (quickCheck.online) {
-        return interaction.reply({
-          content: `🟢 **Server is already online!** \`${host}:${port}\` — ${quickCheck.players.online}/${quickCheck.players.max} players.`,
-          ephemeral: true,
-        });
-      }
-
-      mc().startMonitor(interaction.channel, host, port, 30000, 60);
-
-      const embed = new EmbedBuilder()
-        .setColor(BRAND.colors.warn)
-        .setTitle('📡 Minecraft Server Monitor Started')
-        .setDescription(
-          `Monitoring \`${host}:${port}\` every **30 seconds**.\n\n` +
-          `• I'll notify **@everyone** here when the server comes online\n` +
-          `• Max monitoring time: **30 minutes** (60 checks)\n` +
-          `• Use \`/minecraft stop\` to cancel early\n\n` +
-          `**Current status:** 🔴 Offline`,
-        )
-        .setFooter({ text: BRAND.footer })
-        .setTimestamp();
-
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId('mc:stop-monitor')
-          .setLabel('⛔ Stop Monitor')
-          .setStyle(ButtonStyle.Danger),
-      );
-
-      await interaction.reply({ embeds: [embed], components: [row] });
-    }
-
-    // ─── STOP ──────────────────────────────────────────────────────────────
-    if (sub === 'stop') {
-      const stopped = mc().stopMonitor(interaction.channel.id);
-
-      return interaction.reply({
-        content: stopped
-          ? '⛔ Server monitoring stopped.'
-          : 'There\'s no active monitor in this channel.',
-        ephemeral: true,
-      });
-    }
-
-    // ─── RATE ──────────────────────────────────────────────────────────────
-    if (sub === 'rate') {
-      const stars = interaction.options.getInteger('stars');
-      const starText = '⭐'.repeat(stars) + '☆'.repeat(5 - stars);
-      const messages = {
-        1: [
-          'Yikes... the server was rough. We\'ll do better! 💀',
-          '1 star? That hurts. What went wrong? 😭',
-          'Noted. We need to fix this ASAP. 🔧',
-        ],
-        2: [
-          'Below average. We\'re working on improvements! 🔨',
-          '2 stars — room for improvement. Thanks for the feedback!',
-          'Got it. We\'ll try harder next time. 📝',
-        ],
-        3: [
-          'Solid server! Thanks for playing! 👍',
-          'Average but functional. We\'ll aim higher! ⬆️',
-          '3 stars — not bad! Thanks for the rating!',
-        ],
-        4: [
-          'Nice! Almost perfect. What could make it a 5? 🤔',
-          '4 stars! Glad you enjoyed it! 🎉',
-          'Great feedback — we\'re almost there! 💪',
-        ],
-        5: [
-          'PERFECT SCORE! You\'re the best! 🏆🔥',
-          '5 stars! We love you! Keep playing! 💜',
-          'ABSOLUTELY COOKED! Thanks for the perfect rating! ⭐',
-        ],
-      };
-
-      const msg = messages[stars][Math.floor(Math.random() * messages[stars].length)];
-
-      // Store rating (best effort)
-      try {
-        const { db } = require('../../database');
-        db.prepare(`
-          INSERT INTO guild_config (guild_id, config_key, config_value)
-          VALUES (?, 'mc_rating_${interaction.user.id}', ?)
-          ON CONFLICT(guild_id, config_key) DO UPDATE SET config_value = excluded.config_value
-        `).run(interaction.guild.id, String(stars));
-      } catch {
-        // Rating storage is optional — ignore errors
-      }
-
-      const embed = new EmbedBuilder()
-        .setColor(stars >= 4 ? BRAND.colors.success : stars >= 3 ? BRAND.colors.warn : BRAND.colors.danger)
-        .setTitle('⭐ Server Rating Submitted!')
-        .setDescription(
-          `**${interaction.user.username}** rated **${env.MC_SERVER_NAME}**\n\n` +
-          `**Rating:** ${starText}\n` +
-          `**Score:** ${stars}/5\n\n` +
-          `> ${msg}`,
-        )
-        .setThumbnail(interaction.user.displayAvatarURL({ size: 128 }))
-        .setFooter({ text: BRAND.footer })
-        .setTimestamp();
-
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId(`mc:refresh:${env.MC_SERVER_HOST}:${Number(env.MC_SERVER_PORT)}`)
-          .setLabel('🔄 Check Status')
-          .setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder()
-          .setCustomId('mc:start')
-          .setLabel('🚀 Start Server')
-          .setStyle(ButtonStyle.Success),
-      );
-
-      await interaction.reply({ embeds: [embed], components: [row] });
     }
   },
 };

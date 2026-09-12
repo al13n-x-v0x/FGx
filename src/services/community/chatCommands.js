@@ -199,12 +199,7 @@ function parseCommand(line, mentionIds = []) {
   if (cmd === 'ai') {
     return { type: 'ai', prompt: rest.join(' ').trim() };
   }
-  if (cmd === 'start' || cmd === 'mc' || cmd === 'minecraft') {
-    return { type: 'mcstart' };
-  }
-  if (cmd === 'mcstatus' || cmd === 'mcstats') {
-    return { type: 'mcstatus' };
-  }
+  /* /minecraft chat commands removed */
   if (cmd === 'trick' || cmd === 'ai') {
     const trickCmd = (rest[0] || '').toLowerCase();
     const trickUser = mentionIds[0] || null;
@@ -312,9 +307,6 @@ function helpEmbed() {
       '**👑 VIP**\n' +
       '• `!vip` — status & unlock info\n' +
       '• `!vip daily` — 250 ₣Ԡ🇽 extra (needs full verification)\n\n' +
-      '**🎮 Minecraft**\n' +
-      '• `!start` / `!mc` — start the Minecraft server\n' +
-      '• `!mcstatus` — check if server is online\n\n' +
       '**🌐 Server**\n' +
       '• `fgx profile` / `fgx stats` / `fgx roster` / `fgx leaderboard`\n' +
       '• `fgx scrims` / `fgx events` / `fgx wars` / `fgx loadout`\n\n' +
@@ -502,84 +494,7 @@ async function handle(client, message) {
         return true;
       }
 
-      case 'mcstart': {
-        const { EmbedBuilder } = require('discord.js');
-        const mcService = require('../../services/minecraft/minecraftService');
-        const { env: mcEnv } = require('../../config/env');
-        const mcHost = mcEnv.MC_SERVER_HOST;
-        const mcPort = Number(mcEnv.MC_SERVER_PORT);
-
-        // Quick check
-        const check = await mcService.queryServer(mcHost, mcPort);
-        if (check.online) {
-          await message.reply({ embeds: [new EmbedBuilder()
-            .setColor(0x00ff00)
-            .setTitle('🟢 Server Already Online!')
-            .setDescription(`**${mcEnv.MC_SERVER_NAME}** is ready!\nIP: \`${mcHost}:${mcPort}\`\nPlayers: ${check.players.online}/${check.players.max}`)
-            .setFooter({ text: BRAND.footer })] });
-          return true;
-        }
-
-        // Try to start via Aternos
-        const startResult = await mcService.startAternos();
-        const embed = new EmbedBuilder()
-          .setColor(startResult.success ? 0x00ff00 : 0xff6600)
-          .setTitle(startResult.success ? '🚀 Server Starting!' : '⚠️ Auto-Start Blocked')
-          .setDescription(startResult.success
-            ? `**${mcEnv.MC_SERVER_NAME}** is starting on Aternos!\nI'll notify when it's online.`
-            : `${startResult.message}\nClick the link to start manually!`)
-          .setFooter({ text: BRAND.footer });
-
-        const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-        const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setLabel('🌐 Start on Aternos')
-            .setURL(startResult.manualUrl || 'https://aternos.org/panel/')
-            .setStyle(ButtonStyle.Link),
-        );
-
-        await message.reply({ embeds: [embed], components: [row] });
-
-        // Start monitoring
-        mcService.startMonitor(message.channel, mcHost, mcPort, 30000, 120);
-        await message.channel.send({ embeds: [new EmbedBuilder()
-          .setColor(0x00aaff)
-          .setTitle('📡 Monitoring Started')
-          .setDescription('I\'ll ping the server every 30s and notify when it\'s online!')
-          .setFooter({ text: BRAND.footer })] });
-        return true;
-      }
-
-      case 'mcstatus': {
-        const mcService = require('../../services/minecraft/minecraftService');
-        const { env: mcEnv } = require('../../config/env');
-        const mcHost = mcEnv.MC_SERVER_HOST;
-        const mcPort = Number(mcEnv.MC_SERVER_PORT);
-        const result = await mcService.queryServer(mcHost, mcPort);
-
-        const { EmbedBuilder } = require('discord.js');
-        if (result.online) {
-          await message.reply({ embeds: [new EmbedBuilder()
-            .setColor(0x00ff00)
-            .setTitle('🟢 Server Online')
-            .setDescription(
-              `**${mcEnv.MC_SERVER_NAME}**\n` +
-              `IP: \`${mcHost}:${mcPort}\`\n` +
-              `Version: ${result.version}\n` +
-              `Players: ${result.players.online}/${result.players.max}\n` +
-              (result.motd ? `MOTD: ${result.motd}` : ''))
-            .setFooter({ text: BRAND.footer })] });
-        } else {
-          await message.reply({ embeds: [new EmbedBuilder()
-            .setColor(0xff0000)
-            .setTitle('🔴 Server Offline')
-            .setDescription(
-              `**${mcEnv.MC_SERVER_NAME}** is offline.\n` +
-              `Type \`!start\` to start the server!`)
-            .setFooter({ text: BRAND.footer })] });
-        }
-        return true;
-      }
+      /* mcstart / mcstatus removed — /minecraft command deleted */
 
       case 'pray': {
         const result = await economy.pray(guildId, userId);
