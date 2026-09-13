@@ -47,10 +47,10 @@ async function shutdown(signal) {
 async function connectDiscord(attempt = 1) {
   try {
     logger.info(`Discord: connecting (attempt ${attempt})...`);
-    // Timeout login after 15s — prevents hanging if gateway is unreachable.
+    // Timeout login after 60s — Render cold-start + Discord gateway can be slow.
     const loginPromise = client.login(env.DISCORD_TOKEN);
     const loginTimeout = new Promise((_, reject) => {
-      setTimeout(() => reject(Object.assign(new Error('Login timed out after 15s'), { code: 'LOGIN_TIMEOUT' })), 15_000);
+      setTimeout(() => reject(Object.assign(new Error('Login timed out after 60s'), { code: 'LOGIN_TIMEOUT' })), 60_000);
     });
     await Promise.race([loginPromise, loginTimeout]);
     logger.info('Discord: logged in successfully');

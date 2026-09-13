@@ -215,12 +215,12 @@ async function createRole(interaction) {
       .setColor(color ?? BRAND.colors.primary)
       .setTitle('✅ Role Created')
       .setDescription(
-        `Created the **${role.name}** role.\\n\\n` +
-          (role.color?.toString(16)?.padStart(6, '0') ? `**Color:** \\`#${role.color.toString(16).padStart(6, '0')}\\``#${role.hexColor}` : '') +
-          (role.hoist ? '\\n**Hoist:** Yes — shown separately in member list' : '') +
-          (role.mentionable ? '\\n**Mentionable:** Yes — @mentionable' : '') +
-          (iconFile ? `\\n**Icon:** Yes — ${iconFile.name}` : '') +
-          `\\n**ID:** \\`${role.id}\\``,
+        'Created the **' + role.name + '** role.' + NL + NL +
+        (role.color?.toString(16)?.padStart(6, '0') ? '> **Color:** `' + role.color.toString(16).padStart(6, '0') + '`' : '') +
+        (role.hoist ? NL + '**Hoist:** Yes - shown separately in member list' : '') +
+        (role.mentionable ? NL + '**Mentionable:** Yes - @mentionable' : '') +
+        (iconFile ? NL + '**Icon:** Yes - ' + iconFile.name : '') +
+        NL + '**ID:** `' +' role.id + '`',
       )
       .setFooter({ text: BRAND.footer })
       .setTimestamp();
@@ -322,13 +322,31 @@ async function roleInfo(interaction) {
     .setColor(role.color?.toString(16)?.padStart(6, '0') ? parseInt(role.color.toString(16).padStart(6, '0'), 16) : BRAND.colors.primary)
     .setTitle(`🎭 ${role.name}`)
     .setDescription(
-      `**ID:** \\`${role.id}\\`\\n` +
-        `**Position:** ${role.position}\\n` +
-        `**Hoist:** ${role.hoist ? 'Yes 🔝' : 'No'}\\n` +
-        `**Mentionable:** ${role.mentionable ? 'Yes @️⃣' : 'No'}\\n` +
-        `**Managed:** ${role.managed ? 'Yes (bot/external)' : 'No'}\\n` +
-        `**Members:** ${count}\\n` +
-        `**Permissions:** \\`${role.permissions.toArray().slice(0, 8).join(', ')}${role.permissions.toArray().length > 8 ? '…' : ''}\\``,
+      '**ID:** `${role.id}`
+
+      '**Position:** ${role.position}`
+
+      '**Hoist:** ${role.hoist ? 'Yes' : 'No'}`
+
+      '**Mentionable:** ${role.mentionable ? 'Yes' : 'No'}`
+
+      '**Managed:** ${role.managed ? 'Yes (bot/external)' : 'No'}`
+
+      '**Members:** ${count}`
+
+      '**Permissions:** `${role.permissions.toArray().slice(0, 8).join(', ')}${role.permissions.toArray().length > 8 ? '...' : ''}`',
+    )
+      '**Managed:** ${role.managed ? 'Yes (bot/external)' : 'No'}`
+
+      '**Members:** ${count}`
+
+      '**Permissions:** `${role.permissions.toArray().slice(0, 8).join(', ')}${role.permissions.toArray().length > 8 ? '...' : ''}`',
+    )
+      '**Managed:** ' + (role.managed ? 'Yes (bot/external)' : 'No') + '
+' +
+      '**Members:** ' + count + '
+' +
+      '**Permissions:** `' + role.permissions.toArray().slice(0, 8).join(', ') + (role.permissions.toArray().length > 8 ? '...' : '') + '`',
     )
     .addFields(
       memberNames ? { name: '👥 Members (first 10)', value: memberNames, inline: false } : null,

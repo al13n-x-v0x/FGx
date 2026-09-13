@@ -474,7 +474,7 @@ function classifyAvatar(username) {
     return 'selfie';
   if (/dog|cat|pet|kitty|puppy|kitten|doggo|floof|buddy|bear|wolf|luna|max|charlie/.test(u))
     return 'pet';
-  if (/gaming|fps|rich|clan|esports|valorant|cod|apex|fortnite|pvp|mm|gg|rank|pro|K/D|kd|hd|gamer/.test(u))
+  if (/gaming|fps|rich|clan|esports|valorant|cod|apex|fortnite|pvp|mm|gg|rank|pro|K\/D|kd|hd|gamer/.test(u))
     return 'gaming';
   if (/brand|official|corp|lt|ceo|co|inc|llc|shop|store|business|coding|dev|software|design|studio/.test(u))
     return 'logo';
