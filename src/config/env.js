@@ -22,8 +22,8 @@ const OPTIONAL_DEFAULTS = {
   // lists for key shuffling and model shuffling.
   AI_API_KEY: '',
   AI_KEYS: '',
-  AI_BASE_URL: 'https://api.openai.com/v1',
-  AI_MODEL: 'gpt-4o-mini',
+  AI_BASE_URL: 'https://openrouter.ai/api/v1',
+  AI_MODEL: 'google/gemini-2.0-flash-001',
   AI_MODELS: '',
   GEMINI_API_KEY: '',
   GEMINI_KEYS: '',

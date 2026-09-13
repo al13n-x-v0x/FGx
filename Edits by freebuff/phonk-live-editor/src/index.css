@@ -1,0 +1,231 @@
+:root {
+  --bg-0: #03050a;
+  --bg-1: #070a12;
+  --bg-2: #0c111e;
+  --border: rgba(120, 150, 255, 0.14);
+  --text: #e7ecff;
+  --muted: #8b97be;
+  --accent: #6f8aff;
+  --accent-2: #2fd6b8;
+  --glass: rgba(20, 28, 52, 0.55);
+  --glow: rgba(111, 138, 255, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(111, 138, 255, 0.12), transparent 60%),
+              radial-gradient(900px 500px at -10% 110%, rgba(47, 214, 184, 0.08), transparent 60%),
+              var(--bg-0);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.freebuff-stage {
+  min-height: 100vh;
+  padding: 18px 22px 26px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 18px;
+  align-content: stretch;
+}
+
+.freebuff-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.freebuff-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.freebuff-mark {
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  font-size: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 60%);
+  border-radius: 6px;
+  padding: 6px 7px;
+  line-height: 0.9;
+}
+
+.freebuff-title {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-size: 20px;
+}
+
+.freebuff-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.freebuff-chip {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  backdrop-filter: blur(8px);
+  transition: color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.freebuff-chip:hover {
+  color: var(--text);
+  border-color: rgba(120, 150, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.freebuff-hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 18px;
+  min-height: 0;
+}
+
+.freebuff-glass {
+  position: relative;
+  padding: 34px 40px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  max-width: 760px;
+  width: 100%;
+  transition: transform 120ms ease-out;
+  will-change: transform;
+}
+
+.freebuff-headline {
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.freebuff-token {
+  font-size: clamp(36px, 8vw, 72px);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: linear-gradient(180deg, #ffffff 0%, #9ab0ff 70%, var(--accent-2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.freebuff-sub {
+  font-size: clamp(12px, 2vw, 15px);
+  letter-spacing: 0.28em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.freebuff-line {
+  margin: 6px 0;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.freebuff-line.muted {
+  color: var(--muted);
+}
+
+.freebuff-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.freebuff-btn {
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 17px;
+  border-radius: 10px;
+  transition: background 140ms ease, transform 100ms ease, box-shadow 140ms ease;
+  letter-spacing: 0.02em;
+}
+
+.freebuff-btn.primary {
+  background: linear-gradient(180deg, #6f8aff, #4c65c8);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(111, 138, 255, 0.35);
+}
+.freebuff-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(111, 138, 255, 0.45);
+}
+.freebuff-btn.primary:active {
+  transform: translateY(0px);
+}
+
+.freebuff-btn.ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.freebuff-btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.freebuff-variant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.freebuff-variant-id {
+  color: var(--accent-2);
+  background: rgba(47,214,184,0.08);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.freebuff-foot {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .freebuff-glass {
+    transition: none;
+  }
+  .freebuff-btn, .freebuff-chip {
+    transition: none;
+  }
+}
+
+/* FREEBUFF checkpoint inject: real motion ecosystem, not a fixed neon toy. */

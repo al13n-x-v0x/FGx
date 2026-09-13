@@ -21,15 +21,19 @@ services:
       - key: MC_SERVER_NAME
         value: FGxx Aternos Server
       - key: AI_PROVIDER
-        value: groq
-      - key: GROQ_API_KEY
+        value: gemini
+        sync: false
+      - key: GEMINI_API_KEY
         value: ''
-      - key: GROQ_MODEL
-        value: llama-3.3-70b-versatile
-      - key: HF_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: OPENROUTER_API_KEY
         value: ''
-      - key: HF_MODEL
-        value: 'mistralai/Mistral-7B-Instruct-v0.3'
+        sync: false
+      - key: GUILD_ID
+        value: ''
+        sync: false
       - key: ATERNOS_USERNAME
         sync: false
       - key: ATERNOS_PASSWORD

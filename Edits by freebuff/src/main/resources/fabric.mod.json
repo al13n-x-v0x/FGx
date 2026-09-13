@@ -1,0 +1,31 @@
+{
+    "schemaVersion": 1,
+    "id": "fgx-smp-mod",
+    "version": "${version}",
+    "name": "FGX SMP Server Mod",
+    "description": "The ultimate server mod for FGX SMP - welcome messages, custom chat, scoreboard, economy, claims, warps, shops, jobs, bounties, graves, holograms, map images, and more.",
+    "authors": [
+        "FGX Team"
+    ],
+    "contact": {
+        "homepage": "https://fgx.gg",
+        "sources": "https://github.com/fgx-smp/fgx-smp-mod"
+    },
+    "license": "MIT",
+    "icon": "assets/fgx-smp/icon.png",
+    "environment": "server",
+    "entrypoints": {
+        "server": [
+            "com.fgx.server.FGXServerMod"
+        ]
+    },
+    "mixins": [
+        "fgx-smp-server.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.19.0",
+        "minecraft": "~26.2",
+        "java": ">=21",
+        "fabric-api": "*"
+    }
+}

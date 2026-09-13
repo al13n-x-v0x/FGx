@@ -1,0 +1,4 @@
+# Freebuff Desktop workspace scaffold
+.freebuff/
+build/
+.gradle/
