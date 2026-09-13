@@ -440,6 +440,7 @@ async function handle(client, message) {
 
       case 'giverole': {
         const { EmbedBuilder } = require('discord.js');
+        const roleService = require('../../services/community/roleService');
         const roleId = parsed.roleId ? parsed.roleId.replace(/<@&|>/g, '') : null;
         const targetId = parsed.targetId ?? userId;
         const role = message.guild.roles.cache.get(roleId);
@@ -447,27 +448,29 @@ async function handle(client, message) {
           await message.reply({ embeds: [views.warnEmbed('Role not found', 'That role does not exist in this server.')] });
           return true;
         }
-        if (!message.member.permissions.has(PermissionFlagsBits.ManageRoles) && message.member.roles.highest?.position <= (message.guild.members.me?.roles.highest?.position ?? 0)) {
-          await message.reply({ embeds: [views.warnEmbed('Not allowed', 'Only staff with Manage Roles or a higher role than the bot can use this.')] });
-          return true;
-        }
         const target = message.mentions.users.get(targetId) ?? message.author;
         const targetMember = message.guild.members.cache.get(targetId) ?? await message.guild.members.fetch(targetId).catch(() => null);
-        // Protected check
-        const tName = (targetMember?.user?.username ?? target.username).toLowerCase();
-        const isProtected = tName.includes('al13n') || tName.includes('vox.dev');
-        if (isProtected) {
+        const giver = message.member;
+        if (!roleService.canAssignRole(message.guild, giver, role, targetMember ?? target)) {
+          // Give a specific refusal message depending on what failed.
+          const botMember = message.guild.members.me;
+          const botTop = botMember?.roles.highest?.position ?? 0;
+          const actorTop = giver.roles.highest?.position ?? 0;
+          const isAdmin = giver.permissions.has(PermissionFlagsBits.ManageRoles) || giver.permissions.has(PermissionFlagsBits.Administrator);
+          if (!botMember?.permissions.has(PermissionFlagsBits.ManageRoles)) {
+            await message.reply({ embeds: [views.warnEmbed('Bot cannot manage roles', 'The FGx bot does not have the Manage Roles permission in this server.')] });
+            return true;
+          }
+          if (botTop <= role.position) {
+            await message.reply({ embeds: [views.warnEmbed('Bot too low', 'Move the FGx bot role above the role you want to give.')] });
+            return true;
+          }
+          if (!isAdmin && message.author.id !== message.guild.ownerId && role.position >= actorTop) {
+            await message.reply({ embeds: [views.warnEmbed('Not allowed', 'Only the server owner, administrators, or staff with a role higher than the role you want to give can use this.')] });
+            return true;
+          }
+          // Protected person (al13n / vox.dev).
           await message.reply({ embeds: [{ color: 0xFFD700, title: '👑 PROTECTED PERSON', description: '> That is al13n! I will NOT touch their roles. They are untouchable. Back the fuck off. 👑', footer: { text: BRAND.footer } }] });
-          return true;
-        }
-        // Bot hierarchy
-        const botTop = message.guild.members.me?.roles.highest?.position ?? 0;
-        if (botTop <= role.position) {
-          await message.reply({ embeds: [views.warnEmbed('Bot too low', 'Move the FGx bot role above the role you want to give.')] });
-          return true;
-        }
-        if (targetMember && targetMember.roles.highest?.position >= role.position) {
-          await message.reply({ embeds: [views.warnEmbed('Already has it', 'That person already has a role at or above the one you are trying to give.')] });
           return true;
         }
         await targetMember.roles.add(role);

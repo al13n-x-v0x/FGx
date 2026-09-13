@@ -4,18 +4,7 @@
 
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { BRAND } = require('../../config/constants');
-
-// Protected usernames — never let anyone give these roles away
-const PROTECTED_USERNAMES = ['al13n', 'vox.dev'];
-
-/**
- * Find the bot's highest role position in the guild (used for hierarchy check).
- */
-function botTopPosition(guild) {
-  const bot = guild.members.me;
-  if (!bot || !bot.roles?.cache?.size) return 0;
-  return bot.roles.highest.position;
-}
+const { canAssignRole } = require('../../services/community/roleService');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -39,42 +28,47 @@ module.exports = {
       return;
     }
 
-    // ── Permission check ──────────────────────────────────────────────
-    // Allow: server owner, administrators, or members who already have a
-    // role higher than the bot (so staff can use it too).
+    // Resolve the giver (actor) so we can check role hierarchy + ownership.
     const actor = guild.members.cache.get(interaction.user.id) ?? await guild.members.fetch(interaction.user.id).catch(() => null);
     if (!actor) {
       await interaction.reply({ content: 'I couldn\'t find you in the server cache. Try again.', ephemeral: true });
       return;
     }
 
-    const botTop = botTopPosition(guild);
-    const isAdmin = actor.permissions.has(PermissionFlagsBits.ManageRoles) || actor.permissions.has(PermissionFlagsBits.Administrator);
-    const isOwner = actor.id === guild.ownerId;
-    const actorTop = actor.roles.highest?.position ?? 0;
-    const allowed = isAdmin || isOwner || actorTop > botTop;
-
-    if (!allowed) {
-      await interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(0xed4245)
-            .setTitle('🚫 Not Allowed')
-            .setDescription(
-              'Only the **server owner**, **administrators**, or staff with a role **higher than the FGx bot** can use this command.',
-            )
-            .setFooter({ text: BRAND.footer }),
-        ],
-        ephemeral: true,
-      });
-      return;
-    }
-
-    // ── Protected-person check ────────────────────────────────────────
+    // Resolve the target member.
     const targetMember = guild.members.cache.get(target.id) ?? await guild.members.fetch(target.id).catch(() => null);
-    const targetName = targetMember?.user?.username?.toLowerCase() ?? target.username.toLowerCase();
-    const isProtected = PROTECTED_USERNAMES.some((p) => targetName.includes(p));
-    if (isProtected) {
+
+    // Centralized permission/protect/hierarchy check.
+    if (!canAssignRole(guild, actor, role, targetMember ?? target)) {
+      // Figure out which check failed, so we can give a specific message.
+      const botMember = guild.members.me;
+      const actorTop = actor.roles.highest?.position ?? 0;
+      const botTop = botMember?.roles.highest?.position ?? 0;
+      const isAdmin = actor.permissions.has(PermissionFlagsBits.ManageRoles) || actor.permissions.has(PermissionFlagsBits.Administrator);
+      const isOwner = actor.id === guild.ownerId;
+
+      if (!botMember?.permissions.has(PermissionFlagsBits.ManageRoles)) {
+        await interaction.reply({
+          embeds: [new EmbedBuilder().setColor(0xed4245).setTitle('🚫 Bot Cannot Manage Roles').setDescription('The FGx bot does not have the Manage Roles permission in this server.').setFooter({ text: BRAND.footer })],
+          ephemeral: true,
+        });
+        return;
+      }
+      if (botTop <= role.position) {
+        await interaction.reply({
+          embeds: [new EmbedBuilder().setColor(0xed4245).setTitle('🚫 Bot Too Low').setDescription("I can only give roles that are **below my highest role**. Move the FGx bot role above the role you want to give.").setFooter({ text: BRAND.footer })],
+          ephemeral: true,
+        });
+        return;
+      }
+      if (!isAdmin && !isOwner && role.position >= actorTop) {
+        await interaction.reply({
+          embeds: [new EmbedBuilder().setColor(0xed4245).setTitle('🚫 Not Allowed').setDescription('Only the **server owner**, **administrators**, or staff with a role **higher than the role you want to give** can use this command.').setFooter({ text: BRAND.footer })],
+          ephemeral: true,
+        });
+        return;
+      }
+      // Failed for a protected-person reason (al13n / vox.dev).
       const refusals = [
         "Nah fam, that is al13n! I will NOT touch their roles. They are untouchable. Back the fuck off. 👑",
         "That is al13n! I do NOT mess with their roles. Try someone else, bitch. 👑",
@@ -86,50 +80,7 @@ module.exports = {
       ];
       const refusal = refusals[Math.floor(Math.random() * refusals.length)];
       await interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(0xFFD700)
-            .setTitle('👑 PROTECTED PERSON')
-            .setDescription(`> ${refusal}`)
-            .addFields(
-              { name: '🛡️ Who', value: `<@${target.id}>`, inline: true },
-              { name: '🔒 Status', value: 'Untouchable — protected by FGx', inline: true },
-            )
-            .setFooter({ text: BRAND.footer }),
-        ],
-        ephemeral: true,
-      });
-      return;
-    }
-
-    // ── Bot hierarchy check ───────────────────────────────────────────
-    const targetTop = targetMember?.roles.highest?.position ?? 0;
-    if (botTop <= role.position) {
-      await interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(0xed4245)
-            .setTitle('🚫 Bot Too Low')
-            .setDescription(
-              "I can only give roles that are **below my highest role**. Move the FGx bot role above the role you want to give.",
-            )
-            .setFooter({ text: BRAND.footer }),
-        ],
-        ephemeral: true,
-      });
-      return;
-    }
-    if (targetTop >= role.position) {
-      await interaction.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(0xed4245)
-            .setTitle('🚫 Already Has It / Higher')
-            .setDescription(
-              "That person already has a role at or above the one you're trying to give. You can only give roles **lower** than their highest role.",
-            )
-            .setFooter({ text: BRAND.footer }),
-        ],
+        embeds: [new EmbedBuilder().setColor(0xFFD700).setTitle('👑 PROTECTED PERSON').setDescription(`> ${refusal}`).addFields({ name: '🛡️ Who', value: `<@${target.id}>`, inline: true }, { name: '🔒 Status', value: 'Untouchable — protected by FGx', inline: true }).setFooter({ text: BRAND.footer })],
         ephemeral: true,
       });
       return;
