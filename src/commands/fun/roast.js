@@ -754,7 +754,7 @@ const roastListCmd = {
     // Ephemeral summary
     const total = pages.length;
     await interaction.editReply({
-      content: `✅ Sent **${total}** roast pages to the channel. ${total > 50 ? 'That's a LOT of roasts.' : 'Small collection but pure heat.'}`,
+      content: `✅ Sent **${total}** roast pages to the channel. ${total > 50 ? 'That is a LOT of roasts.' : 'Small collection but pure heat.'}`,
       ephemeral: true,
     });
   },
