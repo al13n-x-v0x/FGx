@@ -199,13 +199,7 @@ function parseCommand(line, mentionIds = []) {
   if (cmd === 'ai') {
     return { type: 'ai', prompt: rest.join(' ').trim() };
   }
-  /* /minecraft chat commands removed */
-  if (cmd === 'trick' || cmd === 'ai') {
-    const trickCmd = (rest[0] || '').toLowerCase();
-    const trickUser = mentionIds[0] || null;
-    const trickText = rest.slice(1).join(' ').trim();
-    return { type: 'trick', trick: trickCmd || 'roast', targetId: trickUser, text: trickText };
-  }
+
   if (socialService.KINDS.includes(cmd)) {
     return { type: 'social', kind: cmd, targetId: mentionIds[0] ?? null };
   }
@@ -229,14 +223,7 @@ function parseCommand(line, mentionIds = []) {
     return { type: 'history', targetId: mentionIds[0] ?? null, count };
   }
 
-  if (cmd === 'giverole' || cmd === 'give-role' || cmd === 'giverole') {
-    const roleId = rest.find((t) => /^<@&\d+>$/.test(t));
-    const targetId = mentionIds[0] ?? null;
-    if (!roleId) {
-      return { type: 'unknown', raw: line };
-    }
-    return { type: 'giverole', roleId, targetId };
-  }
+
 
   if (cmd === 'profile') {
     return { type: 'profile', targetId: mentionIds[0] ?? null };
@@ -288,9 +275,7 @@ function helpEmbed() {
       '• `!choose a | b | c` — random pick\n' +
       '• `!ship @user` — love compatibility\n' +
       '• `!rate <thing>` — rate anything 0-10\n' +
-      '• `!trick roast @user` / `!trick predict @user` — AI tricks with GIFs\n' +
-      '• `!trick poem @user` / `!trick pickup @user` / `!trick translate <text>`\n' +
-      '• `!trick debate <topic>` / `!trick story <topic>` / `!trick simulate <what>`\n\n' +
+
       '**🎲 Party Games**\n' +
       '• `!wyr` — Would You Rather\n' +
       '• `!nhie` — Never Have I Ever\n' +
@@ -438,46 +423,7 @@ async function handle(client, message) {
         return true;
       }
 
-      case 'giverole': {
-        const { EmbedBuilder } = require('discord.js');
-        const roleService = require('../../services/community/roleService');
-        const roleId = parsed.roleId ? parsed.roleId.replace(/<@&|>/g, '') : null;
-        const targetId = parsed.targetId ?? userId;
-        const role = message.guild.roles.cache.get(roleId);
-        if (!role) {
-          await message.reply({ embeds: [views.warnEmbed('Role not found', 'That role does not exist in this server.')] });
-          return true;
-        }
-        const target = message.mentions.users.get(targetId) ?? message.author;
-        const targetMember = message.guild.members.cache.get(targetId) ?? await message.guild.members.fetch(targetId).catch(() => null);
-        const giver = message.member;
-        if (!roleService.canAssignRole(message.guild, giver, role, targetMember ?? target)) {
-          // Give a specific refusal message depending on what failed.
-          const botMember = message.guild.members.me;
-          const botTop = botMember?.roles.highest?.position ?? 0;
-          const actorTop = giver.roles.highest?.position ?? 0;
-          const isAdmin = giver.permissions.has(PermissionFlagsBits.ManageRoles) || giver.permissions.has(PermissionFlagsBits.Administrator);
-          if (!botMember?.permissions.has(PermissionFlagsBits.ManageRoles)) {
-            await message.reply({ embeds: [views.warnEmbed('Bot cannot manage roles', 'The FGx bot does not have the Manage Roles permission in this server.')] });
-            return true;
-          }
-          if (botTop <= role.position) {
-            await message.reply({ embeds: [views.warnEmbed('Bot too low', 'Move the FGx bot role above the role you want to give.')] });
-            return true;
-          }
-          if (!isAdmin && message.author.id !== message.guild.ownerId && role.position >= actorTop) {
-            await message.reply({ embeds: [views.warnEmbed('Not allowed', 'Only the server owner, administrators, or staff with a role higher than the role you want to give can use this.')] });
-            return true;
-          }
-          // Protected person (al13n / vox.dev).
-          await message.reply({ embeds: [{ color: 0xFFD700, title: '👑 PROTECTED PERSON', description: '> That is al13n! I will NOT touch their roles. They are untouchable. Back the fuck off. 👑', footer: { text: BRAND.footer } }] });
-          return true;
-        }
-        await targetMember.roles.add(role);
-        const isSelf = targetId === userId;
-        await message.reply({ embeds: [new EmbedBuilder().setColor(0x2fbf71).setTitle(isSelf ? '✅ Role Given to You' : '✅ Role Given').setDescription(isSelf ? `You now have the **${role.name}** role.` : `You gave **${role.name}** to ${targetMember ? targetMember.user.tag : target.tag}.`).addFields({ name: '🎭 Role', value: `<@&${role.id}>`, inline: true }, { name: '👤 Recipient', value: targetMember ? targetMember.user.tag : target.tag, inline: true }).setFooter({ text: BRAND.footer })] });
-        return true;
-      }
+
 
       case 'zoo': {
         const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) ?? message.author : message.author;
@@ -497,7 +443,7 @@ async function handle(client, message) {
         return true;
       }
 
-      /* mcstart / mcstatus removed — /minecraft command deleted */
+
 
       case 'pray': {
         const result = await economy.pray(guildId, userId);
@@ -581,48 +527,7 @@ async function handle(client, message) {
         return true;
       }
 
-      case 'trick': {
-        const { EmbedBuilder } = require('discord.js');
-        const assistant = require('../../services/ai/assistant');
-        const trick = parsed.trick || 'roast';
-        const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) : null;
-        const text = parsed.text || '';
-        const targetName = target ? target.username : message.author.username;
 
-        const prompts = {
-          roast: { sys: `Savage roast comedian. Roast ${targetName} in one line max 120 chars. Swearing OK. No markdown.`, prompt: `Roast ${targetName} HARD` },
-          compliment: { sys: `Sweet person. Give ${targetName} a heartwarming compliment max 120 chars.`, prompt: `Compliment ${targetName}` },
-          insult: { sys: `Savage roaster. Insult ${targetName} in one line max 100 chars. Funny, not cruel.`, prompt: `Insult ${targetName}` },
-          predict: { sys: `Mystical fortune teller. Predict ${targetName}'s future max 150 chars with emojis.`, prompt: `Predict ${targetName}'s future` },
-          pickup: { sys: `Smoothest person alive. Cheesy pickup line for ${targetName} max 100 chars.`, prompt: `Pickup line for ${targetName}` },
-          poem: { sys: `Poet. Write a funny 4-line poem about ${targetName}. Max 200 chars.`, prompt: `Poem about ${targetName}` },
-          fortune: { sys: `Fortune teller. Cryptic fun fortune for ${targetName} max 150 chars with emojis.`, prompt: `Fortune for ${targetName}` },
-          translate: { sys: `Translator. Translate to pirate language. Beep boop pirate speak.`, prompt: `Translate to pirate: ${text || 'hello friend'}` },
-          debate: { sys: `Debate champion. Argue FOR or AGAINST a topic max 200 chars.`, prompt: `Debate: ${text || 'pineapple on pizza'}` },
-          story: { sys: `Fiction writer. Short funny story max 300 chars about: ${text || 'a gamer'}`, prompt: `Story about: ${text || 'a gamer'}` },
-          roastbattle: { sys: `Roast battle host. Roast TWO users alternating lines max 300 chars.`, prompt: `Roast battle: ${targetName} vs everyone` },
-          simulate: { sys: `Dramatic narrator. Describe: ${text || 'a gaming moment'} max 250 chars with emojis.`, prompt: `Simulate: ${text || 'a gaming moment'}` },
-        };
-
-        const trickData = prompts[trick] || prompts.roast;
-        try {
-          const response = await assistant.chat(trickData.prompt, { system: trickData.sys, user: message.author.username, guild: message.guild?.name });
-          const colors = { roast: 0xFF4500, compliment: 0xFF69B4, insult: 0x8B0000, predict: 0x9B59B6, pickup: 0xFF69B4, poem: 0x3498DB, fortune: 0x9B59B6, translate: 0xE67E22, debate: 0x2ECC71, story: 0x1ABC9C, simulate: 0xF39C12 };
-          const emojis = { roast: '🔥', compliment: '💜', insult: '💀', predict: '🔮', pickup: '💘', poem: '📝', fortune: '🔮', translate: '🌍', debate: '🔥', story: '📖', simulate: '🎭' };
-          const embed = new EmbedBuilder()
-            .setColor(colors[trick] || 0x00ff00)
-            .setTitle(`${emojis[trick] || '✨'} ${trick.charAt(0).toUpperCase() + trick.slice(1)}: ${targetName}`)
-            .setDescription(response?.slice(0, 2000) || 'AI got shy... try again!')
-            .setThumbnail(target?.displayAvatarURL({ size: 64 }))
-            .setFooter({ text: BRAND.footer })
-            .setTimestamp();
-          await message.reply({ embeds: [embed] });
-        } catch (err) {
-          const text = err.safe ? err.message : '❌ AI is taking a break... try again!';
-          await message.reply({ embeds: [views.warnEmbed('AI Trick', text)] }).catch(() => {});
-        }
-        return true;
-      }
 
       case 'socialStats': {
         const target = parsed.targetId ? message.mentions.users.get(parsed.targetId) ?? message.author : message.author;

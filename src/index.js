@@ -116,7 +116,7 @@ async function main() {
       id: client.user?.id,
     });
 
-    // (Minecraft auto-monitor removed — /minecraft command deleted)
+
   });
 
   // Catch gateway errors to prevent silent failures.
@@ -153,9 +153,7 @@ async function main() {
     logger.error('DISCORD_TOKEN is missing or invalid — bot cannot connect to Discord');
   }
 
-  // Bind MC start credentials to the client for the /minecraft embed
-  client[Symbol.for('mcServerId')] = env.ATERNOS_USERNAME || 'FGXstart';
-  client[Symbol.for('mcServerPass')] = env.ATERNOS_PASSWORD || 'FGXBLOXSTRIKE';
+
 }
 
 main().catch((err) => {
