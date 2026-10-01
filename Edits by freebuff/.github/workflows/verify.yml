@@ -1,0 +1,19 @@
+name: verify
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  strike-zero:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax check (build script + map data)
+        run: node --check strike-zero/build.js && node --check strike-zero/map.js
+      - name: Build place file (XML well-formed, unique referents, script parents, Lua balance)
+        working-directory: strike-zero
+        run: node build.js

@@ -1,0 +1,4120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+  <Meta name="ExplicitAutoJoints">true</Meta>
+  <Item class="Workspace" referent="RBX0">
+    <Properties>
+      <string name="Name">Workspace</string>
+    </Properties>
+    <Item class="Model" referent="RBX1">
+      <Properties>
+        <string name="Name">StrikeMap</string>
+      </Properties>
+      <Item class="Part" referent="RBX2">
+        <Properties>
+          <string name="Name">Floor</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>-2</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>190</X><Y>4</Y><Z>130</Z></Vector3>
+          <Vector3 name="Size"><X>190</X><Y>4</Y><Z>130</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4291676868</Color3uint8><Color3uint8 name="Color">4291676868</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX3">
+        <Properties>
+          <string name="Name">Wall_N</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>15</Y><Z>-65</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>190</X><Y>30</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>190</X><Y>30</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282401352</Color3uint8><Color3uint8 name="Color">4282401352</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX4">
+        <Properties>
+          <string name="Name">Wall_S</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>15</Y><Z>65</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>190</X><Y>30</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>190</X><Y>30</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282401352</Color3uint8><Color3uint8 name="Color">4282401352</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX5">
+        <Properties>
+          <string name="Name">Wall_W</string>
+          <CoordinateFrame name="CFrame"><X>-95</X><Y>15</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>30</Y><Z>134</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>30</Y><Z>134</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282401352</Color3uint8><Color3uint8 name="Color">4282401352</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX6">
+        <Properties>
+          <string name="Name">Wall_E</string>
+          <CoordinateFrame name="CFrame"><X>95</X><Y>15</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>30</Y><Z>134</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>30</Y><Z>134</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282401352</Color3uint8><Color3uint8 name="Color">4282401352</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX7">
+        <Properties>
+          <string name="Name">SpawnFloor_FROST</string>
+          <CoordinateFrame name="CFrame"><X>-82</X><Y>0.2</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>24</X><Y>0.4</Y><Z>44</Z></Vector3>
+          <Vector3 name="Size"><X>24</X><Y>0.4</Y><Z>44</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282417874</Color3uint8><Color3uint8 name="Color">4282417874</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">272</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX8">
+        <Properties>
+          <string name="Name">SpawnFloor_BLAZE</string>
+          <CoordinateFrame name="CFrame"><X>82</X><Y>0.2</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>24</X><Y>0.4</Y><Z>44</Z></Vector3>
+          <Vector3 name="Size"><X>24</X><Y>0.4</Y><Z>44</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4293624370</Color3uint8><Color3uint8 name="Color">4293624370</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">272</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX9">
+        <Properties>
+          <string name="Name">DivW_N</string>
+          <CoordinateFrame name="CFrame"><X>-70</X><Y>15</Y><Z>-36.5</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>30</Y><Z>57</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>30</Y><Z>57</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282401352</Color3uint8><Color3uint8 name="Color">4282401352</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX10">
+        <Properties>
+          <string name="Name">DivW_S</string>
+          <CoordinateFrame name="CFrame"><X>-70</X><Y>15</Y><Z>36.5</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>30</Y><Z>57</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>30</Y><Z>57</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282401352</Color3uint8><Color3uint8 name="Color">4282401352</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX11">
+        <Properties>
+          <string name="Name">DivE_N</string>
+          <CoordinateFrame name="CFrame"><X>70</X><Y>15</Y><Z>-36.5</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>30</Y><Z>57</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>30</Y><Z>57</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282401352</Color3uint8><Color3uint8 name="Color">4282401352</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX12">
+        <Properties>
+          <string name="Name">DivE_S</string>
+          <CoordinateFrame name="CFrame"><X>70</X><Y>15</Y><Z>36.5</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>30</Y><Z>57</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>30</Y><Z>57</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4282401352</Color3uint8><Color3uint8 name="Color">4282401352</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX13">
+        <Properties>
+          <string name="Name">LaneN_W</string>
+          <CoordinateFrame name="CFrame"><X>-35</X><Y>7</Y><Z>-22</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>42</X><Y>14</Y><Z>3</Z></Vector3>
+          <Vector3 name="Size"><X>42</X><Y>14</Y><Z>3</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4283059284</Color3uint8><Color3uint8 name="Color">4283059284</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX14">
+        <Properties>
+          <string name="Name">LaneN_E</string>
+          <CoordinateFrame name="CFrame"><X>35</X><Y>7</Y><Z>-22</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>42</X><Y>14</Y><Z>3</Z></Vector3>
+          <Vector3 name="Size"><X>42</X><Y>14</Y><Z>3</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4283059284</Color3uint8><Color3uint8 name="Color">4283059284</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX15">
+        <Properties>
+          <string name="Name">LaneS_W</string>
+          <CoordinateFrame name="CFrame"><X>-35</X><Y>7</Y><Z>22</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>42</X><Y>14</Y><Z>3</Z></Vector3>
+          <Vector3 name="Size"><X>42</X><Y>14</Y><Z>3</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4283059284</Color3uint8><Color3uint8 name="Color">4283059284</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX16">
+        <Properties>
+          <string name="Name">LaneS_E</string>
+          <CoordinateFrame name="CFrame"><X>35</X><Y>7</Y><Z>22</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>42</X><Y>14</Y><Z>3</Z></Vector3>
+          <Vector3 name="Size"><X>42</X><Y>14</Y><Z>3</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4283059284</Color3uint8><Color3uint8 name="Color">4283059284</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX17">
+        <Properties>
+          <string name="Name">LaneP_N</string>
+          <CoordinateFrame name="CFrame"><X>-14</X><Y>7</Y><Z>-35</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>3</X><Y>14</Y><Z>18</Z></Vector3>
+          <Vector3 name="Size"><X>3</X><Y>14</Y><Z>18</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4283059284</Color3uint8><Color3uint8 name="Color">4283059284</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX18">
+        <Properties>
+          <string name="Name">LaneP_S</string>
+          <CoordinateFrame name="CFrame"><X>14</X><Y>7</Y><Z>35</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>3</X><Y>14</Y><Z>18</Z></Vector3>
+          <Vector3 name="Size"><X>3</X><Y>14</Y><Z>18</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4283059284</Color3uint8><Color3uint8 name="Color">4283059284</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX19">
+        <Properties>
+          <string name="Name">MidPlatform</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>2</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>36</X><Y>4</Y><Z>24</Z></Vector3>
+          <Vector3 name="Size"><X>36</X><Y>4</Y><Z>24</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4289900456</Color3uint8><Color3uint8 name="Color">4289900456</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX20">
+        <Properties>
+          <string name="Name">Ramp_N</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>2.46</Y><Z>-17</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>0.9271838545667874</R11><R12>0.374606593415912</R12><R20>0</R20><R21>-0.374606593415912</R21><R22>0.9271838545667874</R22></CoordinateFrame>
+          <Vector3 name="size"><X>12</X><Y>1</Y><Z>10.6</Z></Vector3>
+          <Vector3 name="Size"><X>12</X><Y>1</Y><Z>10.6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4289900456</Color3uint8><Color3uint8 name="Color">4289900456</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX21">
+        <Properties>
+          <string name="Name">Ramp_S</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>2.46</Y><Z>17</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>0.9271838545667874</R11><R12>-0.374606593415912</R12><R20>0</R20><R21>0.374606593415912</R21><R22>0.9271838545667874</R22></CoordinateFrame>
+          <Vector3 name="size"><X>12</X><Y>1</Y><Z>10.6</Z></Vector3>
+          <Vector3 name="Size"><X>12</X><Y>1</Y><Z>10.6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4289900456</Color3uint8><Color3uint8 name="Color">4289900456</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX22">
+        <Properties>
+          <string name="Name">MidStripe</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>4.1</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>40</X><Y>0.2</Y><Z>2</Z></Vector3>
+          <Vector3 name="Size"><X>40</X><Y>0.2</Y><Z>2</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4293314650</Color3uint8><Color3uint8 name="Color">4293314650</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">272</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX23">
+        <Properties>
+          <string name="Name">Platform_Crate1</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>7</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX24">
+        <Properties>
+          <string name="Name">Platform_Crate2</string>
+          <CoordinateFrame name="CFrame"><X>-9</X><Y>7</Y><Z>-6</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX25">
+        <Properties>
+          <string name="Name">Platform_Crate3</string>
+          <CoordinateFrame name="CFrame"><X>9</X><Y>7</Y><Z>6</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX26">
+        <Properties>
+          <string name="Name">Tower_W</string>
+          <CoordinateFrame name="CFrame"><X>-48</X><Y>6</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>14</X><Y>2</Y><Z>20</Z></Vector3>
+          <Vector3 name="Size"><X>14</X><Y>2</Y><Z>20</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4285033072</Color3uint8><Color3uint8 name="Color">4285033072</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="TrussPart" referent="RBX27">
+        <Properties>
+          <string name="Name">Truss_W</string>
+          <CoordinateFrame name="CFrame"><X>-56.5</X><Y>4</Y><Z>6</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>2</X><Y>8</Y><Z>2</Z></Vector3>
+          <Vector3 name="Size"><X>2</X><Y>8</Y><Z>2</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4285033072</Color3uint8><Color3uint8 name="Color">4285033072</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX28">
+        <Properties>
+          <string name="Name">Tower_E</string>
+          <CoordinateFrame name="CFrame"><X>48</X><Y>6</Y><Z>0</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>14</X><Y>2</Y><Z>20</Z></Vector3>
+          <Vector3 name="Size"><X>14</X><Y>2</Y><Z>20</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4285033072</Color3uint8><Color3uint8 name="Color">4285033072</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="TrussPart" referent="RBX29">
+        <Properties>
+          <string name="Name">Truss_E</string>
+          <CoordinateFrame name="CFrame"><X>56.5</X><Y>4</Y><Z>6</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>2</X><Y>8</Y><Z>2</Z></Vector3>
+          <Vector3 name="Size"><X>2</X><Y>8</Y><Z>2</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4285033072</Color3uint8><Color3uint8 name="Color">4285033072</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX30">
+        <Properties>
+          <string name="Name">Crate_N1</string>
+          <CoordinateFrame name="CFrame"><X>-40</X><Y>3</Y><Z>-40</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX31">
+        <Properties>
+          <string name="Name">Crate_N2</string>
+          <CoordinateFrame name="CFrame"><X>-20</X><Y>3</Y><Z>-52</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX32">
+        <Properties>
+          <string name="Name">Crate_N3</string>
+          <CoordinateFrame name="CFrame"><X>5</X><Y>3</Y><Z>-34</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX33">
+        <Properties>
+          <string name="Name">Crate_N4</string>
+          <CoordinateFrame name="CFrame"><X>30</X><Y>1.5</Y><Z>-46</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>3</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>3</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX34">
+        <Properties>
+          <string name="Name">Crate_N5</string>
+          <CoordinateFrame name="CFrame"><X>45</X><Y>3</Y><Z>-33</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX35">
+        <Properties>
+          <string name="Name">Barrier_N</string>
+          <CoordinateFrame name="CFrame"><X>3</X><Y>2</Y><Z>-58</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>16</X><Y>4</Y><Z>2</Z></Vector3>
+          <Vector3 name="Size"><X>16</X><Y>4</Y><Z>2</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4283059284</Color3uint8><Color3uint8 name="Color">4283059284</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX36">
+        <Properties>
+          <string name="Name">Crate_S1</string>
+          <CoordinateFrame name="CFrame"><X>40</X><Y>3</Y><Z>40</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX37">
+        <Properties>
+          <string name="Name">Crate_S2</string>
+          <CoordinateFrame name="CFrame"><X>20</X><Y>3</Y><Z>52</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX38">
+        <Properties>
+          <string name="Name">Crate_S3</string>
+          <CoordinateFrame name="CFrame"><X>-5</X><Y>3</Y><Z>34</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX39">
+        <Properties>
+          <string name="Name">Crate_S4</string>
+          <CoordinateFrame name="CFrame"><X>-30</X><Y>1.5</Y><Z>46</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>3</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>3</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX40">
+        <Properties>
+          <string name="Name">Crate_S5</string>
+          <CoordinateFrame name="CFrame"><X>-45</X><Y>3</Y><Z>33</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX41">
+        <Properties>
+          <string name="Name">Barrier_S</string>
+          <CoordinateFrame name="CFrame"><X>-3</X><Y>2</Y><Z>58</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>16</X><Y>4</Y><Z>2</Z></Vector3>
+          <Vector3 name="Size"><X>16</X><Y>4</Y><Z>2</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4283059284</Color3uint8><Color3uint8 name="Color">4283059284</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">816</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX42">
+        <Properties>
+          <string name="Name">Crate_M1</string>
+          <CoordinateFrame name="CFrame"><X>-30</X><Y>3</Y><Z>-10</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX43">
+        <Properties>
+          <string name="Name">Crate_M2</string>
+          <CoordinateFrame name="CFrame"><X>30</X><Y>3</Y><Z>10</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>6</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX44">
+        <Properties>
+          <string name="Name">Crate_M3</string>
+          <CoordinateFrame name="CFrame"><X>-24</X><Y>1.5</Y><Z>8</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>3</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>3</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX45">
+        <Properties>
+          <string name="Name">Crate_M4</string>
+          <CoordinateFrame name="CFrame"><X>24</X><Y>1.5</Y><Z>-8</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>3</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>3</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4284506728</Color3uint8><Color3uint8 name="Color">4284506728</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">1088</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX46">
+        <Properties>
+          <string name="Name">LaneStripe_N</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>0.1</Y><Z>-42</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>2</X><Y>0.2</Y><Z>40</Z></Vector3>
+          <Vector3 name="Size"><X>2</X><Y>0.2</Y><Z>40</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4293314650</Color3uint8><Color3uint8 name="Color">4293314650</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">272</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX47">
+        <Properties>
+          <string name="Name">LaneStripe_S</string>
+          <CoordinateFrame name="CFrame"><X>0</X><Y>0.1</Y><Z>42</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>2</X><Y>0.2</Y><Z>40</Z></Vector3>
+          <Vector3 name="Size"><X>2</X><Y>0.2</Y><Z>40</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4293314650</Color3uint8><Color3uint8 name="Color">4293314650</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">272</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX48">
+        <Properties>
+          <string name="Name">Spawn_FROST_1</string>
+          <CoordinateFrame name="CFrame"><X>-86</X><Y>1</Y><Z>-12</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4294967295</Color3uint8><Color3uint8 name="Color">4294967295</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX49">
+        <Properties>
+          <string name="Name">Spawn_FROST_2</string>
+          <CoordinateFrame name="CFrame"><X>-86</X><Y>1</Y><Z>12</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4294967295</Color3uint8><Color3uint8 name="Color">4294967295</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX50">
+        <Properties>
+          <string name="Name">Spawn_FROST_3</string>
+          <CoordinateFrame name="CFrame"><X>-78</X><Y>1</Y><Z>-6</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4294967295</Color3uint8><Color3uint8 name="Color">4294967295</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX51">
+        <Properties>
+          <string name="Name">Spawn_FROST_4</string>
+          <CoordinateFrame name="CFrame"><X>-78</X><Y>1</Y><Z>6</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4294967295</Color3uint8><Color3uint8 name="Color">4294967295</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX52">
+        <Properties>
+          <string name="Name">Spawn_BLAZE_1</string>
+          <CoordinateFrame name="CFrame"><X>86</X><Y>1</Y><Z>-12</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4294967295</Color3uint8><Color3uint8 name="Color">4294967295</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX53">
+        <Properties>
+          <string name="Name">Spawn_BLAZE_2</string>
+          <CoordinateFrame name="CFrame"><X>86</X><Y>1</Y><Z>12</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4294967295</Color3uint8><Color3uint8 name="Color">4294967295</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX54">
+        <Properties>
+          <string name="Name">Spawn_BLAZE_3</string>
+          <CoordinateFrame name="CFrame"><X>78</X><Y>1</Y><Z>-6</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4294967295</Color3uint8><Color3uint8 name="Color">4294967295</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX55">
+        <Properties>
+          <string name="Name">Spawn_BLAZE_4</string>
+          <CoordinateFrame name="CFrame"><X>78</X><Y>1</Y><Z>6</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Vector3 name="Size"><X>4</X><Y>0.4</Y><Z>4</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4294967295</Color3uint8><Color3uint8 name="Color">4294967295</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+        </Properties>
+      </Item>
+      <Item class="SpawnLocation" referent="RBX56">
+        <Properties>
+          <string name="Name">SpawnLocation_FROST</string>
+          <CoordinateFrame name="CFrame"><X>-82</X><Y>0.2</Y><Z>-20</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>0.4</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>0.4</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4291348685</Color3uint8><Color3uint8 name="Color">4291348685</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">272</token>
+        </Properties>
+      </Item>
+      <Item class="SpawnLocation" referent="RBX57">
+        <Properties>
+          <string name="Name">SpawnLocation_BLAZE</string>
+          <CoordinateFrame name="CFrame"><X>82</X><Y>0.2</Y><Z>20</Z><R00>1</R00><R01>0</R01><R02>0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>1</R22></CoordinateFrame>
+          <Vector3 name="size"><X>6</X><Y>0.4</Y><Z>6</Z></Vector3>
+          <Vector3 name="Size"><X>6</X><Y>0.4</Y><Z>6</Z></Vector3>
+          <Color3uint8 name="Color3uint8">4291348685</Color3uint8><Color3uint8 name="Color">4291348685</Color3uint8>
+          <bool name="Anchored">true</bool>
+          <bool name="CanCollide">true</bool>
+          <token name="Material">272</token>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="Lighting" referent="RBX58">
+    <Properties>
+      <string name="Name">Lighting</string>
+      <float name="Brightness">2</float>
+      <float name="ClockTime">14</float>
+      <bool name="GlobalShadows">true</bool>
+      <Color3 name="Ambient"><R>0.32</R><G>0.32</G><B>0.36</B></Color3>
+      <Color3 name="OutdoorAmbient"><R>0.5</R><G>0.5</G><B>0.55</B></Color3>
+    </Properties>
+  </Item>
+  <Item class="ReplicatedStorage" referent="RBX59">
+    <Properties>
+      <string name="Name">ReplicatedStorage</string>
+    </Properties>
+    <Item class="Folder" referent="RBX60">
+      <Properties>
+        <string name="Name">Shared</string>
+      </Properties>
+      <Item class="ModuleScript" referent="RBX61">
+        <Properties>
+          <string name="Name">Config</string>
+          <string name="Source">--[[
+	Config.lua (ModuleScript -&gt; ReplicatedStorage/Shared)
+	Central configuration for STRIKE//ZERO. Everything designers are expected
+	to tweak lives here or in WeaponConfig / CombatConfig.
+]]
+
+local Config = {}
+
+Config.GameName = "STRIKE//ZERO"
+Config.Version = "0.1.0"
+
+-- Teams ----------------------------------------------------------------------
+-- Teams are created server-side by PlayerService using these definitions.
+Config.Teams = {
+	{ id = "BLAZE", color = "Bright orange" },
+	{ id = "FROST", color = "Bright blue" },
+}
+
+-- Player ---------------------------------------------------------------------
+Config.MaxHealth = 100
+Config.SpawnForceFieldTime = 3 -- seconds of spawn protection
+
+-- Movement (simulated on the owning client; server only sets base values) ----
+Config.Movement = {
+	walkSpeed = 16,
+	sprintSpeed = 25,
+	sprintFovBoost = 8,
+	sprintFovTime = 0.15,
+	slideBurstSpeed = 34,
+	slideSpeed = 12,
+	slideDuration = 0.9,
+	slideCooldown = 0.8,
+	slideMinSpeed = 20, -- must be sprinting this fast to slide
+	jumpPower = 50,
+	crouchCameraOffset = 1.9, -- studs the camera drops while sliding
+}
+
+-- Match (Team Deathmatch) -----------------------------------------------------
+Config.Match = {
+	scoreLimit = 30,
+	timeLimit = 300, -- seconds
+	respawnDelay = 4,
+	intermission = 6, -- seconds between matches
+	minPlayers = 1,
+}
+
+-- Combat --------------------------------------------------------------------
+Config.Combat = {
+	friendlyFire = false,
+	maxShotOriginDistance = 10, -- server rejects fire origins farther than this from the head
+	minShotDot = -0.5, -- shots must be roughly forward of the body
+	hitConfirmCooldown = 0.05,
+}
+
+-- Admin ----------------------------------------------------------------------
+-- Add your Roblox UserId here, e.g. Admins = { [1234567] = true }
+-- Private-server owners are always allowed. In Studio, everyone is allowed.
+Config.Admins = {}
+
+-- Audio placeholders ---------------------------------------------------------
+-- Drop in your own asset ids (rbxassetid://...). Empty string = silent hook.
+-- Categories are kept separate so sounds can be swapped independently.
+Config.Audio = {
+	gunshot = "",
+	reload = "",
+	hit = "",
+	kill = "",
+	melee = "",
+	slide = "",
+	ui = "",
+	footstep = "",
+}
+
+-- Graphics presets (applied client-side by UIController) ---------------------
+Config.Graphics = {
+	LOW = {
+		shadows = false,
+		postEffects = false,
+		mapMaterials = false, -- flatten map materials locally (fewer texture samples)
+		fogEnd = 1200,
+		fovBoost = 0,
+	},
+	MEDIUM = {
+		shadows = false,
+		postEffects = false,
+		mapMaterials = true,
+		fogEnd = 100000,
+		fovBoost = 0,
+	},
+	HIGH = {
+		shadows = true,
+		postEffects = true,
+		mapMaterials = true,
+		fogEnd = 100000,
+		fovBoost = 0,
+	},
+}
+Config.DefaultGraphics = "LOW"
+
+return Config
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX62">
+        <Properties>
+          <string name="Name">WeaponConfig</string>
+          <string name="Source">--[[
+	WeaponConfig.lua (ModuleScript -&gt; ReplicatedStorage/Shared)
+	Modular weapon framework. To add a weapon: add an entry to Weapons with
+	the same shape and (optionally) a viewmodel blueprint. No other file needs
+	to change for a new gun to be droppable via !giveweapon.
+]]
+
+local WeaponConfig = {}
+
+-- Viewmodel blueprints -------------------------------------------------------
+-- Camera-space parts: size = {x,y,z}, color = {r,g,b}, offset = {x,y,z}
+-- Offsets are relative to the viewmodel root (right, down, forward).
+local function gunBody(barrelColor)
+	return {
+		{ size = { 0.35, 0.5, 1.5 }, color = { 45, 45, 50 }, offset = { 0.42, -0.42, -1.1 } },   -- receiver
+		{ size = { 0.16, 0.16, 1.1 }, color = barrelColor, offset = { 0.42, -0.34, -2.1 } },    -- barrel
+		{ size = { 0.26, 0.55, 0.32 }, color = { 35, 35, 40 }, offset = { 0.42, -0.78, -0.85 } },-- grip/mag
+		{ size = { 0.1, 0.14, 0.3 }, color = { 200, 200, 205 }, offset = { 0.42, -0.13, -1.35 } },-- sight
+	}
+end
+
+WeaponConfig.Weapons = {
+	-- Slot 1: assault rifle ---------------------------------------------------
+	ar = {
+		id = "ar",
+		name = "VK-7 RIFLE",
+		slot = 1,
+		kind = "gun",
+		damage = 24,
+		fireRate = 0.1,      -- seconds between shots (600 RPM)
+		mag = 30,
+		reserve = 90,
+		reloadTime = 2.2,
+		auto = true,
+		recoilUp = 1.15,     -- degrees of camera kick per shot
+		recoilSide = 0.4,
+		spread = 0.9,        -- degrees
+		range = 320,
+		headshot = 2.0,
+		pellets = 1,
+		muzzle = { color = { 255, 200, 90 }, size = 0.28, time = 0.05 },
+		viewmodel = gunBody({ 90, 95, 100 }),
+	},
+
+	-- Slot 1: SMG -------------------------------------------------------------
+	smg = {
+		id = "smg",
+		name="WASP SMG",
+		slot = 1,
+		kind = "gun",
+		damage = 17,
+		fireRate = 0.075,    -- 800 RPM
+		mag = 25,
+		reserve = 100,
+		reloadTime = 1.8,
+		auto = true,
+		recoilUp = 0.75,
+		recoilSide = 0.55,
+		spread = 1.5,
+		range = 150,
+		headshot = 1.8,
+		pellets = 1,
+		muzzle = { color = { 255, 190, 80 }, size = 0.22, time = 0.04 },
+		viewmodel = gunBody({ 70, 72, 78 }),
+	},
+
+	-- Slot 1: shotgun ---------------------------------------------------------
+	shotgun = {
+		id = "shotgun",
+		name = "BREAKER-8",
+		slot = 1,
+		kind = "gun",
+		damage = 11,         -- per pellet
+		fireRate = 0.85,
+		mag = 6,
+		reserve = 24,
+		reloadTime = 2.8,
+		auto = false,
+		recoilUp = 3.2,
+		recoilSide = 0.9,
+		spread = 4.0,        -- degrees, applied per pellet
+		range = 70,
+		headshot = 1.5,
+		pellets = 8,
+		muzzle = { color = { 255, 170, 60 }, size = 0.4, time = 0.07 },
+		viewmodel = gunBody({ 120, 80, 50 }),
+	},
+
+	-- Slot 2: secondary -------------------------------------------------------
+	pistol = {
+		id = "pistol",
+		name = "M1 SIDEARM",
+		slot = 2,
+		kind = "gun",
+		damage = 26,
+		fireRate = 0.18,
+		mag = 12,
+		reserve = 48,
+		reloadTime = 1.5,
+		auto = false,
+		recoilUp = 1.6,
+		recoilSide = 0.3,
+		spread = 1.0,
+		range = 160,
+		headshot = 2.0,
+		pellets = 1,
+		muzzle = { color = { 255, 210, 110 }, size = 0.2, time = 0.04 },
+		viewmodel = {
+			{ size = { 0.3, 0.42, 0.8 }, color = { 50, 50, 55 }, offset = { 0.42, -0.45, -0.85 } },
+			{ size = { 0.13, 0.13, 0.55 }, color = { 110, 110, 118 }, offset = { 0.42, -0.36, -1.4 } },
+			{ size = { 0.24, 0.5, 0.3 }, color = { 35, 35, 40 }, offset = { 0.42, -0.8, -0.65 } },
+		},
+	},
+
+	-- Slot 3: melee -----------------------------------------------------------
+	knife = {
+		id = "knife",
+		name = "TANTO",
+		slot = 3,
+		kind = "melee",
+		viewmodel = {
+			{ size = { 0.1, 0.1, 1.0 }, color = { 210, 214, 220 }, offset = { 0.45, -0.5, -1.15 } }, -- blade
+			{ size = { 0.14, 0.14, 0.4 }, color = { 40, 40, 45 }, offset = { 0.45, -0.5, -0.5 } },   -- grip
+		},
+	},
+}
+
+-- Default loadout ------------------------------------------------------------
+WeaponConfig.Loadout = { "ar", "pistol", "knife" }
+
+-- Teammate-safe aliases: what !giveweapon accepts ----------------------------
+WeaponConfig.ById = WeaponConfig.Weapons
+
+function WeaponConfig.get(id)
+	return WeaponConfig.Weapons[id]
+end
+
+-- Resolve a slot number to a weapon id (nil if empty slot) -------------------
+function WeaponConfig.slotWeapon(loadout, slot)
+	return loadout[slot]
+end
+
+return WeaponConfig
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX63">
+        <Properties>
+          <string name="Name">CombatConfig</string>
+          <string name="Source">--[[
+	CombatConfig.lua (ModuleScript -&gt; ReplicatedStorage/Shared)
+	Melee combo tuning, block/parry rules and server validation tolerances.
+	Numbers are deliberately small and readable: tune fights here.
+]]
+
+local CombatConfig = {}
+
+-- Melee attacks --------------------------------------------------------------
+-- comboDamage: damage per chain index for light attacks (3-hit chain).
+CombatConfig.Light = {
+	cooldown = 0.34,      -- seconds between light swings
+	comboWindow = 0.7,    -- land the next swing inside this window to chain
+	comboDamage = { 20, 20, 32 }, -- third hit finishes harder
+	range = 8,
+	minDot = 0.45,        -- target must be roughly in front (directional attacks)
+	stun = 0.5,           -- seconds of slowed movement on the victim
+	knockback = 26,
+	hitStunDamageScale = 1.0,
+}
+
+CombatConfig.Heavy = {
+	cooldown = 0.9,
+	windup = 0.28,        -- brief delay before the hit resolves (client animates it)
+	range = 8.5,
+	minDot = 0.4,
+	damage = 45,
+	stun = 0.9,
+	knockback = 62,
+}
+
+-- Gun-butt: available only when the equipped gun has EXACTLY 0 in the mag.
+CombatConfig.GunButt = {
+	cooldown = 0.6,
+	range = 7.5,
+	minDot = 0.4,
+	damage = 30,
+	stun = 0.6,
+	knockback = 55,
+}
+
+-- Block / parry --------------------------------------------------------------
+CombatConfig.Block = {
+	damageReduction = 0.75, -- blocked melee takes 25% damage
+	parryWindow = 0.22,      -- blocking this soon after the enemy swing starts = parry
+	parryStun = 1.4,         -- attacker is staggered this long
+	parryKnockback = 40,
+}
+
+-- Server-side validation tolerances -----------------------------------------
+CombatConfig.Validate = {
+	fireRateTolerance = 0.06,  -- extra seconds allowed on top of weapon fireRate (network jitter)
+	meleeCooldownTolerance = 0.1,
+	maxMeleeTargetsPerSwing = 1,
+	reloadTolerance = 0.1,
+}
+
+-- Hit stun applies a temporary WalkSpeed multiplier to the victim.
+CombatConfig.StunSpeedScale = 0.45
+
+return CombatConfig
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX64">
+        <Properties>
+          <string name="Name">Utility</string>
+          <string name="Source">--[[
+	Utility.lua (ModuleScript -&gt; ReplicatedStorage/Shared)
+	Small shared helpers: signals, math, team lookups, server rate limiting,
+	and placeholder audio playback. No game logic lives here.
+]]
+
+local Config = require(script.Parent.Config)
+
+local Utility = {}
+
+-- Math -----------------------------------------------------------------------
+function Utility.clamp(v, lo, hi)
+	if v &lt; lo then
+		return lo
+	elseif v &gt; hi then
+		return hi
+	end
+	return v
+end
+
+function Utility.lerp(a, b, t)
+	return a + (b - a) * t
+end
+
+function Utility.formatTime(seconds)
+	seconds = math.max(0, math.floor(seconds))
+	return string.format("%d:%02d", math.floor(seconds / 60), seconds % 60)
+end
+
+-- Signal ---------------------------------------------------------------------
+-- Minimal connect/fire signal used to wire services and controllers together.
+-- Connections are stored per-signal; callers disconnect on teardown to avoid
+-- leaks (the memory-leak rule from the design doc).
+local Signal = {}
+Signal.__index = Signal
+
+function Utility.newSignal()
+	return setmetatable({ _handlers = {} }, Signal)
+end
+
+function Signal:Connect(fn)
+	local handlers = self._handlers
+	handlers[fn] = true
+	local conn = {}
+	conn.Connected = true
+	conn.Disconnect = function()
+		conn.Connected = false
+		handlers[fn] = nil
+	end
+	return conn
+end
+
+function Signal:Fire(...)
+	-- snapshot so handlers can disconnect during fire
+	local snapshot = {}
+	for fn in pairs(self._handlers) do
+		snapshot[#snapshot + 1] = fn
+	end
+	for i = 1, #snapshot do
+		local ok, err = pcall(snapshot[i], ...)
+		if not ok then
+			warn("[STRIKE//ZERO] signal handler error: " .. tostring(err))
+		end
+	end
+end
+
+-- Event hub (named signals) used by the client bootstrap ---------------------
+function Utility.newHub()
+	local hub = { _signals = {} }
+	function hub:on(name, fn)
+		local sig = self._signals[name]
+		if sig == nil then
+			sig = Utility.newSignal()
+			self._signals[name] = sig
+		end
+		return sig:Connect(fn)
+	end
+	function hub:emit(name, ...)
+		local sig = self._signals[name]
+		if sig then
+			sig:Fire(...)
+		end
+	end
+	return hub
+end
+
+-- Teams ----------------------------------------------------------------------
+function Utility.getTeamId(player)
+	if player.Team then
+		return player.Team.Name
+	end
+	return nil
+end
+
+function Utility.areEnemies(a, b)
+	if a == b then
+		return false
+	end
+	local ta, tb = Utility.getTeamId(a), Utility.getTeamId(b)
+	if ta == nil or tb == nil then
+		return true -- free-for-all fallback (never used in TDM, but safe)
+	end
+	return ta ~= tb
+end
+
+-- Server rate limiting (token bucket, event-driven: no loops) ---------------
+local buckets = {}
+
+function Utility.allow(key, rate, burst)
+	-- returns true if `key` may perform an action at `rate` events/second,
+	-- allowing a short burst of `burst`.
+	local now = os.clock()
+	local b = buckets[key]
+	if b == nil then
+		b = { tokens = burst, at = now }
+		buckets[key] = b
+	end
+	local refill = (now - b.at) * rate
+	b.tokens = math.min(burst, b.tokens + refill)
+	b.at = now
+	if b.tokens &gt;= 1 then
+		b.tokens = b.tokens - 1
+		return true
+	end
+	return false
+end
+
+function Utility.clearRate(key)
+	buckets[key] = nil
+end
+
+-- Audio ----------------------------------------------------------------------
+-- Placeholder hooks: play nothing until ids are configured. Sounds are created
+-- locally in SoundService so they never replicate (zero network cost).
+local sounds = {}
+
+function Utility.play(category, volume)
+	local id = Config.Audio[category]
+	if id == nil or id == "" then
+		return -- silent placeholder hook
+	end
+	local SoundService = game:GetService("SoundService")
+	local snd = sounds[category]
+	if snd == nil then
+		snd = Instance.new("Sound")
+		snd.Name = "SZ_" .. category
+		snd.Looped = false
+		snd.Parent = SoundService
+		sounds[category] = snd
+	end
+	snd.SoundId = id
+	snd.Volume = volume or 0.5
+	snd:Play()
+end
+
+-- Remote notification (server only) -------------------------------------------
+-- One shared RemoteEvent carries every server-&gt;client message, keyed by k=...
+-- so we never spawn a flood of separate RemoteEvents.
+local notifyRemote
+
+function Utility.notify(player, payload)
+	if notifyRemote == nil then
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		notifyRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Notify")
+	end
+	if player then
+		notifyRemote:FireClient(player, payload)
+	else
+		notifyRemote:FireAllClients(payload)
+	end
+end
+
+-- Misc -----------------------------------------------------------------------
+function Utility.characterHead(character)
+	local head = character:FindFirstChild("Head")
+	return head
+end
+
+function Utility.rootOf(character)
+	return character:FindFirstChild("HumanoidRootPart")
+end
+
+function Utility.humanoidOf(character)
+	return character:FindFirstChildOfClass("Humanoid")
+end
+
+return Utility
+</string>
+        </Properties>
+      </Item>
+    </Item>
+    <Item class="Folder" referent="RBX65">
+      <Properties>
+        <string name="Name">Remotes</string>
+      </Properties>
+      <Item class="RemoteEvent" referent="RBX66">
+        <Properties>
+          <string name="Name">Fire</string>
+        </Properties>
+      </Item>
+      <Item class="RemoteEvent" referent="RBX67">
+        <Properties>
+          <string name="Name">Reload</string>
+        </Properties>
+      </Item>
+      <Item class="RemoteEvent" referent="RBX68">
+        <Properties>
+          <string name="Name">Switch</string>
+        </Properties>
+      </Item>
+      <Item class="RemoteEvent" referent="RBX69">
+        <Properties>
+          <string name="Name">Melee</string>
+        </Properties>
+      </Item>
+      <Item class="RemoteEvent" referent="RBX70">
+        <Properties>
+          <string name="Name">Notify</string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="ServerScriptService" referent="RBX71">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="Script" referent="RBX72">
+      <Properties>
+        <string name="Name">Bootstrap</string>
+        <string name="Source">--[[
+	Bootstrap.lua (Script -&gt; ServerScriptService)
+	Single entry point for the server. Services are ModuleScripts so they can
+	be required, tested and reasoned about independently; this Script boots
+	them in dependency order. Cross-service calls inside services use lazy
+	requires to keep the dependency graph acyclic.
+]]
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- wait for the shared tree to exist before anything touches it
+ReplicatedStorage:WaitForChild("Shared")
+ReplicatedStorage:WaitForChild("Remotes")
+
+local Services = script.Parent:WaitForChild("Services")
+
+local PlayerService = require(Services.PlayerService)
+local WeaponService = require(Services.WeaponService)
+local CombatService = require(Services.CombatService)
+local MatchService = require(Services.MatchService)
+local AdminService = require(Services.AdminService)
+
+PlayerService.init()
+WeaponService.init()
+CombatService.init()
+MatchService.init()
+AdminService.init()
+
+print("[STRIKE//ZERO] server online - services: Player, Weapon, Combat, Match, Admin")
+</string>
+      </Properties>
+    </Item>
+    <Item class="Folder" referent="RBX73">
+      <Properties>
+        <string name="Name">Services</string>
+      </Properties>
+      <Item class="ModuleScript" referent="RBX74">
+        <Properties>
+          <string name="Name">PlayerService</string>
+          <string name="Source">--[[
+	PlayerService.lua (ModuleScript -&gt; ServerScriptService/Services)
+	Teams, character setup, spawn points, respawn scheduling, spawn protection.
+	All of it is event-driven: no per-frame or polling loops.
+]]
+
+local Players = game:GetService("Players")
+local Config = require(game:GetService("ReplicatedStorage").Shared.Config)
+local Utility = require(game:GetService("ReplicatedStorage").Shared.Utility)
+
+local PlayerService = {}
+
+local spawnCache = nil -- [teamId] = { {part...} }
+
+-- Teams ----------------------------------------------------------------------
+local function createTeams()
+	for _, def in ipairs(Config.Teams) do
+		local team = Instance.new("Team")
+		team.Name = def.id
+		team.TeamColor = BrickColor.new(def.color)
+		team.AutoAssignable = false
+		team.Parent = game:GetService("Teams")
+	end
+end
+
+local function teamCounts()
+	local counts = {}
+	for _, t in ipairs(Config.Teams) do
+		counts[t.id] = 0
+	end
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p.Team and counts[p.Team.Name] then
+			counts[p.Team.Name] = counts[p.Team.Name] + 1
+		end
+	end
+	return counts
+end
+
+local function pickTeam()
+	local counts = teamCounts()
+	local best, bestCount = Config.Teams[1].id, math.huge
+	for _, t in ipairs(Config.Teams) do
+		if counts[t.id] &lt; bestCount then
+			best, bestCount = t.id, counts[t.id]
+		end
+	end
+	return game:GetService("Teams"):FindFirstChild(best)
+end
+
+-- Spawn points ---------------------------------------------------------------
+local function spawnsFor(teamId)
+	if spawnCache == nil then
+		spawnCache = {}
+		local map = workspace:FindFirstChild("StrikeMap")
+		if map then
+			for _, inst in ipairs(map:GetDescendants()) do
+				local team = inst.Name:match("^Spawn_(%u+)_%d+$")
+				if team and inst:IsA("BasePart") then
+					local list = spawnCache[team]
+					if list == nil then
+						list = {}
+						spawnCache[team] = list
+					end
+					list[#list + 1] = inst.Position
+				end
+			end
+		end
+	end
+	return spawnCache[teamId]
+end
+
+local function randomSpawnCFrame(teamId)
+	local list = spawnsFor(teamId)
+	if list and #list &gt; 0 then
+		local pos = list[math.random(1, #list)]
+		return CFrame.new(pos + Vector3.new(0, 4, 0))
+	end
+	return CFrame.new(0, 8, 0) -- map fallback
+end
+
+-- Spawn protection -----------------------------------------------------------
+local function grantSpawnProtection(character)
+	local ff = Instance.new("ForceField")
+	ff.Parent = character
+	task.delay(Config.SpawnForceFieldTime, function()
+		if ff.Parent then
+			ff:Destroy()
+		end
+	end)
+end
+
+-- Character setup -------------------------------------------------------------
+local function onCharacter(player, character)
+	local humanoid = character:WaitForChild("Humanoid")
+	humanoid.MaxHealth = Config.MaxHealth
+	humanoid.Health = Config.MaxHealth
+	humanoid.UseJumpPower = true
+	humanoid.JumpPower = Config.Movement.jumpPower
+	local mult = humanoid:GetAttribute("SpeedMult") or 1
+	humanoid.WalkSpeed = Config.Movement.walkSpeed * mult
+
+	-- move the fresh character to a team spawn (event-driven, fires once)
+	local teamId = Utility.getTeamId(player)
+	if teamId then
+		character:PivotTo(randomSpawnCFrame(teamId))
+	end
+	grantSpawnProtection(character)
+
+	humanoid.Died:Connect(function()
+		-- lazy require avoids circular module dependencies
+		local MatchService = require(script.Parent.MatchService)
+		MatchService.onPlayerDeath(player)
+	end)
+end
+
+-- Public API -----------------------------------------------------------------
+function PlayerService.respawn(player, delaySeconds)
+	task.delay(delaySeconds or 0, function()
+		if player.Parent and player:FindFirstChild("PlayerGui") ~= nil then
+			player:LoadCharacter()
+		end
+	end)
+end
+
+function PlayerService.forceRespawn(player)
+	if player.Character then
+		local hum = Utility.humanoidOf(player.Character)
+		if hum then
+			hum.Health = 0
+		end
+	end
+	PlayerService.respawn(player, 0.3)
+end
+
+function PlayerService.teleport(player, targetCFrame)
+	local char = player.Character
+	if char then
+		char:PivotTo(targetCFrame)
+	end
+end
+
+function PlayerService.getTeamSpawn(teamId)
+	return randomSpawnCFrame(teamId)
+end
+
+-- Init ------------------------------------------------------------------------
+function PlayerService.init()
+	createTeams()
+
+	local function onPlayer(player)
+		local team = pickTeam()
+		if team then
+			player.Team = team
+		end
+
+		-- leaderstats (Roblox player list / scoreboard data)
+		local ls = Instance.new("Folder")
+		ls.Name = "leaderstats"
+		local kills = Instance.new("IntValue")
+		kills.Name = "Kills"
+		kills.Parent = ls
+		local deaths = Instance.new("IntValue")
+		deaths.Name = "Deaths"
+		deaths.Parent = ls
+		ls.Parent = player
+
+		if player.Character then
+			onCharacter(player, player.Character)
+		end
+		player.CharacterAdded:Connect(function(char)
+			onCharacter(player, char)
+		end)
+
+		-- arm the player instantly so weapons exist before first spawn
+		local WeaponService = require(script.Parent.WeaponService)
+		WeaponService.setupLoadout(player)
+	end
+
+	Players.PlayerAdded:Connect(onPlayer)
+	for _, p in ipairs(Players:GetPlayers()) do
+		onPlayer(p)
+	end
+
+	Players.PlayerRemoving:Connect(function(player)
+		Utility.clearRate(tostring(player.UserId) .. ":fire")
+		Utility.clearRate(tostring(player.UserId) .. ":melee")
+	end)
+end
+
+return PlayerService
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX75">
+        <Properties>
+          <string name="Name">WeaponService</string>
+          <string name="Source">--[[
+	WeaponService.lua (ModuleScript -&gt; ServerScriptService/Services)
+	Server-authoritative weapons: ammunition, fire rate, reload timing,
+	equipped slot, loadout. Damage is handed to CombatService; this file never
+	trusts a client's ammo or timing claims.
+
+	Remotes consumed: Fire, Reload, Switch  (from ReplicatedStorage/Remotes)
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Config = require(ReplicatedStorage.Shared.Config)
+local Utility = require(ReplicatedStorage.Shared.Utility)
+local WeaponConfig = require(ReplicatedStorage.Shared.WeaponConfig)
+local CombatConfig = require(ReplicatedStorage.Shared.CombatConfig)
+
+local WeaponService = {}
+
+local states = {} -- [player] = { loadout, slot, ammo, reloading, lastFire }
+
+local remotes = ReplicatedStorage:WaitForChild("Remotes")
+local FireRemote = remotes:WaitForChild("Fire")
+local ReloadRemote = remotes:WaitForChild("Reload")
+local SwitchRemote = remotes:WaitForChild("Switch")
+
+local function sendState(player)
+	local st = states[player]
+	if not st then
+		return
+	end
+	local wid = st.loadout[st.slot]
+	local ammo = wid and st.ammo[wid]
+	Utility.notify(player, {
+		k = "state",
+		slot = st.slot,
+		wid = wid,
+		mag = ammo and ammo.mag or 0,
+		reserve = ammo and ammo.reserve or 0,
+	})
+end
+
+local function resetAmmo(player)
+	local st = states[player]
+	if not st then
+		return
+	end
+	for wid, def in pairs(WeaponConfig.Weapons) do
+		if def.kind == "gun" then
+			local owned = false
+			for i = 1, 3 do
+				if st.loadout[i] == wid then
+					owned = true
+				end
+			end
+			if owned then
+				st.ammo[wid] = { mag = def.mag, reserve = def.reserve }
+			end
+		end
+	end
+	st.reloading = false
+	st.slot = 1
+end
+
+function WeaponService.setupLoadout(player)
+	if states[player] then
+		return
+	end
+	local st = {
+		loadout = {},
+		ammo = {},
+		slot = 1,
+		reloading = false,
+		lastFire = 0,
+	}
+	for i, wid in ipairs(WeaponConfig.Loadout) do
+		st.loadout[i] = wid
+	end
+	for wid, def in pairs(WeaponConfig.Weapons) do
+		if def.kind == "gun" then
+			st.ammo[wid] = { mag = def.mag, reserve = def.reserve }
+		end
+	end
+	states[player] = st
+
+	-- fresh life = full ammo (event-driven, no loops)
+	player.CharacterAdded:Connect(function()
+		resetAmmo(player)
+		task.defer(sendState, player)
+	end)
+	task.defer(sendState, player)
+end
+
+-- Admin/other services -------------------------------------------------------
+function WeaponService.give(player, weaponId)
+	local st = states[player]
+	local def = WeaponConfig.get(weaponId)
+	if not st or not def then
+		return false
+	end
+	if def.kind == "gun" then
+		st.loadout[def.slot] = weaponId
+		st.ammo[weaponId] = { mag = def.mag, reserve = def.reserve }
+	elseif def.kind == "melee" then
+		st.loadout[3] = weaponId
+	end
+	Utility.notify(player, { k = "feed", text = "GIVEN: " .. def.name })
+	sendState(player)
+	return true
+end
+
+function WeaponService.getMag(player)
+	local st = states[player]
+	if not st then
+		return nil
+	end
+	local wid = st.loadout[st.slot]
+	local def = wid and WeaponConfig.get(wid)
+	if not def or def.kind ~= "gun" then
+		return nil
+	end
+	return st.ammo[wid].mag
+end
+
+function WeaponService.isReloading(player)
+	local st = states[player]
+	return st ~= nil and st.reloading
+end
+
+function WeaponService.getEquipped(player)
+	local st = states[player]
+	if not st then
+		return nil
+	end
+	return st.loadout[st.slot], st
+end
+
+-- Fire -----------------------------------------------------------------------
+local function handleFire(player, origin, direction)
+	local st = states[player]
+	if not st or st.reloading then
+		return
+	end
+	local wid = st.loadout[st.slot]
+	local def = wid and WeaponConfig.get(wid)
+	if not def or def.kind ~= "gun" then
+		return
+	end
+
+	local ammo = st.ammo[wid]
+	if ammo.mag &lt;= 0 then
+		-- client should have sent a gun-butt instead; resync it
+		sendState(player)
+		return
+	end
+
+	-- server-side fire rate validation
+	local now = os.clock()
+	if now - st.lastFire &lt; def.fireRate - CombatConfig.Validate.fireRateTolerance then
+		return -- drop silently: client over-fired
+	end
+
+	-- rate limiter backstop against remote spam
+	local uid = tostring(player.UserId)
+	if not Utility.allow(uid .. ":fire", 1 / def.fireRate + 2, 8) then
+		return
+	end
+
+	-- origin sanity: must originate near this player's head (anti-teleport aim)
+	local char = player.Character
+	local head = char and Utility.characterHead(char)
+	if not head then
+		return
+	end
+	if (Vector3.new(origin.x, origin.y, origin.z) - head.Position).Magnitude &gt; Config.Combat.maxShotOriginDistance then
+		return
+	end
+
+	-- direction sanity: roughly forward of the body
+	local root = Utility.rootOf(char)
+	if root then
+		local flat = Vector3.new(direction.x, 0, direction.z)
+		if flat.Magnitude &gt; 0.001 and root.CFrame.LookVector:Dot(flat.Unit) &lt; Config.Combat.minShotDot then
+			return
+		end
+	end
+
+	st.lastFire = now
+	ammo.mag = ammo.mag - 1
+
+	-- resolve hits server-side (authoritative raycast + damage)
+	local CombatService = require(script.Parent.CombatService)
+	CombatService.resolveGunshot(player, Vector3.new(origin.x, origin.y, origin.z), Vector3.new(direction.x, direction.y, direction.z), def)
+end
+
+-- Reload ---------------------------------------------------------------------
+local function handleReload(player)
+	local st = states[player]
+	if not st or st.reloading then
+		return
+	end
+	local wid = st.loadout[st.slot]
+	local def = wid and WeaponConfig.get(wid)
+	if not def or def.kind ~= "gun" then
+		return
+	end
+	local ammo = st.ammo[wid]
+	if ammo.mag &gt;= def.mag or ammo.reserve &lt;= 0 then
+		return
+	end
+	st.reloading = true
+	Utility.notify(player, { k = "reloadstart", wid = wid, time = def.reloadTime })
+
+	task.delay(def.reloadTime + CombatConfig.Validate.reloadTolerance, function()
+		if not states[player] then
+			return
+		end
+		-- reload completes only if still holding the same gun and still alive
+		local currentWid = st.loadout[st.slot]
+		if currentWid == wid and player.Character then
+			local needed = def.mag - ammo.mag
+			local take = math.min(needed, ammo.reserve)
+			ammo.mag = ammo.mag + take
+			ammo.reserve = ammo.reserve - take
+		end
+		st.reloading = false
+		if player.Parent then
+			sendState(player)
+		end
+	end)
+end
+
+-- Switch ---------------------------------------------------------------------
+local function handleSwitch(player, slot)
+	local st = states[player]
+	if not st then
+		return
+	end
+	slot = math.floor(tonumber(slot) or 0)
+	if slot &lt; 1 or slot &gt; 3 then
+		return
+	end
+	local wid = st.loadout[slot]
+	if wid == nil or wid == st.loadout[st.slot] then
+		return
+	end
+	st.slot = slot
+	st.reloading = false -- switching cancels a reload (classic feel)
+	sendState(player)
+end
+
+function WeaponService.init()
+	Players.PlayerAdded:Connect(function(player)
+		WeaponService.setupLoadout(player)
+	end)
+	Players.PlayerRemoving:Connect(function(player)
+		states[player] = nil
+	end)
+
+	FireRemote.OnServerEvent:Connect(function(player, origin, direction)
+		if type(origin) ~= "table" and typeof(origin) ~= "Vector3" then
+			return
+		end
+		if type(direction) ~= "table" and typeof(direction) ~= "Vector3" then
+			return
+		end
+		handleFire(player, origin, direction)
+	end)
+
+	ReloadRemote.OnServerEvent:Connect(function(player)
+		handleReload(player)
+	end)
+
+	SwitchRemote.OnServerEvent:Connect(function(player, slot)
+		handleSwitch(player, slot)
+	end)
+end
+
+return WeaponService
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX76">
+        <Properties>
+          <string name="Name">CombatService</string>
+          <string name="Source">--[[
+	CombatService.lua (ModuleScript -&gt; ServerScriptService/Services)
+	Authoritative combat: gun raycasts, damage application, headshots,
+	melee combos, gun-butt fallback, hit stun, knockback, block/parry.
+	Never trusts client damage or kill claims: clients only report intent
+	(aim direction, swing kind); the server computes every outcome.
+
+	Remotes consumed: Melee (from ReplicatedStorage/Remotes)
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Config = require(ReplicatedStorage.Shared.Config)
+local Utility = require(ReplicatedStorage.Shared.Utility)
+local CombatConfig = require(ReplicatedStorage.Shared.CombatConfig)
+
+local CombatService = {}
+
+local lastDamaged = {} -- [victim] = {attacker, at, weapon, head}
+local lastSwing = {}   -- [player] = {light, heavy, butt}
+local comboIndex = {}  -- [player] = number
+local blockState = {}  -- [player] = {active, since}
+
+local remotes = ReplicatedStorage:WaitForChild("Remotes")
+local MeleeRemote = remotes:WaitForChild("Melee")
+
+-- Helpers --------------------------------------------------------------------
+-- Uniform random direction inside a cone of `degrees` around dir.
+local function spreadDirection(dir, degrees)
+	if degrees &lt;= 0 then
+		return dir
+	end
+	local r = math.rad(degrees)
+	local angle = math.random() * 2 * math.pi
+	local radius = math.sqrt(math.random()) * r
+	local up = math.abs(dir.Y) &lt; 0.99 and Vector3.new(0, 1, 0) or Vector3.new(1, 0, 0)
+	local right = dir:Cross(up).Unit
+	local fwd = right:Cross(dir)
+	local axis = right * math.cos(angle) + fwd * math.sin(angle)
+	return (dir * math.cos(radius) + axis * math.sin(radius)).Unit
+end
+
+local function knockback(char, dir, force)
+	local root = Utility.rootOf(char)
+	if root and not root.Anchored then
+		local vel = root.AssemblyLinearVelocity
+		root.AssemblyLinearVelocity = vel + dir * force
+	end
+end
+
+-- Temporary movement slow (hit stun). Restores the configured base speed.
+local function applyHitStun(humanoid, seconds)
+	if not humanoid.Parent or humanoid.Health &lt;= 0 then
+		return
+	end
+	humanoid.WalkSpeed = humanoid.WalkSpeed * CombatConfig.StunSpeedScale
+	task.delay(seconds, function()
+		if humanoid.Parent and humanoid.Health &gt; 0 then
+			local mult = humanoid:GetAttribute("SpeedMult") or 1
+			humanoid.WalkSpeed = Config.Movement.walkSpeed * mult
+		end
+	end)
+end
+
+-- Damage pipeline ------------------------------------------------------------
+local function applyDamage(attacker, victimPlayer, amount, info)
+	if not victimPlayer or not victimPlayer.Parent then
+		return false
+	end
+	local char = victimPlayer.Character
+	local hum = char and Utility.humanoidOf(char)
+	if not hum or hum.Health &lt;= 0 then
+		return false
+	end
+
+	-- team gate
+	if not Config.Combat.friendlyFire and attacker and not Utility.areEnemies(attacker, victimPlayer) then
+		return false
+	end
+
+	-- spawn protection: ForceField absorbs the hit, attacker gets feedback
+	if char:FindFirstChildOfClass("ForceField") then
+		if attacker then
+			Utility.notify(attacker, { k = "hit", blocked = true })
+		end
+		return false
+	end
+
+	-- block / parry (melee only)
+	if info.melee and attacker then
+		local bs = blockState[victimPlayer]
+		if bs and bs.active then
+			if (os.clock() - bs.since) &lt;= CombatConfig.Block.parryWindow then
+				-- just-timed block = parry: negate the hit and stagger the attacker
+				local vRoot = Utility.rootOf(char)
+				local aChar = attacker.Character
+				if aChar then
+					local aHum = Utility.humanoidOf(aChar)
+					if aHum then
+						applyHitStun(aHum, CombatConfig.Block.parryStun)
+					end
+					if vRoot and aChar then
+						local dir = (Utility.rootOf(aChar).Position - vRoot.Position)
+						dir = Vector3.new(dir.X, 0, dir.Z)
+						if dir.Magnitude &gt; 0.01 then
+							knockback(aChar, -dir.Unit, CombatConfig.Block.parryKnockback)
+						end
+					end
+				end
+				Utility.notify(victimPlayer, { k = "parry" })
+				Utility.notify(attacker, { k = "parried" })
+				return false
+			end
+			amount = amount * (1 - CombatConfig.Block.damageReduction)
+		end
+	end
+
+	hum:TakeDamage(amount)
+
+	-- hit stun + knockback for melee hits
+	if info.melee then
+		applyHitStun(hum, info.stun or 0.5)
+		if info.dir and info.knockback then
+			knockback(char, info.dir, info.knockback)
+		end
+	end
+
+	local died = hum.Health &lt;= 0
+	lastDamaged[victimPlayer] = {
+		attacker = attacker,
+		at = os.clock(),
+		weapon = info.weaponName,
+		head = info.head,
+	}
+
+	Utility.notify(victimPlayer, { k = "damaged", amount = math.floor(amount + 0.5) })
+	if attacker then
+		Utility.notify(attacker, {
+			k = "hit",
+			dmg = math.floor(amount + 0.5),
+			head = info.head and true or false,
+			killed = died,
+		})
+	end
+	return true
+end
+
+-- Guns -----------------------------------------------------------------------
+function CombatService.resolveGunshot(shooter, origin, baseDir, def)
+	local char = shooter.Character
+	if not char then
+		return
+	end
+	if baseDir.Magnitude &lt; 0.001 then
+		return
+	end
+	local dir = baseDir.Unit
+
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { char }
+	params.IgnoreWater = true
+
+	local perVictim = {}
+	for _ = 1, def.pellets do
+		local shotDir = spreadDirection(dir, def.spread)
+		local result = workspace:Raycast(origin, shotDir * def.range, params)
+		if result then
+			local victimChar = result.Instance.Parent
+			local victimPlayer = victimChar and Players:GetPlayerFromCharacter(victimChar)
+			local hum = victimPlayer and Utility.humanoidOf(victimChar)
+			if hum and hum.Health &gt; 0 then
+				local isHead = result.Instance.Name == "Head"
+				local dmg = def.damage * (isHead and def.headshot or 1)
+				local acc = perVictim[victimPlayer]
+				if acc == nil then
+					acc = { dmg = 0, head = false }
+					perVictim[victimPlayer] = acc
+				end
+				acc.dmg = acc.dmg + dmg
+				acc.head = acc.head or isHead
+			end
+		end
+	end
+
+	for victim, acc in pairs(perVictim) do
+		applyDamage(shooter, victim, acc.dmg, {
+			weaponName = def.name,
+			head = acc.head,
+			melee = false,
+		})
+	end
+end
+
+-- Melee ----------------------------------------------------------------------
+-- Find the best (nearest, in-cone, unobstructed) enemy in front of the attacker.
+local function findMeleeTarget(player, attackerChar, def)
+	local head = Utility.characterHead(attackerChar)
+	local root = Utility.rootOf(attackerChar)
+	if not head or not root then
+		return nil, nil
+	end
+	local origin = head.Position
+	local look = root.CFrame.LookVector
+
+	local best, bestDist = nil, def.range
+	for _, other in ipairs(Players:GetPlayers()) do
+		if other.Character then
+			local oChar = other.Character
+			local oHum = Utility.humanoidOf(oChar)
+			local oHead = Utility.characterHead(oChar)					if oHum and oHum.Health &gt; 0 and oHead and other.Character.Parent
+						and Utility.areEnemies(player, other) then
+				local delta = oHead.Position - origin
+				local dist = delta.Magnitude
+				if dist &lt;= def.range and dist &gt; 0.01 then
+					local dir = delta.Unit
+					if look:Dot(dir) &gt;= def.minDot then
+						-- line of sight: nothing solid between us
+						local params = RaycastParams.new()
+						params.FilterType = Enum.RaycastFilterType.Exclude
+						params.FilterDescendantsInstances = { attackerChar, other.Character }
+						local blocked = workspace:Raycast(origin, delta, params)
+						if not blocked then
+							if dist &lt; bestDist then
+								best, bestDist = other, dist
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if best then
+		local tRoot = Utility.rootOf(best.Character)
+		if not tRoot then
+			return nil, nil
+		end
+		local dir = tRoot.Position - origin
+		dir = Vector3.new(dir.X, 0, dir.Z)
+		if dir.Magnitude &gt; 0.01 then
+			dir = dir.Unit
+		else
+			dir = look
+		end
+		return best, dir
+	end
+	return nil, nil
+end
+
+local function performSwing(player, def, kindName, damage, combo)
+	local char = player.Character
+	if not char then
+		return
+	end
+	local target, dir = findMeleeTarget(player, char, def)
+	Utility.notify(player, { k = "swing", kind = kindName, combo = combo or 1 })
+	if target then
+		applyDamage(player, target, damage, {
+			weaponName = kindName,
+			head = false,
+			melee = true,
+			stun = def.stun,
+			knockback = def.knockback,
+			dir = dir,
+		})
+	end
+end
+
+local function handleMelee(player, payload)
+	if type(payload) ~= "table" then
+		return
+	end
+	local kind = payload.kind
+	local now = os.clock()
+
+	-- anti-spam backstop
+	if not Utility.allow(tostring(player.UserId) .. ":melee", 6, 5) then
+		return
+	end
+
+	local char = player.Character
+	local hum = char and Utility.humanoidOf(char)
+	if not hum or hum.Health &lt;= 0 then
+		return
+	end
+
+	if kind == "block" then
+		local active = payload.active and true or false
+		if active then
+			blockState[player] = { active = true, since = now }
+		else
+			local bs = blockState[player]
+			if bs then
+				bs.active = false
+			end
+		end
+		Utility.notify(player, { k = "block", active = active })
+		return
+	end
+
+	local def, damage, combo
+	if kind == "light" then
+		def = CombatConfig.Light
+	elseif kind == "heavy" then
+		def = CombatConfig.Heavy
+	elseif kind == "gunbutt" then
+		def = CombatConfig.GunButt
+	else
+		return
+	end
+
+	local ls = lastSwing[player]
+	if ls == nil then
+		ls = {}
+		lastSwing[player] = ls
+	end
+
+	-- gun-butt requires the equipped gun to be at EXACTLY 0 ammunition
+	if kind == "gunbutt" then
+		local WeaponService = require(script.Parent.WeaponService)
+		local mag = WeaponService.getMag(player)
+		if mag == nil or mag &gt; 0 then
+			return -- not a gun, or gun still has ammo: not a legal butt-strike
+		end
+	end
+
+	local last = ls[kind] or 0
+	if now - last &lt; def.cooldown - CombatConfig.Validate.meleeCooldownTolerance then
+		return -- server-enforced swing cooldown
+	end
+	ls[kind] = now
+
+	if kind == "light" then
+		-- chain a follow-up swing if the previous light landed inside the window
+		local idx = 1
+		if last &gt; 0 and (now - last) &lt;= def.comboWindow then
+			idx = (comboIndex[player] or 0) + 1
+			if idx &gt; #def.comboDamage then
+				idx = 1
+			end
+		end
+		comboIndex[player] = idx
+		damage = def.comboDamage[idx]
+		combo = idx
+	elseif kind == "heavy" then
+		damage = def.damage
+		combo = 1
+	else
+		damage = def.damage
+		combo = 1
+	end
+
+	if kind == "heavy" then
+		-- brief windup before the hit resolves (client animates the windup)
+		local windup = def.windup
+		task.delay(windup, function()
+			if player.Parent and player.Character then
+				local h = Utility.humanoidOf(player.Character)
+				if h and h.Health &gt; 0 then
+					performSwing(player, def, "HEAVY", damage, combo)
+				end
+			end
+		end)
+	else
+		performSwing(player, def, kind == "gunbutt" and "GUNBUTT" or "LIGHT", damage, combo)
+	end
+end
+
+-- Queries used by other services ---------------------------------------------
+function CombatService.getLastAttacker(victim)
+	return lastDamaged[victim]
+end
+
+function CombatService.isBlocking(player)
+	local bs = blockState[player]
+	return bs ~= nil and bs.active
+end
+
+-- Init ------------------------------------------------------------------------
+function CombatService.init()
+	MeleeRemote.OnServerEvent:Connect(function(player, payload)
+		handleMelee(player, payload)
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		lastDamaged[player] = nil
+		lastSwing[player] = nil
+		comboIndex[player] = nil
+		blockState[player] = nil
+	end)
+end
+
+return CombatService
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX77">
+        <Properties>
+          <string name="Name">MatchService</string>
+          <string name="Source">--[[
+	MatchService.lua (ModuleScript -&gt; ServerScriptService/Services)
+	Team Deathmatch: scores, match timer, kill feed, streaks, win detection,
+	match-end screen and automatic next-round transition.
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Config = require(ReplicatedStorage.Shared.Config)
+local Utility = require(ReplicatedStorage.Shared.Utility)
+
+local MatchService = {}
+
+local scores = {} -- [teamId] = number
+local streaks = {} -- [player] = number
+local phase = "live" -- "live" | "over"
+local remaining = Config.Match.timeLimit
+local killFeed = {} -- keep last N entries so late joiners can be caught up
+
+local function scoreOf(teamId)
+	return scores[teamId] or 0
+end
+
+local function broadcastScores()
+	Utility.notify(nil, {
+		k = "scores",
+		blaze = scoreOf("BLAZE"),
+		frost = scoreOf("FROST"),
+		limit = Config.Match.scoreLimit,
+		phase = phase,
+	})
+end
+
+local function leaderstat(player, name)
+	local ls = player:FindFirstChild("leaderstats")
+	if ls then
+		return ls:FindFirstChild(name)
+	end
+	return nil
+end
+
+local function winnerOf()
+	local b, f = scoreOf("BLAZE"), scoreOf("FROST")
+	if b &gt; f then
+		return "BLAZE"
+	elseif f &gt; b then
+		return "FROST"
+	end
+	return "DRAW"
+end
+
+local function endMatch()
+	if phase == "over" then
+		return
+	end
+	phase = "over"
+	local winner = winnerOf()
+	Utility.notify(nil, {
+		k = "matchend",
+		winner = winner,
+		blaze = scoreOf("BLAZE"),
+		frost = scoreOf("FROST"),
+	})
+	Utility.notify(nil, { k = "announce", text = winner .. " WINS THE ROUND" })
+
+	-- automatic next-round transition
+	task.delay(Config.Match.intermission, function()
+		scores = { BLAZE = 0, FROST = 0 }
+		streaks = {}
+		remaining = Config.Match.timeLimit
+		phase = "live"
+		broadcastScores()
+		Utility.notify(nil, { k = "timer", t = remaining })
+		Utility.notify(nil, { k = "announce", text = "NEW ROUND - GO!" })
+		-- fresh life for everyone
+		local PlayerService = require(script.Parent.PlayerService)
+		for _, p in ipairs(Players:GetPlayers()) do
+			PlayerService.forceRespawn(p)
+		end
+	end)
+end
+
+local function checkWin()
+	if scoreOf("BLAZE") &gt;= Config.Match.scoreLimit or scoreOf("FROST") &gt;= Config.Match.scoreLimit then
+		endMatch()
+	end
+end
+
+-- Kill pipeline --------------------------------------------------------------
+function MatchService.registerKill(killer, victim, weaponName, headshot)
+	-- scoring (suicides / falls: killer == nil)
+	if killer and killer ~= victim and Utility.areEnemies(killer, victim) then
+		local team = Utility.getTeamId(killer)
+		if team then
+			scores[team] = scoreOf(team) + 1
+		end
+		local k = leaderstat(killer, "Kills")
+		if k then
+			k.Value = k.Value + 1
+		end
+		local streak = (streaks[killer] or 0) + 1
+		streaks[killer] = streak
+		if streak &gt;= 3 then
+			Utility.notify(killer, { k = "streak", n = streak })
+		end
+	end
+	if victim then
+		streaks[victim] = 0
+		local d = leaderstat(victim, "Deaths")
+		if d then
+			d.Value = d.Value + 1
+		end
+	end
+
+	local entry = {
+		k = "kill",
+		killer = killer and killer.Name or "",
+		victim = victim and victim.Name or "",
+		weapon = weaponName or "",
+		head = headshot and true or false,
+		team = killer and Utility.getTeamId(killer) or "",
+	}
+	killFeed[#killFeed + 1] = entry
+	if #killFeed &gt; 8 then
+		table.remove(killFeed, 1)
+	end
+	Utility.notify(nil, entry)
+	broadcastScores()
+	checkWin()
+end
+
+function MatchService.onPlayerDeath(victim)
+	-- attribute the kill using recent damage info
+	local CombatService = require(script.Parent.CombatService)
+	local last = CombatService.getLastAttacker(victim)
+	local killer, weapon, head = nil, "FALL", false
+	if last and (os.clock() - last.at) &lt; 5 then
+		killer = last.attacker
+		weapon = last.weapon
+		head = last.head
+	end
+	MatchService.registerKill(killer, victim, weapon, head)
+
+	local PlayerService = require(script.Parent.PlayerService)
+	PlayerService.respawn(victim, Config.Match.respawnDelay)
+end
+
+function MatchService.getSpectatorFeed()
+	return killFeed
+end
+
+-- Init ------------------------------------------------------------------------
+function MatchService.init()
+	scores = { BLAZE = 0, FROST = 0 }
+	remaining = Config.Match.timeLimit
+	phase = "live"
+
+	-- 1 Hz match clock: the only periodic server loop in the game.
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			if #Players:GetPlayers() &gt; 0 then
+				if phase == "live" then
+					remaining = remaining - 1
+					Utility.notify(nil, { k = "timer", t = remaining })
+					if remaining &lt;= 0 then
+						endMatch()
+					end
+				end
+			end
+		end
+	end)
+
+	-- catch up late joiners when they arrive
+	Players.PlayerAdded:Connect(function(player)
+		task.delay(1, function()
+			if player.Parent then
+				Utility.notify(player, { k = "scores", blaze = scoreOf("BLAZE"), frost = scoreOf("FROST"), limit = Config.Match.scoreLimit, phase = phase })
+				Utility.notify(player, { k = "timer", t = remaining })
+				for _, entry in ipairs(killFeed) do
+					Utility.notify(player, entry)
+				end
+			end
+		end)
+	end)
+end
+
+return MatchService
+</string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX78">
+        <Properties>
+          <string name="Name">AdminService</string>
+          <string name="Source">--[[
+	AdminService.lua (ModuleScript -&gt; ServerScriptService/Services)
+	Chat-driven admin commands. Permission is checked SERVER-SIDE on every
+	command; the client is never asked "are you admin?". Normal players get
+	silently ignored - their chat commands do nothing.
+
+	Commands:
+	  !giveweapon &lt;ar|smg|shotgun|pistol|knife&gt; [player]
+	  !speed &lt;multiplier&gt; [player]     !heal [player]
+	  !gravity &lt;number&gt;                !lowgravity
+	  !teleport &lt;player&gt; [target]      !announcement &lt;text...&gt;
+	  !freeze &lt;player&gt;                 !respawn &lt;player&gt;
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Config = require(ReplicatedStorage.Shared.Config)
+local Utility = require(ReplicatedStorage.Shared.Utility)
+
+local AdminService = {}
+
+-- Server-side permission gate -------------------------------------------------
+local function isAdmin(player)
+	-- Studio = developer environment
+	if game:GetService("RunService"):IsStudio() then
+		return true
+	end
+	-- configured admins
+	if Config.Admins[player.UserId] then
+		return true
+	end
+	-- private server owner
+	if game.PrivateServerId ~= "" and game.PrivateServerOwnerId == player.UserId then
+		return true
+	end
+	return false
+end
+
+local function findPlayer(name)
+	name = string.lower(name or "")
+	for _, p in ipairs(Players:GetPlayers()) do
+		if string.find(string.lower(p.Name), name, 1, true) == 1 then
+			return p
+		end
+	end
+	return nil
+end
+
+local function resolve(msg, index, fallback)
+	local target = msg[index] and findPlayer(msg[index])
+	return target or fallback
+end
+
+-- Command handlers ------------------------------------------------------------
+local handlers = {}
+
+handlers.giveweapon = function(admin, msg)
+	local wid = msg[2]
+	if wid == nil then
+		return
+	end
+	local target = resolve(msg, 3, admin)
+	local WeaponService = require(script.Parent.WeaponService)
+	WeaponService.give(target, wid)
+end
+
+handlers.speed = function(admin, msg)
+	local mult = tonumber(msg[2])
+	if not mult then
+		return
+	end
+	mult = Utility.clamp(mult, 0.1, 10)
+	local target = resolve(msg, 3, admin)
+	local hum = target.Character and Utility.humanoidOf(target.Character)
+	if hum then
+		hum:SetAttribute("SpeedMult", mult)
+		hum.WalkSpeed = Config.Movement.walkSpeed * mult
+	end
+end
+
+handlers.heal = function(admin, msg)
+	local target = resolve(msg, 2, admin)
+	local hum = target.Character and Utility.humanoidOf(target.Character)
+	if hum then
+		hum.Health = hum.MaxHealth
+	end
+end
+
+handlers.gravity = function(_, msg)
+	local g = tonumber(msg[2])
+	if g then
+		workspace.Gravity = Utility.clamp(g, 1, 500)
+	end
+end
+
+handlers.lowgravity = function()
+	workspace.Gravity = 45
+	Utility.notify(nil, { k = "announce", text = "LOW GRAVITY" })
+end
+
+handlers.teleport = function(admin, msg)
+	local target = resolve(msg, 2, admin)
+	local destName = msg[3] and findPlayer(msg[3])
+	if target and destName and destName.Character then
+		local root = Utility.rootOf(destName.Character)
+		if root then
+			local PlayerService = require(script.Parent.PlayerService)
+			PlayerService.teleport(target, root.CFrame * CFrame.new(0, 0, -6))
+		end
+	end
+end
+
+handlers.announcement = function(_, msg)
+	local text = table.concat(msg, " ", 2)
+	if text ~= "" then
+		Utility.notify(nil, { k = "announce", text = string.upper(text) })
+	end
+end
+
+handlers.freeze = function(admin, msg)
+	local target = resolve(msg, 2, admin)
+	local root = target.Character and Utility.rootOf(target.Character)
+	if root then
+		root.Anchored = not root.Anchored
+		Utility.notify(admin, { k = "feed", text = (root.Anchored and "FROZEN: " or "UNFROZEN: ") .. target.Name })
+	end
+end
+
+handlers.respawn = function(admin, msg)
+	local target = resolve(msg, 2, admin)
+	local PlayerService = require(script.Parent.PlayerService)
+	PlayerService.forceRespawn(target)
+end
+
+-- Init ------------------------------------------------------------------------
+function AdminService.init()
+	Players.PlayerAdded:Connect(function(player)
+		player.Chatted:Connect(function(message)
+			if string.sub(message, 1, 1) ~= "!" then
+				return
+			end
+			-- permission check happens HERE, server-side, before any parsing
+			if not isAdmin(player) then
+				return
+			end
+			local msg = {}
+			for word in string.gmatch(message, "%S+") do
+				msg[#msg + 1] = word
+			end
+			local name = string.lower(string.sub(msg[1], 2))
+			local handler = handlers[name]
+			if handler then
+				local ok, err = pcall(handler, player, msg)
+				if not ok then
+					warn("[STRIKE//ZERO] admin command error: " .. tostring(err))
+				end
+			end
+		end)
+	end)
+end
+
+return AdminService
+</string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="StarterPlayer" referent="RBX79">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="RBX80">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="LocalScript" referent="RBX81">
+        <Properties>
+          <string name="Name">ClientMain</string>
+          <string name="Source">--[[
+	ClientMain.lua (LocalScript -&gt; StarterPlayer/StarterPlayerScripts)
+	Client entry point. Wires the shared event hub, routes the single server
+	Notify remote onto the hub, and boots the four controllers in order.
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+ReplicatedStorage:WaitForChild("Shared")
+local Config = require(ReplicatedStorage.Shared.Config)
+local Utility = require(ReplicatedStorage.Shared.Utility)
+
+local player = Players.LocalPlayer
+
+-- First-person is the primary gameplay: lock the camera.
+player.CameraMode = Enum.CameraMode.LockFirstPerson
+
+-- Shared event hub: controllers talk through this instead of referencing
+-- each other directly (loose coupling, no leaky references).
+local hub = Utility.newHub()
+
+local Controllers = script.Parent:WaitForChild("Controllers")
+local UIController = require(Controllers.UIController)
+local MovementController = require(Controllers.MovementController)
+local WeaponController = require(Controllers.WeaponController)
+local CombatController = require(Controllers.CombatController)
+
+-- Route server messages ------------------------------------------------------
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local Notify = Remotes:WaitForChild("Notify")
+
+Notify.OnClientEvent:Connect(function(payload)
+	if type(payload) ~= "table" or type(payload.k) ~= "string" then
+		return
+	end
+	hub:emit("notify", payload)
+	hub:emit("n_" .. payload.k, payload) -- typed channel, e.g. "n_kill"
+end)
+
+-- Boot controllers ------------------------------------------------------------
+UIController.init(hub)
+WeaponController.init(hub)
+CombatController.init(hub)
+MovementController.init(hub)
+
+print("[STRIKE//ZERO] client online - v" .. Config.Version)
+</string>
+        </Properties>
+      </Item>
+      <Item class="Folder" referent="RBX82">
+        <Properties>
+          <string name="Name">Controllers</string>
+        </Properties>
+        <Item class="ModuleScript" referent="RBX83">
+          <Properties>
+            <string name="Name">MovementController</string>
+            <string name="Source">--[[
+	MovementController.lua (ModuleScript -&gt; StarterPlayerScripts/Controllers)
+	COD/Rivals-style sprint + slide. Fully event-driven: no RenderStepped
+	loop, no polling. Movement state changes are broadcast on the hub so the
+	viewmodel can tilt/slide without this module touching UI or weapons.
+]]
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local Utility = require(ReplicatedStorage.Shared.Utility)
+
+local MovementController = {}
+
+local hub = nil
+local player = Players.LocalPlayer
+
+local sprintHeld = false
+local sliding = false
+local slideEndAt = 0
+local slideToken = 0 -- invalidates stale slide timers across respawns
+
+local function humanoid()
+	local char = player.Character
+	return char and Utility.humanoidOf(char)
+end
+
+local function speedMult(hum)
+	return hum:GetAttribute("SpeedMult") or 1
+end
+
+local function emitMove()
+	hub:emit("move", { sprint = sprintHeld and not sliding, slide = sliding })
+end
+
+local function applySpeed(hum)
+	local cfg = Config.Movement
+	local m = speedMult(hum)
+	if sliding then
+		hum.WalkSpeed = cfg.slideBurstSpeed * m
+	elseif sprintHeld then
+		hum.WalkSpeed = cfg.sprintSpeed * m
+	else
+		hum.WalkSpeed = cfg.walkSpeed * m
+	end
+end
+
+local function setFov(boost)
+	local camera = workspace.CurrentCamera
+	if camera then
+		local target = 70 + boost
+		if math.abs(camera.FieldOfView - target) &gt; 0.1 then
+			TweenService:Create(
+				camera,
+				TweenInfo.new(Config.Movement.sprintFovTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				{ FieldOfView = target }
+			):Play()
+		end
+	end
+end
+
+local function stopSlide()
+	if not sliding then
+		return
+	end
+	sliding = false
+	slideToken = slideToken + 1
+	local hum = humanoid()
+	if hum then
+		hum.CameraOffset = Vector3.new(0, 0, 0)
+		applySpeed(hum)
+	end
+	emitMove()
+end
+
+local function startSlide()
+	if sliding then
+		return
+	end
+	local hum = humanoid()
+	if not hum or hum.Health &lt;= 0 then
+		return
+	end
+	if hum.FloorMaterial == Enum.Material.Air then
+		return -- no airborne slides
+	end
+	local cfg = Config.Movement
+	sliding = true
+	slideToken = slideToken + 1
+	local myToken = slideToken
+	hum.CameraOffset = Vector3.new(0, -cfg.crouchCameraOffset, 0)
+	applySpeed(hum)
+	Utility.play("slide", 0.4)
+	emitMove()
+
+	-- decay burst into slide speed, then stand up (event-driven timers)
+	task.delay(0.3, function()
+		if sliding and slideToken == myToken then
+			local h = humanoid()
+			if h then
+				h.WalkSpeed = cfg.slideSpeed * speedMult(h)
+			end
+		end
+	end)
+	task.delay(cfg.slideDuration, function()
+		if sliding and slideToken == myToken then
+			stopSlide()
+		end
+	end)
+end
+
+local function updateSprint()
+	local hum = humanoid()
+	if hum then
+		applySpeed(hum)
+	end
+	setFov(sprintHeld and not sliding and Config.Movement.sprintFovBoost or 0)
+	emitMove()
+end
+
+function MovementController.init(h)
+	hub = h
+
+	local function onInput(input, processed)
+		if processed then
+			return
+		end
+		if input.KeyCode == Enum.KeyCode.LeftShift then
+			if not sprintHeld then
+				sprintHeld = true
+				updateSprint()
+			end
+		elseif input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.C then
+			if sprintHeld and not sliding then
+				startSlide()
+			end
+		elseif input.KeyCode == Enum.KeyCode.Space and sliding then
+			-- slide-jump: cancel the slide, keep the momentum
+			stopSlide()
+			updateSprint()
+		end
+	end
+
+	local function onRelease(input, processed)
+		if input.KeyCode == Enum.KeyCode.LeftShift then
+			sprintHeld = false
+			updateSprint()
+		end
+	end
+
+	UserInputService.InputBegan:Connect(onInput)
+	UserInputService.InputReleased:Connect(onRelease)
+
+	-- respawn resets movement state
+	player.CharacterAdded:Connect(function(char)
+		sliding = false
+		slideToken = slideToken + 1
+		local hum = char:WaitForChild("Humanoid")
+		hum.CameraOffset = Vector3.new(0, 0, 0)
+		-- admin !speed changes SpeedMult; re-apply base speed on spawn
+		applySpeed(hum)
+		emitMove()
+	end)
+
+	-- admin !speed while alive: attribute changes are replicated to us
+	player.CharacterAdded:Connect(function(char)
+		local hum = char:WaitForChild("Humanoid")
+		hum:GetAttributeChangedSignal("SpeedMult"):Connect(function()
+			applySpeed(hum)
+		end)
+	end)
+end
+
+return MovementController
+</string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="RBX84">
+          <Properties>
+            <string name="Name">WeaponController</string>
+            <string name="Source">--[[
+	WeaponController.lua (ModuleScript -&gt; StarterPlayerScripts/Controllers)
+	Client weapon feel: procedural viewmodel (no animation assets), camera
+	recoil with recovery, ammo prediction, firing, reload + switch inputs.
+	The server stays authoritative: this file predicts for zero perceived
+_latency and reconciles on every "n_state" message.
+]]
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local WeaponConfig = require(ReplicatedStorage.Shared.WeaponConfig)
+local CombatConfig = require(ReplicatedStorage.Shared.CombatConfig)
+local Utility = require(ReplicatedStorage.Shared.Utility)
+
+local WeaponController = {}
+
+local hub = nil
+local player = Players.LocalPlayer
+
+-- mirrors (server corrects these on n_state) ---------------------------------
+local loadout = { 1 = "ar", 2 = "pistol", 3 = "knife" }
+local ammoMirror = {} -- [wid] = {mag, reserve}
+local currentSlot = 1
+local pendingReload = false -- R pressed, waiting for server ack
+local lastButt = 0
+
+-- viewmodel ------------------------------------------------------------------
+local vmParts = {} -- { {part, offset} }
+local vmRoot = nil -- Model parented to camera
+local muzzle = nil -- reusable flash part (pooled: never re-created per shot)
+local flashToken = 0
+
+-- animation / feel state -----------------------------------------------------
+local recoilRemaining = 0 -- radians of pitch left to recover
+local recoilSide = 0
+local kickBack = 0 -- viewmodel z kick
+local swayPitch, swayYaw = 0, 0
+local bobTime = 0
+local sprintT, slideT = 0, 0
+local anim = { kind = "none", start = 0, dur = 0, a = 0, b = 0 }
+local prevCamCF = nil
+local firing = false
+local lastBuiltWid = nil
+local sprintActive = false
+local slideActive = false
+local lightChain = 1
+local lightPrev = 0
+
+local function camera()
+	return workspace.CurrentCamera
+end
+
+local function currentDef()
+	return WeaponConfig.get(loadout[currentSlot])
+end
+
+local function playAnim(kind, dur, a, b)
+	anim = { kind = kind, start = os.clock(), dur = dur, a = a or 0, b = b or 0 }
+end
+
+function WeaponController.playSwing(kind, combo)
+	-- kind: "LIGHT" | "HEAVY" | "GUNBUTT"
+	if kind == "LIGHT" then
+		local dir = (combo == 2) and -1 or 1
+		playAnim("swing", 0.26, 55 * dir, -55 * dir)
+	elseif kind == "HEAVY" then
+		playAnim("heavy", 0.5, 0, 0)
+	elseif kind == "GUNBUTT" then
+		playAnim("butt", 0.34, 0, 0)
+	end
+end
+
+-- Build the camera-space gun from the weapon's data blueprint ----------------
+local function destroyViewmodel()
+	if vmRoot then
+		vmRoot:Destroy()
+	end
+	vmRoot = nil
+	vmParts = {}
+	muzzle = nil
+end
+
+local function buildViewmodel(def)
+	destroyViewmodel()
+	local cam = camera()
+	if not cam or not def.viewmodel then
+		return
+	end
+	local model = Instance.new("Model")
+	model.Name = "SZ_Viewmodel"
+	for _, piece in ipairs(def.viewmodel) do
+		local part = Instance.new("Part")
+		part.Size = Vector3.new(piece.size[1], piece.size[2], piece.size[3])
+		part.Color = Color3.fromRGB(piece.color[1], piece.color[2], piece.color[3])
+		part.Material = Enum.Material.SmoothPlastic
+		part.Anchored = true
+		part.CanCollide = false
+		part.CanQuery = false
+		part.CanTouch = false
+		part.CastShadow = false
+		part.Massless = true
+		part.Parent = model
+		vmParts[#vmParts + 1] = { part = part, offset = piece.offset }
+	end
+	-- pooled muzzle flash (one instance for the whole session; melee has none)
+	if def.muzzle then
+		muzzle = Instance.new("Part")
+		muzzle.Shape = Enum.PartType.Ball
+		muzzle.Color = Color3.fromRGB(def.muzzle.color[1], def.muzzle.color[2], def.muzzle.color[3])
+		muzzle.Material = Enum.Material.Neon
+		muzzle.Size = Vector3.new(1, 1, 1) * def.muzzle.size
+		muzzle.Transparency = 1
+		muzzle.Anchored = true
+		muzzle.CanCollide = false
+		muzzle.CanQuery = false
+		muzzle.CanTouch = false
+		muzzle.CastShadow = false
+		muzzle.Parent = model
+	end
+	vmRoot = model
+	vmRoot.Parent = cam
+	lastBuiltWid = def.id
+end
+
+local function flashMuzzle(def)
+	if not muzzle then
+		return
+	end
+	flashToken = flashToken + 1
+	local my = flashToken
+	muzzle.Transparency = 0
+	muzzle.Size = Vector3.new(1, 1, 1) * def.muzzle.size
+	task.delay(def.muzzle.time, function()
+		if flashToken == my and muzzle then
+			muzzle.Transparency = 1
+		end
+	end)
+end
+
+-- Ammo / weapon HUD emission ------------------------------------------------
+local function emitAmmo()
+	local def = currentDef()
+	if not def or def.kind == "melee" then
+		hub:emit("ammo", { melee = true, name = def and def.name or "" })
+		return
+	end
+	local a = ammoMirror[def.id]
+	hub:emit("ammo", {
+		name = def.name,
+		mag = a and a.mag or 0,
+		reserve = a and a.reserve or 0,
+		slot = currentSlot,
+	})
+end
+
+local function emitWeapon()
+	local def = currentDef()
+	if def then
+		hub:emit("weapon", { wid = def.id, name = def.name, slot = currentSlot, kind = def.kind })
+	end
+end
+
+-- Shooting --------------------------------------------------------------------
+local function applyCameraRecoil(def)
+	recoilRemaining = recoilRemaining + math.rad(def.recoilUp)
+	recoilSide = math.rad((math.random() * 2 - 1) * def.recoilSide)
+	kickBack = math.min(0.22, kickBack + 0.08 + def.recoilUp * 0.02)
+	local cam = camera()
+	if cam then
+		cam.CFrame = cam.CFrame * CFrame.Angles(math.rad(def.recoilUp), recoilSide, 0)
+	end
+end
+
+local function sendFire()
+	local cam = camera()
+	if not cam then
+		return
+	end
+	local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+	Remotes:WaitForChild("Fire"):FireServer(cam.CFrame.Position, cam.CFrame.LookVector)
+end
+
+local function attemptGunButt()
+	local now = os.clock()
+	if now - lastButt &lt; CombatConfig.GunButt.cooldown - CombatConfig.Validate.meleeCooldownTolerance then
+		return
+	end
+	lastButt = now
+	WeaponController.playSwing("GUNBUTT", 1)
+	hub:emit("req_gunbutt")
+end
+
+local function tryShoot()
+	local def = currentDef()
+	if not def or def.kind ~= "gun" then
+		return
+	end
+	if pendingReload then
+		return
+	end
+	local a = ammoMirror[def.id]
+	if a == nil then
+		return
+	end
+	if a.mag &lt;= 0 then
+		-- EXACTLY 0: the shoot button becomes a gun-butt strike
+		attemptGunButt()
+		firing = false
+		return
+	end
+
+	a.mag = a.mag - 1 -- predicted; server reconciles via n_state
+	emitAmmo()
+	flashMuzzle(def)
+	applyCameraRecoil(def)
+	Utility.play("gunshot", 0.45)
+	sendFire()
+end
+
+local function startFiring()
+	if firing then
+		return
+	end
+	local def = currentDef()
+	if not def or def.kind ~= "gun" then
+		return
+	end
+	firing = true
+	task.spawn(function()
+		while firing do
+			local d = currentDef()
+			if not d or d.kind ~= "gun" then
+				break
+			end
+			tryShoot()
+			if not d.auto then
+				break
+			end
+			task.wait(d.fireRate)
+		end
+		firing = false
+	end)
+end
+
+local function stopFiring()
+	firing = false
+end
+
+-- Reload ----------------------------------------------------------------------
+local function requestReload()
+	local def = currentDef()
+	if not def or def.kind ~= "gun" or pendingReload then
+		return
+	end
+	local a = ammoMirror[def.id]
+	if a == nil or a.mag &gt;= def.mag or a.reserve &lt;= 0 then
+		return
+	end
+	pendingReload = true
+	playAnim("reload", def.reloadTime, 0, 0)
+	Utility.play("reload", 0.5)
+	ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Reload"):FireServer()
+	-- safety: if the server rejects (state changed), never soft-lock the gun
+	task.delay(def.reloadTime + 0.5, function()
+		if pendingReload then
+			pendingReload = false
+		end
+	end)
+end
+
+-- Weapon switching ------------------------------------------------------------
+local function setSlotLocal(slot)
+	if loadout[slot] == nil or slot == currentSlot then
+		return
+	end
+	currentSlot = slot
+	firing = false
+	pendingReload = false
+	local def = currentDef()
+	if def then
+		buildViewmodel(def)
+	end
+	emitWeapon()
+	emitAmmo()
+end
+
+local function requestSlot(slot)
+	if loadout[slot] == nil then
+		return
+	end
+	setSlotLocal(slot)
+	ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Switch"):FireServer(slot)
+end
+
+function WeaponController.getEquipped()
+	local def = currentDef()
+	return loadout[currentSlot], def
+end
+
+function WeaponController.getMag()
+	local def = currentDef()
+	if not def or def.kind ~= "gun" then
+		return nil
+	end
+	local a = ammoMirror[def.id]
+	return a and a.mag or 0
+end
+
+-- Input ----------------------------------------------------------------------
+local function onInput(input, processed)
+	if processed then
+		return
+	end
+	local def = currentDef()
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if def and def.kind == "melee" then
+			local now = os.clock()
+			local idx = 1
+			if now - lightPrev &lt;= CombatConfig.Light.comboWindow then
+				idx = lightChain + 1
+				if idx &gt; #CombatConfig.Light.comboDamage then
+					idx = 1
+				end
+			end
+			lightChain = idx
+			lightPrev = now
+			WeaponController.playSwing("LIGHT", idx)
+			hub:emit("req_light")
+		elseif def and def.kind == "gun" then
+			local a = ammoMirror[def.id]
+			if a and a.mag &lt;= 0 then
+				attemptGunButt()
+			else
+				startFiring()
+			end
+		end
+	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+		if def and def.kind == "melee" then
+			WeaponController.playSwing("HEAVY", 1)
+			hub:emit("req_heavy")
+		end
+	elseif input.KeyCode == Enum.KeyCode.R then
+		requestReload()
+	elseif input.KeyCode == Enum.KeyCode.One then
+		requestSlot(1)
+	elseif input.KeyCode == Enum.KeyCode.Two then
+		requestSlot(2)
+	elseif input.KeyCode == Enum.KeyCode.Three then
+		requestSlot(3)
+	end
+end
+
+local function onInputEnd(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		stopFiring()
+	end
+end
+
+-- Render: viewmodel placement + recoil recovery -------------------------------
+local function onRender(dt)
+	local cam = camera()
+	if not cam then
+		return
+	end
+
+	-- recoil recovery: pull the pitch back down after each kick
+	if recoilRemaining &gt; 0.0001 then
+		local recover = math.min(recoilRemaining, dt * 6)
+		cam.CFrame = cam.CFrame * CFrame.Angles(-recover, 0, 0)
+		recoilRemaining = recoilRemaining - recover
+	end
+
+	if vmRoot == nil then
+		prevCamCF = cam.CFrame
+		return
+	end
+	if vmRoot.Parent ~= cam then
+		vmRoot.Parent = cam
+	end
+
+	-- aim sway (camera rotation delta, clamped)
+	if prevCamCF then
+		local delta = prevCamCF:ToObjectSpace(cam.CFrame)
+		local dx, dy = delta:ToEulerAnglesYXZ()
+		local k = math.min(1, dt * 12)
+		swayPitch = swayPitch + (Utility.clamp(dx, -0.07, 0.07) - swayPitch) * k
+		swayYaw = swayYaw + (Utility.clamp(dy, -0.09, 0.09) - swayYaw) * k
+	end
+	prevCamCF = cam.CFrame
+
+	-- movement bob (only while actually moving on the ground)
+	local char = player.Character
+	local hum = char and Utility.humanoidOf(char)
+	local moveMag = 0
+	if hum then
+		moveMag = hum.MoveDirection.Magnitude
+	end
+	bobTime = bobTime + dt * 9 * moveMag
+	local bobX = math.cos(bobTime) * 0.02 * moveMag
+	local bobY = math.abs(math.sin(bobTime)) * 0.018 * moveMag
+
+	-- sprint / slide pose blending (state arrives event-driven via the hub)
+	local k = math.min(1, dt * 10)
+	local sprintTarget = (sprintActive and not slideActive) and 1 or 0
+	local slideTarget = slideActive and 1 or 0
+	sprintT = sprintT + (sprintTarget - sprintT) * k
+	sprintT = Utility.clamp(sprintT, 0, 1)
+	slideT = slideT + (slideTarget - slideT) * k
+	slideT = Utility.clamp(slideT, 0, 1)
+
+	-- animation pose
+	local pos = Vector3.new(bobX, bobY, 0)
+	local pitch = -swayPitch * 0.6
+	local yaw = swayYaw * 0.6
+	local roll = 0
+	local t = os.clock() - anim.start
+	if anim.kind ~= "none" and t &lt;= anim.dur then
+		local p = t / anim.dur
+		if anim.kind == "reload" then
+			local s = math.sin(p * math.pi)
+			pitch = pitch - 0.6 * s
+			roll = roll + 0.3 * s
+			pos = pos + Vector3.new(0, -0.25 * s, 0.12 * s)
+		elseif anim.kind == "swing" then
+			local e = p * p * (3 - 2 * p)
+			yaw = yaw + math.rad(anim.a + (anim.b - anim.a) * e)
+			pitch = pitch - 0.5 * math.sin(p * math.pi)
+			pos = pos + Vector3.new(0.12 * math.sin(p * math.pi), -0.05, -0.3 * math.sin(p * math.pi))
+		elseif anim.kind == "heavy" then
+			if p &lt; 0.45 then
+				local q = p / 0.45
+				pitch = pitch - 0.9 * q
+				pos = pos + Vector3.new(0, 0.12 * q, 0.12 * q)
+			else
+				local q = (p - 0.45) / 0.55
+				pitch = pitch - 0.9 + 1.6 * q
+				pos = pos + Vector3.new(0, 0.12 - 0.24 * q, 0.12 - 0.6 * q)
+			end
+		elseif anim.kind == "butt" then
+			local s = math.sin(p * math.pi)
+			pitch = pitch + 0.4 * s
+			pos = pos + Vector3.new(0, -0.1 * s, -0.55 * s)
+		end
+	else
+		anim.kind = "none"
+	end
+
+	-- recoil kick spring on the gun itself
+	kickBack = kickBack * math.max(0, 1 - dt * 12)
+	pitch = pitch + kickBack * 1.2
+	pos = pos + Vector3.new(0, kickBack * 0.1, kickBack)
+
+	-- sprint tilt (gun drops left) + slide drop
+	yaw = yaw + sprintT * math.rad(14)
+	pitch = pitch - sprintT * math.rad(20)
+	pitch = pitch - slideT * math.rad(24)
+	pos = pos + Vector3.new(-0.06 * sprintT, -0.08 * slideT, 0)
+
+	local pose = CFrame.new(pos) * CFrame.Angles(pitch, yaw, roll)
+	local base = cam.CFrame * pose
+	for _, entry in ipairs(vmParts) do
+		local o = entry.offset
+		entry.part.CFrame = base * CFrame.new(o[1], o[2], o[3])
+	end
+	if muzzle then
+		muzzle.CFrame = base * CFrame.new(0.42, -0.34, -2.7)
+	end
+end
+
+-- Init ------------------------------------------------------------------------
+function WeaponController.init(h)
+	hub = h
+
+	local def = currentDef()
+	if def then
+		buildViewmodel(def)
+	end
+	emitWeapon()
+	emitAmmo()
+
+	UserInputService.InputBegan:Connect(onInput)
+	UserInputService.InputReleased:Connect(onInputEnd)
+	RunService:BindToRenderStep("SZ_Viewmodel", Enum.RenderPriority.Camera.Value + 1, onRender)
+
+	-- authoritative snapshot from the server
+	hub:on("n_state", function(p)
+		if type(p) ~= "table" then
+			return
+		end
+		if p.wid and p.slot then
+			loadout[p.slot] = p.wid
+		end
+		if p.wid and p.mag ~= nil then
+			ammoMirror[p.wid] = { mag = p.mag, reserve = p.reserve }
+		end
+		if p.slot then
+			currentSlot = p.slot
+		end
+		pendingReload = false
+		local d = currentDef()
+		if d and lastBuiltWid ~= d.id then
+			buildViewmodel(d)
+			emitWeapon()
+		end
+		emitAmmo()
+	end)
+
+	-- server confirmed a reload: block firing until the next n_state
+	hub:on("n_reloadstart", function(p)
+		pendingReload = true
+		if anim.kind ~= "reload" then
+			playAnim("reload", (p and p.time) or 2, 0, 0)
+		end
+	end)
+
+	-- movement pose state from MovementController
+	hub:on("move", function(s)
+		sprintActive = s.sprint and true or false
+		slideActive = s.slide and true or false
+	end)
+end
+
+return WeaponController
+</string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="RBX85">
+          <Properties>
+            <string name="Name">CombatController</string>
+            <string name="Source">--[[
+	CombatController.lua (ModuleScript -&gt; StarterPlayerScripts/Controllers)
+	Melee input: light chain, heavy, block/parry, and the gun-butt fallback
+	(WeaponController routes the shoot button here when the mag is empty).
+	Client only sends INTENT to the server; damage is decided server-side.
+]]
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local CombatConfig = require(ReplicatedStorage.Shared.CombatConfig)
+
+local CombatController = {}
+
+local hub = nil
+local player = Players.LocalPlayer
+local MeleeRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Melee")
+
+local lastSent = { light = 0, heavy = 0, butt = 0 }
+local blocking = false
+
+local function localGate(kind, cooldown)
+	local now = os.clock()
+	if now - (lastSent[kind] or 0) &lt; cooldown - CombatConfig.Validate.meleeCooldownTolerance then
+		return false
+	end
+	lastSent[kind] = now
+	return true
+end
+
+local function requestLight()
+	if blocking then
+		return
+	end
+	if localGate("light", CombatConfig.Light.cooldown) then
+		MeleeRemote:FireServer({ kind = "light" })
+	end
+end
+
+local function requestHeavy()
+	if blocking then
+		return
+	end
+	if localGate("heavy", CombatConfig.Heavy.cooldown) then
+		MeleeRemote:FireServer({ kind = "heavy" })
+	end
+end
+
+-- Gun-butt: routed here by WeaponController when the equipped mag == 0.
+function CombatController.requestGunButt()
+	if blocking then
+		return
+	end
+	if localGate("butt", CombatConfig.GunButt.cooldown) then
+		MeleeRemote:FireServer({ kind = "gunbutt" })
+	end
+end
+
+local function setBlock(active)
+	if blocking == active then
+		return
+	end
+	blocking = active
+	MeleeRemote:FireServer({ kind = "block", active = active })
+	hub:emit("blockstate", active)
+end
+
+function CombatController.isBlocking()
+	return blocking
+end
+
+function CombatController.init(h)
+	hub = h
+
+	-- WeaponController routes mouse clicks for the knife slot through the hub
+	hub:on("req_light", requestLight)
+	hub:on("req_heavy", requestHeavy)
+
+	-- server swing acknowledgements drive the combo counter in the HUD
+	hub:on("n_swing", function(payload)
+		if payload.kind == "LIGHT" or payload.kind == "HEAVY" or payload.kind == "GUNBUTT" then
+			hub:emit("combo", { kind = payload.kind, combo = payload.combo or 1 })
+		end
+	end)
+
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then
+			return
+		end
+		if input.KeyCode == Enum.KeyCode.F then
+			setBlock(true)
+		end
+	end)
+	UserInputService.InputReleased:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.F then
+			setBlock(false)
+		end
+	end)
+
+	-- never leave a dangling block state after death/respawn
+	player.CharacterAdded:Connect(function()
+		blocking = false
+		hub:emit("blockstate", false)
+	end)
+end
+
+return CombatController
+</string>
+          </Properties>
+        </Item>
+        <Item class="ModuleScript" referent="RBX86">
+          <Properties>
+            <string name="Name">UIController</string>
+            <string name="Source">--[[
+	UIController.lua (ModuleScript -&gt; StarterPlayerScripts/Controllers)
+	Runtime-built competitive HUD: crosshair, health, ammo, scores, timer,
+	kill feed, hit markers, damage feedback, streaks, match-end screen and
+	the LOW/MEDIUM/HIGH graphics preset switcher. Everything is event-driven:
+	this file contains no RunService loops and never polls.
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local Utility = require(ReplicatedStorage.Shared.Utility)
+local WeaponConfig = require(ReplicatedStorage.Shared.WeaponConfig)
+
+local UIController = {}
+
+local hub = nil
+local player = Players.LocalPlayer
+
+local COLORS = {
+	blade = Color3.fromRGB(255, 140, 50),
+	frost = Color3.fromRGB(70, 160, 255),
+	panel = Color3.fromRGB(18, 20, 26),
+	text = Color3.fromRGB(235, 238, 245),
+	dim = Color3.fromRGB(150, 156, 168),
+	accent = Color3.fromRGB(120, 255, 170),
+	danger = Color3.fromRGB(255, 80, 80),
+}
+
+local gui, refs = nil, {}
+
+-- Construction helpers -------------------------------------------------------
+local function mk(class, props, parent)
+	local inst = Instance.new(class)
+	for k, v in pairs(props) do
+		inst[k] = v
+	end
+	inst.Parent = parent
+	return inst
+end
+
+local function panel(name, size, pos, parent)
+	local f = mk("Frame", {
+		Name = name,
+		Size = size,
+		Position = pos,
+		BackgroundColor3 = COLORS.panel,
+		BackgroundTransparency = 0.25,
+		BorderSizePixel = 0,
+	}, parent)
+	mk("UICorner", { CornerRadius = UDim.new(0, 8) }, f)
+	return f
+end
+
+local function label(props, parent)
+	props.BorderSizePixel = 0
+	props.BackgroundTransparency = props.BackgroundTransparency or 1
+	props.Font = props.Font or Enum.Font.GothamBold
+	props.TextColor3 = props.TextColor3 or COLORS.text
+	return mk("TextLabel", props, parent)
+end
+
+local function buildHUD()
+	gui = mk("ScreenGui", {
+		Name = "SZ_HUD",
+		ResetOnSpawn = false,
+		IgnoreGuiInset = true,
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+	}, player:WaitForChild("PlayerGui"))
+
+	-- crosshair (4 lines + center dot) --------------------------------------
+	local cross = mk("Frame", {
+		Name = "Crosshair",
+		Size = UDim2.fromOffset(0, 0),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		BackgroundTransparency = 1,
+	}, gui)
+	refs.cross = {}
+	for i = 1, 4 do
+		refs.cross[i] = mk("Frame", {
+			BackgroundColor3 = COLORS.text,
+			BorderSizePixel = 0,
+			Size = UDim2.fromOffset(2, 8),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+		}, cross)
+	end
+	refs.crossDot = mk("Frame", {
+		BackgroundColor3 = COLORS.text,
+		BorderSizePixel = 0,
+		Size = UDim2.fromOffset(3, 3),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Parent = cross,
+	}, cross)
+
+	-- hitmarker + damage numbers --------------------------------------------
+	refs.hitmarker = label({
+		Name = "Hitmarker",
+		Size = UDim2.fromOffset(60, 60),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Text = "x",
+		TextSize = 30,
+		TextTransparency = 1,
+	}, gui)
+
+	refs.dmgLabels = {}
+	for i = 1, 3 do
+		refs.dmgLabels[i] = label({
+			Name = "Dmg" .. i,
+			Size = UDim2.fromOffset(120, 30),
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.45),
+			Text = "",
+			TextSize = 20,
+			TextTransparency = 1,
+		}, gui)
+	end
+
+	-- damage vignette --------------------------------------------------------
+	refs.flash = mk("Frame", {
+		Name = "DamageFlash",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundColor3 = Color3.fromRGB(200, 20, 20),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ZIndex = 0,
+	}, gui)
+
+	-- health (bottom-left) ---------------------------------------------------
+	local health = panel("Health", UDim2.fromOffset(260, 54), UDim2.new(0, 16, 1, -70), gui)
+	refs.healthText = label({
+		Size = UDim2.new(1, -20, 0, 22),
+		Position = UDim2.fromOffset(12, 4),
+		Text = "100",
+		TextSize = 20,
+		TextXAlignment = Enum.TextXAlignment.Left,
+	}, health)
+	refs.healthBarBG = mk("Frame", {
+		Size = UDim2.new(1, -24, 0, 12),
+		Position = UDim2.fromOffset(12, 32),
+		BackgroundColor3 = Color3.fromRGB(40, 44, 52),
+		BorderSizePixel = 0,
+	}, health)
+	mk("UICorner", { CornerRadius = UDim.new(0, 6) }, refs.healthBarBG)
+	refs.healthBar = mk("Frame", {
+		Size = UDim2.fromScale(1, 1),
+		BackgroundColor3 = COLORS.accent,
+		BorderSizePixel = 0,
+	}, refs.healthBarBG)
+	mk("UICorner", { CornerRadius = UDim.new(0, 6) }, refs.healthBar)
+
+	-- ammo (bottom-right) ----------------------------------------------------
+	local ammo = panel("Ammo", UDim2.fromOffset(240, 78), UDim2.new(1, -256, 1, -94), gui)
+	refs.weaponName = label({
+		Size = UDim2.new(1, -20, 0, 20),
+		Position = UDim2.fromOffset(12, 6),
+		Text = "VK-7 RIFLE",
+		TextSize = 15,
+		TextColor3 = COLORS.dim,
+		TextXAlignment = Enum.TextXAlignment.Right,
+	}, ammo)
+	refs.ammoText = label({
+		Size = UDim2.new(1, -20, 0, 34),
+		Position = UDim2.fromOffset(12, 26),
+		Text = "30 / 90",
+		TextSize = 30,
+		TextXAlignment = Enum.TextXAlignment.Right,
+	}, ammo)
+	refs.slots = {}
+	for i = 1, 3 do
+		refs.slots[i] = label({
+			Name = "Slot" .. i,
+			Size = UDim2.fromOffset(26, 20),
+			Position = UDim2.fromOffset(12 + (i - 1) * 30, 54),
+			Text = tostring(i),
+			TextSize = 13,
+			BackgroundColor3 = Color3.fromRGB(45, 50, 60),
+			BackgroundTransparency = 0.35,
+		}, ammo)
+		mk("UICorner", { CornerRadius = UDim.new(0, 5) }, refs.slots[i])
+	end
+
+	-- top bar: scores + timer ------------------------------------------------
+	local top = panel("TopBar", UDim2.fromOffset(430, 54), UDim2.new(0.5, -215, 0, 10), gui)
+	refs.scoreBlaze = label({
+		Size = UDim2.fromOffset(140, 34),
+		Position = UDim2.fromOffset(14, 10),
+		Text = "BLAZE 0",
+		TextSize = 22,
+		TextColor3 = COLORS.blade,
+		TextXAlignment = Enum.TextXAlignment.Left,
+	}, top)
+	refs.scoreFrost = label({
+		Size = UDim2.fromOffset(140, 34),
+		Position = UDim2.new(1, -154, 0, 10),
+		Text = "0 FROST",
+		TextSize = 22,
+		TextColor3 = COLORS.frost,
+		TextXAlignment = Enum.TextXAlignment.Right,
+	}, top)
+	refs.timer = label({
+		Size = UDim2.fromOffset(110, 34),
+		Position = UDim2.new(0.5, -55, 0, 10),
+		Text = "5:00",
+		TextSize = 22,
+		TextColor3 = COLORS.dim,
+	}, top)
+	refs.limit = label({
+		Size = UDim2.fromOffset(430, 12),
+		Position = UDim2.fromOffset(0, 42),
+		Text = "FIRST TO 30",
+		TextSize = 10,
+		TextColor3 = COLORS.dim,
+	}, top)
+
+	-- kill feed (pooled labels, top-right) -----------------------------------
+	local feed = mk("Frame", {
+		Name = "KillFeed",
+		Size = UDim2.fromOffset(340, 160),
+		Position = UDim2.new(1, -356, 0, 76),
+		BackgroundTransparency = 1,
+	}, gui)
+	mk("UIListLayout", {
+		FillDirection = Enum.FillDirection.Vertical,
+		HorizontalAlignment = Enum.HorizontalAlignment.Right,
+		Padding = UDim.new(0, 4),
+	}, feed)
+	refs.feed = {}
+	for i = 1, 6 do
+		refs.feed[i] = label({
+			Name = "Feed" .. i,
+			Size = UDim2.fromOffset(340, 22),
+			BackgroundColor3 = COLORS.panel,
+			BackgroundTransparency = 0.3,
+			TextSize = 14,
+			TextTransparency = 1,
+		}, feed)
+		mk("UICorner", { CornerRadius = UDim.new(0, 6) }, refs.feed[i])
+	end
+	refs.feedCursor = 1
+	refs.feedTokens = {}
+end
+
+-- Feedback: hit markers, numbers, flash --------------------------------------
+local hitToken, dmgCursor, feedTokens = 0, 1, {}
+
+local function showHitmarker(kind)
+	hitToken = hitToken + 1
+	local my = hitToken
+	local hm = refs.hitmarker
+	hm.Text = kind == "blocked" and "o" or "x"
+	hm.TextColor3 = kind == "kill" and COLORS.danger
+		or (kind == "head" and Color3.fromRGB(255, 210, 80)
+		or (kind == "blocked" and COLORS.dim or COLORS.text))
+	hm.TextSize = kind == "kill" and 38 or 30
+	hm.TextTransparency = 0
+	TweenService:Create(hm, TweenInfo.new(0.28, Enum.EasingStyle.Quad), { TextTransparency = 1 }):Play()
+end
+
+local function showDamageNumber(text, color)
+	local lbl = refs.dmgLabels[dmgCursor]
+	dmgCursor = dmgCursor % #refs.dmgLabels + 1
+	lbl.Text = text
+	lbl.TextColor3 = color or COLORS.text
+	lbl.TextTransparency = 0
+	lbl.Position = UDim2.fromScale(0.5, 0.45)
+	TweenService:Create(lbl, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.fromScale(0.5, 0.38),
+		TextTransparency = 1,
+	}):Play()
+end
+
+local function damageFlash()
+	local f = refs.flash
+	f.BackgroundTransparency = 0.72
+	TweenService:Create(f, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		BackgroundTransparency = 1,
+	}):Play()
+end
+
+-- Kill feed -----------------------------------------------------------------
+local function pushFeed(text, color)
+	local lbl = refs.feed[refs.feedCursor]
+	refs.feedCursor = refs.feedCursor % #refs.feed + 1
+	feedTokens[lbl] = (feedTokens[lbl] or 0) + 1
+	local my = feedTokens[lbl]
+	lbl.Text = text
+	lbl.TextColor3 = color or COLORS.text
+	lbl.TextTransparency = 0
+	task.delay(6, function()
+		if feedTokens[lbl] == my and lbl.Parent then
+			TweenService:Create(lbl, TweenInfo.new(0.3), { TextTransparency = 1 }):Play()
+		end
+	end)
+end
+
+-- Toasts (announcements / feed messages) -------------------------------------
+local function buildToasts()
+	refs.announce = label({
+		Name = "Announce",
+		Size = UDim2.fromOffset(700, 60),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.3),
+		Text = "",
+		TextSize = 34,
+		TextTransparency = 1,
+	}, gui)
+	refs.streak = label({
+		Name = "Streak",
+		Size = UDim2.fromOffset(500, 44),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.38),
+		Text = "",
+		TextSize = 26,
+		TextColor3 = Color3.fromRGB(255, 200, 80),
+		TextTransparency = 1,
+	}, gui)
+	refs.combo = label({
+		Name = "Combo",
+		Size = UDim2.fromOffset(300, 30),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.62),
+		Text = "",
+		TextSize = 20,
+		TextColor3 = COLORS.accent,
+		TextTransparency = 1,
+	}, gui)
+	refs.blockTag = label({
+		Name = "BlockTag",
+		Size = UDim2.fromOffset(200, 26),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.57),
+		Text = "BLOCK",
+		TextSize = 16,
+		TextColor3 = COLORS.frost,
+		TextTransparency = 1,
+	}, gui)
+end
+
+local function flashText(lbl, text, seconds, size)
+	lbl.Text = text
+	if size then
+		lbl.TextSize = size
+	end
+	lbl.TextTransparency = 0
+	TweenService:Create(lbl, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+		TextTransparency = 1,
+	}):Play()
+end
+
+-- Match end overlay ----------------------------------------------------------
+local function buildEndOverlay()
+	refs.endOverlay = mk("Frame", {
+		Name = "EndOverlay",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundColor3 = Color3.fromRGB(8, 9, 12),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Visible = false,
+		ZIndex = 5,
+	}, gui)
+	refs.endTitle = label({
+		Size = UDim2.fromOffset(800, 80),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.42),
+		Text = "",
+		TextSize = 54,
+		ZIndex = 6,
+	}, refs.endOverlay)
+	refs.endScore = label({
+		Size = UDim2.fromOffset(600, 40),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.52),
+		Text = "",
+		TextSize = 26,
+		TextColor3 = COLORS.dim,
+		ZIndex = 6,
+	}, refs.endOverlay)
+end
+
+-- Crosshair ------------------------------------------------------------------
+local crossGap = 7
+local baseGap = 7
+
+local function layoutCrosshair(gap)
+	local c = refs.cross
+	c[1].Position = UDim2.fromOffset(0, -gap)
+	c[2].Position = UDim2.fromOffset(0, gap)
+	c[3].Position = UDim2.fromOffset(-gap, 0)
+	c[3].Rotation = 90
+	c[4].Position = UDim2.fromOffset(gap, 0)
+	c[4].Rotation = 90
+end
+
+local function bloomCrosshair()
+	layoutCrosshair(baseGap + 5)
+	task.delay(0.09, function()
+		layoutCrosshair(baseGap)
+	end)
+end
+
+-- Health ---------------------------------------------------------------------
+local healthConn = nil
+
+local function watchCharacter(char)
+	if healthConn then
+		healthConn:Disconnect()
+		healthConn = nil
+	end
+	local hum = char:WaitForChild("Humanoid")
+	local function update()
+		local pct = Utility.clamp(hum.Health / math.max(1, hum.MaxHealth), 0, 1)
+		refs.healthText.Text = tostring(math.floor(hum.Health + 0.5))
+		refs.healthBar.Size = UDim2.fromScale(pct, 1)
+		refs.healthBar.BackgroundColor3 = Color3.fromRGB(
+			math.floor(90 + 165 * (1 - pct)),
+			math.floor(80 + 140 * pct),
+			math.floor(80 + 40 * pct)
+		)
+	end
+	healthConn = hum.HealthChanged:Connect(update)
+	update()
+end
+
+-- Graphics presets (client-local: never replicates, zero server cost) --------
+local savedMaterials = nil
+local postEffects = nil
+
+local function applyGraphics(name)
+	local preset = Config.Graphics[name]
+	if not preset then
+		return
+	end
+	player:SetAttribute("GraphicsPreset", name)
+
+	Lighting.GlobalShadows = preset.shadows
+	Lighting.FogEnd = preset.fogEnd
+
+	if postEffects then
+		for _, e in ipairs(postEffects) do
+			e:Destroy()
+		end
+		postEffects = nil
+	end
+	if preset.postEffects then
+		local bloom = Instance.new("BloomEffect")
+		bloom.Name = "SZ_Bloom"
+		bloom.Intensity = 0.4
+		bloom.Size = 28
+		bloom.Threshold = 1.1
+		bloom.Parent = Lighting
+		local cc = Instance.new("ColorCorrectionEffect")
+		cc.Name = "SZ_CC"
+		cc.Contrast = 0.06
+		cc.Saturation = 0.06
+		cc.Parent = Lighting
+		postEffects = { bloom, cc }
+	end
+
+	-- LOW flattens map materials locally: far fewer texture samples to sample,
+	-- which is the cheapest big win on integrated GPUs.
+	local map = workspace:FindFirstChild("StrikeMap")
+	if map then
+		if savedMaterials == nil then
+			savedMaterials = {}
+			for _, d in ipairs(map:GetDescendants()) do
+				if d:IsA("BasePart") then
+					savedMaterials[#savedMaterials + 1] = { part = d, material = d.Material }
+				end
+			end
+		end
+		for _, entry in ipairs(savedMaterials) do
+			if entry.part.Parent then
+				if preset.mapMaterials then
+					entry.part.Material = entry.material
+				else
+					entry.part.Material = Enum.Material.SmoothPlastic
+				end
+			end
+		end
+	end
+	if refs.presetLabel then
+		refs.presetLabel.Text = "GRAPHICS: " .. name
+	end
+end
+
+local function buildSettings()
+	local btn = mk("TextButton", {
+		Name = "GfxButton",
+		Size = UDim2.fromOffset(92, 30),
+		Position = UDim2.fromOffset(16, 12),
+		BackgroundColor3 = COLORS.panel,
+		BackgroundTransparency = 0.25,
+		BorderSizePixel = 0,
+		Font = Enum.Font.GothamBold,
+		Text = "GFX",
+		TextColor3 = COLORS.text,
+		TextSize = 14,
+	}, gui)
+	mk("UICorner", { CornerRadius = UDim.new(0, 8) }, btn)
+
+	local frame = panel("Settings", UDim2.fromOffset(210, 150), UDim2.fromOffset(16, 50), gui)
+	frame.Visible = false
+	refs.presetLabel = label({
+		Size = UDim2.new(1, -20, 0, 24),
+		Position = UDim2.fromOffset(10, 8),
+		Text = "GRAPHICS: " .. Config.DefaultGraphics,
+		TextSize = 14,
+		TextColor3 = COLORS.dim,
+	}, frame)
+
+	local presets = { "LOW", "MEDIUM", "HIGH" }
+	for i, name in ipairs(presets) do
+		local b = mk("TextButton", {
+			Size = UDim2.new(1, -20, 0, 30),
+			Position = UDim2.fromOffset(10, 34 + (i - 1) * 36),
+			BackgroundColor3 = Color3.fromRGB(45, 50, 60),
+			BorderSizePixel = 0,
+			Font = Enum.Font.GothamBold,
+			Text = name,
+			TextColor3 = COLORS.text,
+			TextSize = 14,
+		}, frame)
+		mk("UICorner", { CornerRadius = UDim.new(0, 6) }, b)
+		b.Activated:Connect(function()
+			applyGraphics(name)
+		end)
+	end
+
+	btn.Activated:Connect(function()
+		frame.Visible = not frame.Visible
+	end)
+end
+
+-- Init: all hub subscriptions (event-driven, no loops) -----------------------
+function UIController.init(h)
+	hub = h
+	buildHUD()
+	buildToasts()
+	buildEndOverlay()
+	buildSettings()
+	layoutCrosshair(baseGap)
+
+	-- match state ------------------------------------------------------------
+	hub:on("n_scores", function(p)
+		refs.scoreBlaze.Text = "BLAZE " .. tostring(p.blaze or 0)
+		refs.scoreFrost.Text = tostring(p.frost or 0) .. " FROST"
+		refs.limit.Text = "FIRST TO " .. tostring(p.limit or Config.Match.scoreLimit)
+		if p.phase == "live" and refs.endOverlay.Visible then
+			refs.endOverlay.Visible = false
+		end
+	end)
+	hub:on("n_timer", function(p)
+		refs.timer.Text = Utility.formatTime(p.t or 0)
+	end)
+	hub:on("n_kill", function(p)
+		if p.killer == "" or p.killer == nil then
+			pushFeed(p.victim .. " died", COLORS.dim)
+			return
+		end
+		local hs = p.head and "  [HS]" or ""
+		local mine = p.killer == player.Name
+		local color = mine and COLORS.accent or (p.team == "BLAZE" and COLORS.blade or COLORS.frost)
+		pushFeed((mine and "YOU" or p.killer) .. "  &gt;  " .. p.victim .. "  · " .. p.weapon .. hs, color)
+		if mine then
+			Utility.play("kill", 0.5)
+		end
+	end)
+	hub:on("n_matchend", function(p)
+		refs.endOverlay.Visible = true
+		refs.endOverlay.BackgroundTransparency = 0.15
+		if p.winner == "DRAW" then
+			refs.endTitle.Text = "DRAW"
+			refs.endTitle.TextColor3 = COLORS.text
+		elseif p.winner == "BLAZE" then
+			refs.endTitle.Text = "BLAZE WINS"
+			refs.endTitle.TextColor3 = COLORS.blade
+		else
+			refs.endTitle.Text = "FROST WINS"
+			refs.endTitle.TextColor3 = COLORS.frost
+		end
+		refs.endScore.Text = tostring(p.blaze or 0) .. "   -   " .. tostring(p.frost or 0)
+	end)
+
+	-- combat feedback --------------------------------------------------------
+	hub:on("n_hit", function(p)
+		if p.blocked then
+			showHitmarker("blocked")
+			showDamageNumber("BLOCKED", COLORS.dim)
+			return
+		end
+		local kind = p.killed and "kill" or (p.head and "head" or "normal")
+		showHitmarker(kind)
+		showDamageNumber("-" .. tostring(p.dmg or 0),
+			p.killed and COLORS.danger or (p.head and Color3.fromRGB(255, 210, 80) or COLORS.text))
+		Utility.play("hit", 0.45)
+	end)
+	hub:on("n_damaged", function()
+		damageFlash()
+	end)
+	hub:on("n_streak", function(p)
+		flashText(refs.streak, tostring(p.n) .. " KILL STREAK!", 1.5, 26)
+		Utility.play("ui", 0.5)
+	end)
+	hub:on("n_parry", function()
+		refs.combo.TextColor3 = COLORS.accent
+		flashText(refs.combo, "PARRY!", 1, 26)
+	end)
+	hub:on("n_parried", function()
+		refs.combo.TextColor3 = COLORS.danger
+		flashText(refs.combo, "PARRIED!", 1, 22)
+	end)
+	hub:on("n_block", function(p)
+		refs.blockTag.TextTransparency = p.active and 0 or 1
+	end)
+	hub:on("combo", function(p)
+		if p.kind == "LIGHT" and p.combo and p.combo &gt; 1 then
+			refs.combo.TextColor3 = COLORS.accent
+			flashText(refs.combo, "COMBO x" .. tostring(p.combo), 0.7, 20)
+		elseif p.kind == "GUNBUTT" then
+			refs.combo.TextColor3 = COLORS.text
+			flashText(refs.combo, "GUN BUTT!", 0.7, 20)
+		end
+	end)
+	hub:on("blockstate", function(active)
+		refs.blockTag.TextTransparency = active and 0 or 1
+	end)
+
+	-- announcements ----------------------------------------------------------
+	hub:on("n_announce", function(p)
+		flashText(refs.announce, tostring(p.text), 2.5, 34)
+	end)
+	hub:on("n_feed", function(p)
+		flashText(refs.announce, tostring(p.text), 2, 24)
+	end)
+
+	-- weapon / ammo ----------------------------------------------------------
+	hub:on("ammo", function(p)
+		if p.melee then
+			refs.ammoText.Text = "--"
+			if p.name then
+				refs.weaponName.Text = p.name
+			end
+			return
+		end
+		refs.ammoText.Text = tostring(p.mag or 0) .. " / " .. tostring(p.reserve or 0)
+		if p.name then
+			refs.weaponName.Text = p.name
+		end
+		if (p.mag or 0) &gt; 0 then
+			bloomCrosshair()
+		end
+	end)
+	hub:on("weapon", function(p)
+		refs.weaponName.Text = p.name
+		for i = 1, 3 do
+			refs.slots[i].BackgroundColor3 = (i == p.slot) and COLORS.accent or Color3.fromRGB(45, 50, 60)
+		end
+		local def = WeaponConfig.get(p.wid)
+		baseGap = 7 + (def and def.spread or 1) * 1.6
+		layoutCrosshair(baseGap)
+	end)
+
+	-- health -----------------------------------------------------------------
+	player.CharacterAdded:Connect(watchCharacter)
+	if player.Character then
+		watchCharacter(player.Character)
+	end
+
+	-- graphics presets --------------------------------------------------------
+	applyGraphics(Config.DefaultGraphics)
+end
+
+return UIController
+</string>
+          </Properties>
+        </Item>
+      </Item>
+    </Item>
+  </Item>
+</roblox>
